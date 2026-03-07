@@ -1,0 +1,69 @@
+'use client';
+
+import Link from 'next/link';
+import type { RecordModel } from 'pocketbase';
+import { UserAvatar } from '../social/user-avatar';
+import { LikeButton } from '../social/like-button';
+import { CommentSection } from '../social/comment-section';
+import { PostImageGrid } from './post-image-grid';
+import { relativeTime } from '../../lib/pb-helpers';
+
+interface PostCardProps {
+  post: RecordModel;
+}
+
+export function PostCard({ post }: PostCardProps) {
+  const author = post.expand?.user as RecordModel | undefined;
+
+  return (
+    <article className="rounded-lg border border-gray-200 bg-white p-4">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        {author && (
+          <Link href={`/profile/${author.id}`}>
+            <UserAvatar user={author} size="md" />
+          </Link>
+        )}
+        <div className="min-w-0 flex-1">
+          {author && (
+            <Link
+              href={`/profile/${author.id}`}
+              className="text-sm font-medium text-gray-900 hover:underline"
+            >
+              {author.name || author.displayName || 'Painter'}
+            </Link>
+          )}
+          <p className="text-xs text-gray-500">{relativeTime(post.created)}</p>
+        </div>
+      </div>
+
+      {/* Content */}
+      <p className="mt-3 whitespace-pre-wrap text-sm text-gray-800">{post.content}</p>
+
+      {/* Images */}
+      <PostImageGrid post={post} />
+
+      {/* Tags */}
+      {post.tags?.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {post.tags.map((tag: string) => (
+            <span
+              key={tag}
+              className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="mt-3 flex items-center gap-4 border-t border-gray-100 pt-3">
+        <LikeButton targetId={post.id} targetType="post" initialCount={post.like_count || 0} />
+      </div>
+
+      {/* Comments */}
+      <CommentSection targetId={post.id} targetType="post" commentCount={post.comment_count || 0} />
+    </article>
+  );
+}

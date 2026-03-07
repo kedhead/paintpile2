@@ -1,0 +1,6 @@
+{
+  "name": "@paintpile/config",
+  "version": "0.0.1",
+  "private": true,
+  "files": ["tsconfig.json", "tsconfig.base.json", "tailwind.config.ts", "eslint.config.mjs"]
+}

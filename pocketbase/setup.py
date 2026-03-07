@@ -1,0 +1,201 @@
+import json, urllib.request, urllib.error
+
+BASE = "http://127.0.0.1:8090/api"
+
+# Auth
+data = json.dumps({"identity": "admin@paintpile.app", "password": "paintpile2admin"}).encode()
+req = urllib.request.Request(BASE + "/collections/_superusers/auth-with-password", data=data, headers={"Content-Type": "application/json"}, method="POST")
+token = json.loads(urllib.request.urlopen(req).read())["token"]
+headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json"}
+
+def api(method, path, data=None):
+    body = json.dumps(data).encode() if data else None
+    req = urllib.request.Request(BASE + path, data=body, headers=headers, method=method)
+    try:
+        return json.loads(urllib.request.urlopen(req).read())
+    except urllib.error.HTTPError as e:
+        err = e.read().decode()
+        print("  ERROR: " + err[:400])
+        return None
+
+USERS = "_pb_users_auth_"
+
+# Helper to build flat field dicts for PB v0.25
+def text(name, required=False, max_len=0):
+    f = {"name": name, "type": "text", "required": required}
+    if max_len: f["max"] = max_len
+    return f
+
+def number(name, required=False):
+    return {"name": name, "type": "number", "required": required}
+
+def bool_field(name):
+    return {"name": name, "type": "bool", "required": False}
+
+def relation(name, collection_id, required=True, cascade=True, max_select=1):
+    return {"name": name, "type": "relation", "required": required, "collectionId": collection_id, "cascadeDelete": cascade, "maxSelect": max_select}
+
+def select(name, values, required=True):
+    return {"name": name, "type": "select", "required": required, "values": values}
+
+def json_field(name):
+    return {"name": name, "type": "json", "required": False}
+
+def date_field(name):
+    return {"name": name, "type": "date", "required": False}
+
+def file_field(name, max_select=1, max_size=10485760):
+    return {"name": name, "type": "file", "required": False, "maxSelect": max_select, "maxSize": max_size}
+
+def url_field(name):
+    return {"name": name, "type": "url", "required": False}
+
+def create_col(name, fields, rules):
+    body = {"name": name, "type": "base", "fields": fields}
+    body.update(rules)
+    result = api("POST", "/collections", body)
+    if result:
+        print("Created: " + name)
+        return result["id"]
+    else:
+        print("FAILED: " + name)
+        return None
+
+# Get channels ID (already created)
+ch = api("GET", "/collections/channels")
+CHANNELS = ch["id"] if ch else None
+
+# Create collections
+PUBLIC = {"listRule": "", "viewRule": ""}
+AUTH_ONLY = {"listRule": "@request.auth.id != ''", "viewRule": "@request.auth.id != ''"}
+OWNER_ONLY = lambda: {"listRule": "@request.auth.id = user", "viewRule": "@request.auth.id = user"}
+
+# paints (admin-only write, public read)
+create_col("paints", [
+    text("brand", required=True),
+    text("name", required=True),
+    text("hex_color", required=True),
+    select("type", ["base", "layer", "shade", "metallic", "technical", "contrast"]),
+    text("category"),
+], PUBLIC)
+
+# Get paints ID
+paints_col = api("GET", "/collections/paints")
+PAINTS = paints_col["id"] if paints_col else "paints"
+
+# user_stats
+create_col("user_stats", [
+    relation("user", USERS),
+    number("project_count"), number("photo_count"), number("pile_count"),
+    number("paint_count"), number("follower_count"), number("following_count"),
+    number("army_count"), number("likes_received"), number("recipes_created"),
+    number("badge_count"), number("comment_count"), number("post_count"),
+], {"listRule": "", "viewRule": "", "createRule": "@request.auth.id != ''", "updateRule": "@request.auth.id = user"})
+
+# follows
+create_col("follows", [
+    relation("follower", USERS),
+    relation("following", USERS),
+], {"listRule": "", "viewRule": "", "createRule": "@request.auth.id = follower && follower != following", "deleteRule": "@request.auth.id = follower"})
+
+# posts
+create_col("posts", [
+    relation("user", USERS),
+    text("content", required=True),
+    json_field("tags"),
+    file_field("images", max_select=10),
+    number("like_count"), number("comment_count"),
+    bool_field("is_public"),
+], {"listRule": "is_public = true || user = @request.auth.id", "viewRule": "is_public = true || user = @request.auth.id", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user"})
+
+# armies
+create_col("armies", [
+    relation("user", USERS),
+    text("name", required=True),
+    text("description"),
+    text("faction"),
+    json_field("tags"),
+    file_field("cover_photo"),
+    bool_field("is_public"),
+    number("like_count"), number("comment_count"),
+], {"listRule": "is_public = true || user = @request.auth.id", "viewRule": "is_public = true || user = @request.auth.id", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user"})
+
+# projects
+create_col("projects", [
+    relation("user", USERS),
+    text("name", required=True),
+    text("description"),
+    select("status", ["not-started", "in-progress", "completed"]),
+    number("quantity"),
+    json_field("tags"),
+    date_field("start_date"),
+    bool_field("is_public"),
+    number("photo_count"), number("paint_count"),
+    file_field("cover_photo"),
+    number("like_count"), number("comment_count"),
+    json_field("last_critique"),
+], {"listRule": "is_public = true || user = @request.auth.id", "viewRule": "is_public = true || user = @request.auth.id", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user"})
+
+# likes
+create_col("likes", [
+    relation("user", USERS),
+    text("target_id", required=True),
+    select("target_type", ["post", "project", "army", "recipe", "message"]),
+], {"listRule": "", "viewRule": "", "createRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user"})
+
+# comments
+create_col("comments", [
+    relation("user", USERS),
+    text("target_id", required=True),
+    select("target_type", ["post", "project", "army", "recipe"]),
+    text("content", required=True),
+    bool_field("edited"),
+], {"listRule": "", "viewRule": "", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user"})
+
+# notifications
+create_col("notifications", [
+    relation("user", USERS),
+    select("type", ["follow", "like", "comment", "comment_reply", "mention", "badge_earned", "message", "system"]),
+    relation("actor", USERS),
+    text("target_id", required=True),
+    text("target_type", required=True),
+    text("message", required=True),
+    bool_field("read"),
+    url_field("action_url"),
+], {"listRule": "@request.auth.id = user", "viewRule": "@request.auth.id = user", "createRule": "@request.auth.id != ''", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user"})
+
+# messages
+if CHANNELS:
+    create_col("messages", [
+        relation("channel", CHANNELS),
+        relation("user", USERS),
+        text("content", required=True),
+        file_field("image"),
+        bool_field("edited"),
+    ], {"listRule": "@request.auth.id != ''", "viewRule": "@request.auth.id != ''", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user"})
+
+# user_paints
+create_col("user_paints", [
+    relation("user", USERS),
+    relation("paint", PAINTS, cascade=False),
+    number("quantity"),
+    text("notes"),
+], {"listRule": "@request.auth.id = user", "viewRule": "@request.auth.id = user", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user"})
+
+# ai_usage
+create_col("ai_usage", [
+    relation("user", USERS),
+    text("operation", required=True),
+    number("credits_used", required=True),
+    text("month_key", required=True),
+], {"listRule": "@request.auth.id = user", "viewRule": "@request.auth.id = user", "createRule": "@request.auth.id = user"})
+
+# ai_quota
+create_col("ai_quota", [
+    relation("user", USERS),
+    number("monthly_limit"),
+    number("credits_used"),
+    text("month_key", required=True),
+], {"listRule": "@request.auth.id = user", "viewRule": "@request.auth.id = user", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user"})
+
+print("\nSetup complete!")

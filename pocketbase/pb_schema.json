@@ -1,0 +1,274 @@
+[
+  {
+    "name": "users",
+    "type": "auth",
+    "schema": [
+      { "name": "name", "type": "text", "required": true },
+      { "name": "username", "type": "text", "options": { "min": 3, "max": 20, "pattern": "^[a-z0-9_]+$" } },
+      { "name": "bio", "type": "text", "options": { "max": 200 } },
+      { "name": "avatar", "type": "file", "options": { "maxSelect": 1, "maxSize": 5242880, "mimeTypes": ["image/jpeg", "image/png", "image/webp"] } },
+      { "name": "settings", "type": "json" },
+      { "name": "last_active_at", "type": "date" }
+    ],
+    "options": {
+      "allowEmailAuth": true,
+      "allowOAuth2Auth": true,
+      "allowUsernameAuth": false,
+      "minPasswordLength": 6
+    },
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "@request.auth.id = id",
+    "deleteRule": "@request.auth.id = id"
+  },
+  {
+    "name": "user_stats",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "project_count", "type": "number", "options": { "min": 0 } },
+      { "name": "photo_count", "type": "number", "options": { "min": 0 } },
+      { "name": "pile_count", "type": "number", "options": { "min": 0 } },
+      { "name": "paint_count", "type": "number", "options": { "min": 0 } },
+      { "name": "follower_count", "type": "number", "options": { "min": 0 } },
+      { "name": "following_count", "type": "number", "options": { "min": 0 } },
+      { "name": "army_count", "type": "number", "options": { "min": 0 } },
+      { "name": "likes_received", "type": "number", "options": { "min": 0 } },
+      { "name": "recipes_created", "type": "number", "options": { "min": 0 } },
+      { "name": "badge_count", "type": "number", "options": { "min": 0 } },
+      { "name": "comment_count", "type": "number", "options": { "min": 0 } },
+      { "name": "post_count", "type": "number", "options": { "min": 0 } }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": null
+  },
+  {
+    "name": "follows",
+    "type": "base",
+    "schema": [
+      { "name": "follower", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "following", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } }
+    ],
+    "indexes": [],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.id = follower && follower != following",
+    "updateRule": null,
+    "deleteRule": "@request.auth.id = follower"
+  },
+  {
+    "name": "posts",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "content", "type": "text", "required": true, "options": { "max": 2000 } },
+      { "name": "tags", "type": "json" },
+      { "name": "images", "type": "file", "options": { "maxSelect": 10, "maxSize": 10485760, "mimeTypes": ["image/jpeg", "image/png", "image/webp", "image/gif"] } },
+      { "name": "like_count", "type": "number", "options": { "min": 0 } },
+      { "name": "comment_count", "type": "number", "options": { "min": 0 } },
+      { "name": "is_public", "type": "bool" }
+    ],
+    "listRule": "is_public = true || user = @request.auth.id",
+    "viewRule": "is_public = true || user = @request.auth.id",
+    "createRule": "@request.auth.id = user",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": "@request.auth.id = user"
+  },
+  {
+    "name": "projects",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "name", "type": "text", "required": true, "options": { "max": 100 } },
+      { "name": "description", "type": "text", "options": { "max": 500 } },
+      { "name": "status", "type": "select", "required": true, "options": { "values": ["not-started", "in-progress", "completed"] } },
+      { "name": "quantity", "type": "number", "options": { "min": 1 } },
+      { "name": "tags", "type": "json" },
+      { "name": "start_date", "type": "date" },
+      { "name": "is_public", "type": "bool" },
+      { "name": "photo_count", "type": "number", "options": { "min": 0 } },
+      { "name": "paint_count", "type": "number", "options": { "min": 0 } },
+      { "name": "cover_photo", "type": "file", "options": { "maxSelect": 1, "maxSize": 10485760, "mimeTypes": ["image/jpeg", "image/png", "image/webp"] } },
+      { "name": "like_count", "type": "number", "options": { "min": 0 } },
+      { "name": "comment_count", "type": "number", "options": { "min": 0 } },
+      { "name": "armies", "type": "relation", "options": { "collectionId": "armies", "maxSelect": 99 } },
+      { "name": "last_critique", "type": "json" }
+    ],
+    "listRule": "is_public = true || user = @request.auth.id",
+    "viewRule": "is_public = true || user = @request.auth.id",
+    "createRule": "@request.auth.id = user",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": "@request.auth.id = user"
+  },
+  {
+    "name": "armies",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "name", "type": "text", "required": true, "options": { "max": 100 } },
+      { "name": "description", "type": "text", "options": { "max": 500 } },
+      { "name": "faction", "type": "text", "options": { "max": 100 } },
+      { "name": "tags", "type": "json" },
+      { "name": "cover_photo", "type": "file", "options": { "maxSelect": 1, "maxSize": 10485760 } },
+      { "name": "is_public", "type": "bool" },
+      { "name": "like_count", "type": "number", "options": { "min": 0 } },
+      { "name": "comment_count", "type": "number", "options": { "min": 0 } }
+    ],
+    "listRule": "is_public = true || user = @request.auth.id",
+    "viewRule": "is_public = true || user = @request.auth.id",
+    "createRule": "@request.auth.id = user",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": "@request.auth.id = user"
+  },
+  {
+    "name": "likes",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "target_id", "type": "text", "required": true },
+      { "name": "target_type", "type": "select", "required": true, "options": { "values": ["post", "project", "army", "recipe", "message"] } }
+    ],
+    "indexes": [],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.id = user",
+    "updateRule": null,
+    "deleteRule": "@request.auth.id = user"
+  },
+  {
+    "name": "comments",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "target_id", "type": "text", "required": true },
+      { "name": "target_type", "type": "select", "required": true, "options": { "values": ["post", "project", "army", "recipe"] } },
+      { "name": "content", "type": "text", "required": true, "options": { "max": 2000 } },
+      { "name": "edited", "type": "bool" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.id = user",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": "@request.auth.id = user"
+  },
+  {
+    "name": "channels",
+    "type": "base",
+    "schema": [
+      { "name": "name", "type": "text", "required": true },
+      { "name": "slug", "type": "text", "required": true },
+      { "name": "description", "type": "text" },
+      { "name": "category", "type": "text", "required": true },
+      { "name": "sort_order", "type": "number" }
+    ],
+    "indexes": [],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "name": "messages",
+    "type": "base",
+    "schema": [
+      { "name": "channel", "type": "relation", "required": true, "options": { "collectionId": "channels", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "content", "type": "text", "required": true, "options": { "max": 2000 } },
+      { "name": "image", "type": "file", "options": { "maxSelect": 1, "maxSize": 10485760, "mimeTypes": ["image/jpeg", "image/png", "image/webp", "image/gif"] } },
+      { "name": "reply_to", "type": "relation", "options": { "collectionId": "messages", "maxSelect": 1 } },
+      { "name": "edited", "type": "bool" }
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id = user",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": null
+  },
+  {
+    "name": "notifications",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "type", "type": "select", "required": true, "options": { "values": ["follow", "like", "comment", "comment_reply", "mention", "badge_earned", "message", "system"] } },
+      { "name": "actor", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "target_id", "type": "text", "required": true },
+      { "name": "target_type", "type": "text", "required": true },
+      { "name": "message", "type": "text", "required": true },
+      { "name": "read", "type": "bool" },
+      { "name": "action_url", "type": "url" }
+    ],
+    "listRule": "@request.auth.id = user",
+    "viewRule": "@request.auth.id = user",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": "@request.auth.id = user"
+  },
+  {
+    "name": "paints",
+    "type": "base",
+    "schema": [
+      { "name": "brand", "type": "text", "required": true },
+      { "name": "name", "type": "text", "required": true },
+      { "name": "hex_color", "type": "text", "required": true },
+      { "name": "type", "type": "select", "required": true, "options": { "values": ["base", "layer", "shade", "metallic", "technical", "contrast"] } },
+      { "name": "category", "type": "text" }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "name": "user_paints",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "paint", "type": "relation", "required": true, "options": { "collectionId": "paints", "maxSelect": 1 } },
+      { "name": "quantity", "type": "number", "options": { "min": 1 } },
+      { "name": "notes", "type": "text", "options": { "max": 500 } }
+    ],
+    "indexes": [],
+    "listRule": "@request.auth.id = user",
+    "viewRule": "@request.auth.id = user",
+    "createRule": "@request.auth.id = user",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": "@request.auth.id = user"
+  },
+  {
+    "name": "ai_usage",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "operation", "type": "text", "required": true },
+      { "name": "credits_used", "type": "number", "required": true },
+      { "name": "month_key", "type": "text", "required": true }
+    ],
+    "listRule": "@request.auth.id = user",
+    "viewRule": "@request.auth.id = user",
+    "createRule": "@request.auth.id = user",
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "name": "ai_quota",
+    "type": "base",
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
+      { "name": "monthly_limit", "type": "number", "options": { "min": 0 } },
+      { "name": "credits_used", "type": "number", "options": { "min": 0 } },
+      { "name": "month_key", "type": "text", "required": true }
+    ],
+    "indexes": [],
+    "listRule": "@request.auth.id = user",
+    "viewRule": "@request.auth.id = user",
+    "createRule": "@request.auth.id = user",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": null
+  }
+]
