@@ -51,6 +51,9 @@ def file_field(name, max_select=1, max_size=10485760):
 def url_field(name):
     return {"name": name, "type": "url", "required": False}
 
+def autodate(name, on_create=True, on_update=True):
+    return {"name": name, "type": "autodate", "required": False, "onCreate": on_create, "onUpdate": on_update}
+
 def create_col(name, fields, rules):
     body = {"name": name, "type": "base", "fields": fields}
     body.update(rules)
@@ -180,6 +183,8 @@ GROUPS = create_col("groups", [
     number("member_count"),
     bool_field("is_public"),
     text("invite_code"),
+    autodate("created", on_create=True, on_update=False),
+    autodate("updated"),
 ], {"listRule": "", "viewRule": "", "createRule": "@request.auth.id != ''", "updateRule": "@request.auth.id = owner", "deleteRule": "@request.auth.id = owner"})
 
 # group_members
@@ -187,6 +192,8 @@ create_col("group_members", [
     relation("group", GROUPS),
     relation("user", USERS),
     select("role", ["admin", "moderator", "member"]),
+    autodate("created", on_create=True, on_update=False),
+    autodate("updated"),
 ], {"listRule": "@request.auth.id != ''", "viewRule": "@request.auth.id != ''", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id != ''", "deleteRule": "@request.auth.id = user || @request.auth.id != ''"})
 
 # group_invites
@@ -197,6 +204,8 @@ create_col("group_invites", [
     number("max_uses"),
     number("use_count"),
     date_field("expires_at"),
+    autodate("created", on_create=True, on_update=False),
+    autodate("updated"),
 ], {"listRule": "@request.auth.id != ''", "viewRule": "", "createRule": "@request.auth.id != ''", "deleteRule": "@request.auth.id = created_by || @request.auth.id != ''"})
 
 # group_channels
@@ -207,6 +216,8 @@ GROUP_CHANNELS = create_col("group_channels", [
     text("description", max_len=500),
     number("sort_order"),
     text("category", max_len=100),
+    autodate("created", on_create=True, on_update=False),
+    autodate("updated"),
 ], {"listRule": "@request.auth.id != ''", "viewRule": "@request.auth.id != ''", "createRule": "@request.auth.id != ''", "updateRule": "@request.auth.id != ''", "deleteRule": "@request.auth.id != ''"})
 
 # group_messages
@@ -216,6 +227,8 @@ create_col("group_messages", [
     text("content", required=True),
     file_field("image"),
     bool_field("edited"),
+    autodate("created", on_create=True, on_update=False),
+    autodate("updated"),
 ], {"listRule": "@request.auth.id != ''", "viewRule": "@request.auth.id != ''", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user || @request.auth.id != ''"})
 
 # user_paints
