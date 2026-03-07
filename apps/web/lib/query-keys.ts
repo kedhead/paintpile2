@@ -32,12 +32,18 @@ export const queryKeys = {
     list: () => [...queryKeys.notifications.all, 'list'] as const,
     unreadCount: () => [...queryKeys.notifications.all, 'unread'] as const,
   },
-  channels: {
-    all: ['channels'] as const,
-    list: () => [...queryKeys.channels.all, 'list'] as const,
+  groups: {
+    all: ['groups'] as const,
+    my: () => [...queryKeys.groups.all, 'my'] as const,
+    public: () => [...queryKeys.groups.all, 'public'] as const,
+    detail: (groupId: string) => [...queryKeys.groups.all, 'detail', groupId] as const,
+    members: (groupId: string) => [...queryKeys.groups.all, 'members', groupId] as const,
+    channels: (groupId: string) => [...queryKeys.groups.all, 'channels', groupId] as const,
+    invites: (groupId: string) => [...queryKeys.groups.all, 'invites', groupId] as const,
+    inviteByCode: (code: string) => [...queryKeys.groups.all, 'invite', code] as const,
   },
-  messages: {
-    all: ['messages'] as const,
-    byChannel: (channelId: string) => [...queryKeys.messages.all, 'channel', channelId] as const,
+  groupMessages: {
+    all: ['groupMessages'] as const,
+    byChannel: (channelId: string) => [...queryKeys.groupMessages.all, 'channel', channelId] as const,
   },
 };

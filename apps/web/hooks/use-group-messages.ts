@@ -7,13 +7,13 @@ import { queryKeys } from '../lib/query-keys';
 
 const PAGE_SIZE = 50;
 
-export function useMessages(channelId: string | null) {
+export function useGroupMessages(channelId: string | null) {
   const { pb } = useAuth();
 
   return useQuery({
-    queryKey: queryKeys.messages.byChannel(channelId || ''),
+    queryKey: queryKeys.groupMessages.byChannel(channelId || ''),
     queryFn: async () => {
-      return pb.collection('messages').getList(1, PAGE_SIZE, {
+      return pb.collection('group_messages').getList(1, PAGE_SIZE, {
         sort: 'created',
         filter: `channel = "${channelId}"`,
         expand: 'user',
@@ -23,7 +23,7 @@ export function useMessages(channelId: string | null) {
   });
 }
 
-export function useSendMessage() {
+export function useSendGroupMessage() {
   const { pb, user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -43,17 +43,17 @@ export function useSendMessage() {
       formData.append('user', user!.id);
       if (image) formData.append('image', image);
 
-      return pb.collection('messages').create(formData, { expand: 'user' });
+      return pb.collection('group_messages').create(formData, { expand: 'user' });
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.byChannel(variables.channelId),
+        queryKey: queryKeys.groupMessages.byChannel(variables.channelId),
       });
     },
   });
 }
 
-export function useEditMessage() {
+export function useEditGroupMessage() {
   const { pb } = useAuth();
   const queryClient = useQueryClient();
 
@@ -66,20 +66,20 @@ export function useEditMessage() {
       channelId: string;
       content: string;
     }) => {
-      return pb.collection('messages').update(messageId, {
+      return pb.collection('group_messages').update(messageId, {
         content,
         edited: true,
       });
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.byChannel(variables.channelId),
+        queryKey: queryKeys.groupMessages.byChannel(variables.channelId),
       });
     },
   });
 }
 
-export function useDeleteMessage() {
+export function useDeleteGroupMessage() {
   const { pb } = useAuth();
   const queryClient = useQueryClient();
 
@@ -90,17 +90,17 @@ export function useDeleteMessage() {
       messageId: string;
       channelId: string;
     }) => {
-      return pb.collection('messages').delete(messageId);
+      return pb.collection('group_messages').delete(messageId);
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.messages.byChannel(variables.channelId),
+        queryKey: queryKeys.groupMessages.byChannel(variables.channelId),
       });
     },
   });
 }
 
-export function useRealtimeMessages(channelId: string | null) {
+export function useRealtimeGroupMessages(channelId: string | null) {
   const queryClient = useQueryClient();
   const { pb } = useAuth();
 
@@ -109,10 +109,10 @@ export function useRealtimeMessages(channelId: string | null) {
 
     let unsubscribe: (() => void) | undefined;
 
-    pb.collection('messages').subscribe('*', (e) => {
+    pb.collection('group_messages').subscribe('*', (e) => {
       if (e.record.channel === channelId) {
         queryClient.invalidateQueries({
-          queryKey: queryKeys.messages.byChannel(channelId),
+          queryKey: queryKeys.groupMessages.byChannel(channelId),
         });
       }
     }).then((unsub) => {

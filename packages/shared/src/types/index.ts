@@ -10,6 +10,7 @@ export * from './army';
 export * from './activity';
 export * from './post';
 export * from './channel';
+export * from './group';
 export * from './badge';
 export * from './pile';
 export * from './challenge';

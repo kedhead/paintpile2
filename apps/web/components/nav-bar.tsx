@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from './auth-provider';
-import { Home, MessageSquare, User, Palette, LogOut } from 'lucide-react';
+import { Home, MessageSquare, User, Palette, LogOut, Users } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
 
 const navItems = [
   { href: '/feed', label: 'Feed', icon: Home },
-  { href: '/chat', label: 'Chat', icon: MessageSquare },
+  { href: '/groups', label: 'Groups', icon: Users },
   { href: '/projects', label: 'Projects', icon: Palette },
   { href: '/profile', label: 'Profile', icon: User },
 ];

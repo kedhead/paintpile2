@@ -1,0 +1,155 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Trash2, Upload } from 'lucide-react';
+import type { RecordModel } from 'pocketbase';
+import { useUpdateGroup, useDeleteGroup } from '../../hooks/use-groups';
+import { getFileUrl } from '../../lib/pb-helpers';
+
+interface GroupSettingsProps {
+  group: RecordModel;
+}
+
+export function GroupSettings({ group }: GroupSettingsProps) {
+  const router = useRouter();
+  const updateGroup = useUpdateGroup();
+  const deleteGroup = useDeleteGroup();
+  const [name, setName] = useState(group.name);
+  const [description, setDescription] = useState(group.description || '');
+  const [icon, setIcon] = useState<File | null>(null);
+  const [showDelete, setShowDelete] = useState(false);
+
+  const iconUrl = group.icon ? getFileUrl(group, group.icon) : null;
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', name.trim());
+    formData.append('description', description.trim());
+    if (icon) formData.append('icon', icon);
+
+    await updateGroup.mutateAsync({ groupId: group.id, data: formData });
+  };
+
+  const handleDelete = async () => {
+    await deleteGroup.mutateAsync(group.id);
+    router.push('/groups');
+  };
+
+  return (
+    <div className="mx-auto max-w-lg p-6">
+      <button
+        onClick={() => router.push(`/groups/${group.id}`)}
+        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to group
+      </button>
+
+      <h1 className="text-xl font-bold text-gray-900 mb-6">Group Settings</h1>
+
+      <form onSubmit={handleSave} className="space-y-4">
+        {/* Icon */}
+        <div className="flex items-center gap-4">
+          <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 hover:border-primary-400 overflow-hidden">
+            {icon ? (
+              <img src={URL.createObjectURL(icon)} alt="" className="h-full w-full object-cover" />
+            ) : iconUrl ? (
+              <img src={iconUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <Upload className="h-5 w-5 text-gray-400" />
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setIcon(e.target.files?.[0] || null)}
+            />
+          </label>
+          <span className="text-sm text-gray-500">Click to change icon</span>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={100}
+            required
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength={500}
+            rows={3}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none resize-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Invite Code</label>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 rounded bg-gray-100 px-3 py-2 text-sm text-gray-800">
+              {group.invite_code || 'None'}
+            </code>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(
+                `${window.location.origin}/groups/join/${group.invite_code}`
+              )}
+              className="rounded-lg px-3 py-2 text-sm text-primary-600 hover:bg-primary-50"
+            >
+              Copy Link
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={updateGroup.isPending}
+          className="w-full rounded-lg bg-primary-600 px-4 py-2 text-sm text-white hover:bg-primary-700 disabled:opacity-50"
+        >
+          {updateGroup.isPending ? 'Saving...' : 'Save Changes'}
+        </button>
+      </form>
+
+      {/* Danger zone */}
+      <div className="mt-8 rounded-lg border border-red-200 p-4">
+        <h3 className="text-sm font-semibold text-red-700 mb-2">Danger Zone</h3>
+        {showDelete ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Are you sure?</span>
+            <button
+              onClick={handleDelete}
+              disabled={deleteGroup.isPending}
+              className="rounded bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {deleteGroup.isPending ? 'Deleting...' : 'Yes, Delete'}
+            </button>
+            <button
+              onClick={() => setShowDelete(false)}
+              className="rounded px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowDelete(true)}
+            className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete this group
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

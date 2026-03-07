@@ -61,9 +61,12 @@ def create_col(name, fields, rules):
         print("FAILED: " + name)
         return None
 
-# Get channels ID (already created)
-ch = api("GET", "/collections/channels")
-CHANNELS = ch["id"] if ch else None
+# Delete old channels + messages collections (replaced by groups system)
+for old_col in ["messages", "channels"]:
+    existing = api("GET", f"/collections/{old_col}")
+    if existing:
+        api("DELETE", f"/collections/{existing['id']}")
+        print(f"Deleted old collection: {old_col}")
 
 # Create collections
 PUBLIC = {"listRule": "", "viewRule": ""}
@@ -164,15 +167,55 @@ create_col("notifications", [
     url_field("action_url"),
 ], {"listRule": "@request.auth.id = user", "viewRule": "@request.auth.id = user", "createRule": "@request.auth.id != ''", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user"})
 
-# messages
-if CHANNELS:
-    create_col("messages", [
-        relation("channel", CHANNELS),
-        relation("user", USERS),
-        text("content", required=True),
-        file_field("image"),
-        bool_field("edited"),
-    ], {"listRule": "@request.auth.id != ''", "viewRule": "@request.auth.id != ''", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user"})
+# --- Groups System ---
+
+# groups
+GROUPS = create_col("groups", [
+    text("name", required=True, max_len=100),
+    text("description", max_len=500),
+    file_field("icon"),
+    file_field("banner"),
+    relation("owner", USERS),
+    number("member_count"),
+    bool_field("is_public"),
+    text("invite_code"),
+], {"listRule": "", "viewRule": "", "createRule": "@request.auth.id != ''", "updateRule": "@request.auth.id = owner", "deleteRule": "@request.auth.id = owner"})
+
+# group_members
+create_col("group_members", [
+    relation("group", GROUPS),
+    relation("user", USERS),
+    select("role", ["admin", "moderator", "member"]),
+], {"listRule": "@request.auth.id != ''", "viewRule": "@request.auth.id != ''", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id != ''", "deleteRule": "@request.auth.id = user || @request.auth.id != ''"})
+
+# group_invites
+create_col("group_invites", [
+    relation("group", GROUPS),
+    relation("created_by", USERS),
+    text("code", required=True),
+    number("max_uses"),
+    number("use_count"),
+    date_field("expires_at"),
+], {"listRule": "@request.auth.id != ''", "viewRule": "", "createRule": "@request.auth.id != ''", "deleteRule": "@request.auth.id = created_by || @request.auth.id != ''"})
+
+# group_channels
+GROUP_CHANNELS = create_col("group_channels", [
+    relation("group", GROUPS),
+    text("name", required=True, max_len=100),
+    select("type", ["text", "voice"]),
+    text("description", max_len=500),
+    number("sort_order"),
+    text("category", max_len=100),
+], {"listRule": "@request.auth.id != ''", "viewRule": "@request.auth.id != ''", "createRule": "@request.auth.id != ''", "updateRule": "@request.auth.id != ''", "deleteRule": "@request.auth.id != ''"})
+
+# group_messages
+create_col("group_messages", [
+    relation("channel", GROUP_CHANNELS),
+    relation("user", USERS),
+    text("content", required=True),
+    file_field("image"),
+    bool_field("edited"),
+], {"listRule": "@request.auth.id != ''", "viewRule": "@request.auth.id != ''", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user || @request.auth.id != ''"})
 
 # user_paints
 create_col("user_paints", [
