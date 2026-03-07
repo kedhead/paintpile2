@@ -15,7 +15,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pb = getClient();
-  const [user, setUser] = useState<RecordModel | null>(pb.authStore.record);
+  const [user, setUser] = useState<RecordModel | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

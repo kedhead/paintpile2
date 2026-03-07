@@ -32,4 +32,12 @@ export const queryKeys = {
     list: () => [...queryKeys.notifications.all, 'list'] as const,
     unreadCount: () => [...queryKeys.notifications.all, 'unread'] as const,
   },
+  channels: {
+    all: ['channels'] as const,
+    list: () => [...queryKeys.channels.all, 'list'] as const,
+  },
+  messages: {
+    all: ['messages'] as const,
+    byChannel: (channelId: string) => [...queryKeys.messages.all, 'channel', channelId] as const,
+  },
 };
