@@ -12,7 +12,8 @@ def api(method, path, data=None):
     body = json.dumps(data).encode() if data else None
     req = urllib.request.Request(BASE + path, data=body, headers=headers, method=method)
     try:
-        return json.loads(urllib.request.urlopen(req).read())
+        resp = urllib.request.urlopen(req).read()
+        return json.loads(resp) if resp else None
     except urllib.error.HTTPError as e:
         err = e.read().decode()
         print("  ERROR: " + err[:400])
