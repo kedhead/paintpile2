@@ -39,7 +39,7 @@ export function useMyInventory() {
     queryKey: queryKeys.paints.inventory(),
     queryFn: async () => {
       // Fetch all inventory records for this user, expanding the paint relation
-      const records = await pb.collection('paint_inventory').getFullList({
+      const records = await pb.collection('user_paints').getFullList({
         filter: `user="${user!.id}"`,
         expand: 'paint',
         sort: '-created',
@@ -56,7 +56,7 @@ export function useAddToInventory() {
 
   return useMutation({
     mutationFn: async (paintId: string) => {
-      return pb.collection('paint_inventory').create({
+      return pb.collection('user_paints').create({
         user: user!.id,
         paint: paintId,
       });
@@ -73,7 +73,7 @@ export function useRemoveFromInventory() {
 
   return useMutation({
     mutationFn: async (inventoryId: string) => {
-      return pb.collection('paint_inventory').delete(inventoryId);
+      return pb.collection('user_paints').delete(inventoryId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.paints.inventory() });
