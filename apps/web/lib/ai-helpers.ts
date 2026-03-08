@@ -1,0 +1,99 @@
+import PocketBase from 'pocketbase';
+import Anthropic from '@anthropic-ai/sdk';
+import { OPERATION_COSTS, type AIOperation } from '@paintpile/shared';
+
+const pbUrl = process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
+
+export function getMonthKey(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function createAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY not configured');
+  }
+  return new Anthropic({ apiKey });
+}
+
+export async function validatePBAuth(pbToken: string): Promise<{ pb: PocketBase; userId: string; user: Record<string, unknown> }> {
+  const pb = new PocketBase(pbUrl);
+  pb.authStore.save(pbToken, null);
+
+  try {
+    const result = await pb.collection('users').authRefresh();
+    return { pb, userId: result.record.id, user: result.record as unknown as Record<string, unknown> };
+  } catch {
+    throw new Error('Invalid auth token');
+  }
+}
+
+export async function validateAndDeductCredits(
+  pb: PocketBase,
+  userId: string,
+  operation: AIOperation
+): Promise<{ creditsUsed: number }> {
+  const cost = OPERATION_COSTS[operation];
+
+  // Get or create ai_quota record for this user
+  let quota;
+  try {
+    const quotas = await pb.collection('ai_quota').getFullList({
+      filter: `user="${userId}"`,
+    });
+    quota = quotas[0];
+  } catch {
+    // Collection might not exist yet — skip quota check
+    return { creditsUsed: cost };
+  }
+
+  if (quota) {
+    const monthKey = getMonthKey();
+    const monthlyUsage = quota.monthly_usage || {};
+    const currentMonthUsage = monthlyUsage[monthKey] || 0;
+    const limit = quota.monthly_limit || 500;
+
+    if (currentMonthUsage + cost > limit) {
+      throw new Error(`Insufficient credits. ${limit - currentMonthUsage} remaining, ${cost} needed.`);
+    }
+
+    // Deduct credits
+    monthlyUsage[monthKey] = currentMonthUsage + cost;
+    await pb.collection('ai_quota').update(quota.id, {
+      monthly_usage: monthlyUsage,
+      total_used: (quota.total_used || 0) + cost,
+    });
+  }
+
+  // Log usage
+  try {
+    await pb.collection('ai_usage').create({
+      user: userId,
+      operation,
+      credits: cost,
+      month_key: getMonthKey(),
+    });
+  } catch {
+    // ai_usage collection might not exist yet
+  }
+
+  return { creditsUsed: cost };
+}
+
+export async function fetchImageAsBase64(imageUrl: string): Promise<{ base64: string; mediaType: string }> {
+  const response = await fetch(imageUrl);
+  if (!response.ok) throw new Error('Failed to fetch image');
+
+  const contentType = response.headers.get('content-type') || 'image/jpeg';
+  const buffer = await response.arrayBuffer();
+  const base64 = Buffer.from(buffer).toString('base64');
+
+  // Map content type to Anthropic's expected media types
+  let mediaType = contentType.split(';')[0].trim();
+  if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(mediaType)) {
+    mediaType = 'image/jpeg';
+  }
+
+  return { base64, mediaType };
+}

@@ -46,4 +46,15 @@ export const queryKeys = {
     all: ['groupMessages'] as const,
     byChannel: (channelId: string) => [...queryKeys.groupMessages.all, 'channel', channelId] as const,
   },
+  projects: {
+    all: ['projects'] as const,
+    my: () => [...queryKeys.projects.all, 'my'] as const,
+    public: () => [...queryKeys.projects.all, 'public'] as const,
+    detail: (projectId: string) => [...queryKeys.projects.all, 'detail', projectId] as const,
+    byUser: (userId: string) => [...queryKeys.projects.all, 'user', userId] as const,
+  },
+  aiQuota: {
+    all: ['aiQuota'] as const,
+    user: (userId: string) => [...queryKeys.aiQuota.all, userId] as const,
+  },
 };
