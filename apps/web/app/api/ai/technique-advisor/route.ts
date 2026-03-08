@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validatePBAuth, validateAndDeductCredits, createAnthropicClient, fetchImageAsBase64 } from '../../../../lib/ai-helpers';
+import { validatePBAuth, validateAndDeductCredits, createAnthropicClient, fetchImageAsBase64, parseAIJson } from '../../../../lib/ai-helpers';
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,7 +55,7 @@ Focus on practical, actionable techniques: edge highlighting, wet blending, laye
     });
 
     const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    const advice = JSON.parse(text);
+    const advice = parseAIJson(text) as Record<string, unknown>;
 
     return NextResponse.json({ success: true, data: { ...advice, creditsUsed } });
   } catch (error) {

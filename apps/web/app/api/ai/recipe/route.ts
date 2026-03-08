@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validatePBAuth, validateAndDeductCredits, createAnthropicClient, fetchImageAsBase64 } from '../../../../lib/ai-helpers';
+import { validatePBAuth, validateAndDeductCredits, createAnthropicClient, fetchImageAsBase64, parseAIJson } from '../../../../lib/ai-helpers';
 
 export async function POST(req: NextRequest) {
   try {
@@ -72,7 +72,7 @@ Use real paint names from Citadel, Vallejo, Army Painter, or Scale75.`,
     });
 
     const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    const recipe = JSON.parse(text);
+    const recipe = parseAIJson(text) as Record<string, unknown>;
 
     return NextResponse.json({ success: true, data: { recipe, creditsUsed } });
   } catch (error) {

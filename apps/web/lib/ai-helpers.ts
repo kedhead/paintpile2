@@ -97,3 +97,13 @@ export async function fetchImageAsBase64(imageUrl: string): Promise<{ base64: st
 
   return { base64, mediaType };
 }
+
+/** Strip markdown code fences (```json ... ```) that Claude sometimes wraps around JSON responses */
+export function parseAIJson(text: string): unknown {
+  let cleaned = text.trim();
+  // Remove ```json or ``` prefix and trailing ```
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+  }
+  return JSON.parse(cleaned);
+}

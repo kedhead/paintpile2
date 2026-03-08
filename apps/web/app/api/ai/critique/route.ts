@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validatePBAuth, validateAndDeductCredits, createAnthropicClient, fetchImageAsBase64 } from '../../../../lib/ai-helpers';
+import { validatePBAuth, validateAndDeductCredits, createAnthropicClient, fetchImageAsBase64, parseAIJson } from '../../../../lib/ai-helpers';
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,7 +49,7 @@ Focus on: paint consistency, edge highlighting, blending, basing, color theory, 
     });
 
     const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    const critique = JSON.parse(text);
+    const critique = parseAIJson(text) as Record<string, unknown>;
     critique.createdAt = new Date().toISOString();
 
     // Save critique to project

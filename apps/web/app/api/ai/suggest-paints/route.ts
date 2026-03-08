@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validatePBAuth, validateAndDeductCredits, createAnthropicClient, fetchImageAsBase64 } from '../../../../lib/ai-helpers';
+import { validatePBAuth, validateAndDeductCredits, createAnthropicClient, fetchImageAsBase64, parseAIJson } from '../../../../lib/ai-helpers';
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,7 +56,7 @@ Suggest paints from Citadel, Vallejo, Army Painter, or Scale75. Include base, la
     });
 
     const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    const suggestions = JSON.parse(text);
+    const suggestions = parseAIJson(text) as Record<string, unknown>;
 
     return NextResponse.json({ success: true, data: { ...suggestions, creditsUsed } });
   } catch (error) {
