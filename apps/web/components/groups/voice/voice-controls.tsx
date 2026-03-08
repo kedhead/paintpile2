@@ -36,11 +36,11 @@ export function VoiceControls({ room, onDisconnect }: VoiceControlsProps) {
   };
 
   return (
-    <div className="flex items-center justify-center gap-3 border-t border-gray-200 bg-gray-50 px-4 py-3">
+    <div className="flex items-center justify-center gap-3 border-t border-border bg-background px-4 py-3">
       <button
         onClick={toggleMute}
         className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-          muted ? 'bg-red-100 text-red-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          muted ? 'bg-red-100 text-red-600' : 'bg-muted text-foreground hover:bg-muted'
         }`}
         title={muted ? 'Unmute' : 'Mute'}
       >
@@ -50,7 +50,7 @@ export function VoiceControls({ room, onDisconnect }: VoiceControlsProps) {
       <button
         onClick={toggleDeafen}
         className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-          deafened ? 'bg-red-100 text-red-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          deafened ? 'bg-red-100 text-red-600' : 'bg-muted text-foreground hover:bg-muted'
         }`}
         title={deafened ? 'Undeafen' : 'Deafen'}
       >

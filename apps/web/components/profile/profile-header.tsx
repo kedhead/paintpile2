@@ -24,21 +24,21 @@ export function ProfileHeader({ profileUser }: ProfileHeaderProps) {
   const isOwnProfile = user?.id === profileUser.id;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6">
+    <div className="rounded-lg border border-border bg-card p-6">
       <div className="flex items-start gap-4">
         <UserAvatar user={profileUser} size="lg" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-foreground">
               {profileUser.name || profileUser.displayName || 'Painter'}
             </h1>
             {!isOwnProfile && <FollowButton targetUserId={profileUser.id} />}
           </div>
           {profileUser.username && (
-            <p className="text-sm text-gray-500">@{profileUser.username}</p>
+            <p className="text-sm text-muted-foreground">@{profileUser.username}</p>
           )}
           {profileUser.bio && (
-            <p className="mt-2 text-sm text-gray-700">{profileUser.bio}</p>
+            <p className="mt-2 text-sm text-foreground">{profileUser.bio}</p>
           )}
           <div className="mt-4">
             <ProfileStats

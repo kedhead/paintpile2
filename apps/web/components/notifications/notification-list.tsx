@@ -11,7 +11,7 @@ export function NotificationList() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -25,7 +25,7 @@ export function NotificationList() {
           <button
             onClick={() => markAllRead.mutate()}
             disabled={markAllRead.isPending}
-            className="text-xs text-primary-600 hover:underline"
+            className="text-xs text-primary hover:underline"
           >
             Mark all as read
           </button>
@@ -33,7 +33,7 @@ export function NotificationList() {
       )}
 
       {notifications.length === 0 ? (
-        <div className="py-8 text-center text-sm text-gray-500">No notifications yet</div>
+        <div className="py-8 text-center text-sm text-muted-foreground">No notifications yet</div>
       ) : (
         notifications.map((n) => <NotificationItem key={n.id} notification={n} />)
       )}

@@ -20,14 +20,14 @@ export default function GroupPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center text-gray-400">
+      <div className="flex flex-1 items-center justify-center text-muted-foreground">
         Loading...
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center text-gray-400">
+    <div className="flex flex-1 items-center justify-center text-muted-foreground">
       No channels yet. Create one to get started!
     </div>
   );

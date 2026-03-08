@@ -30,29 +30,29 @@ export function MemberItem({ member, groupId }: MemberItemProps) {
   const BadgeIcon = badge.icon;
 
   return (
-    <div className="group flex items-center gap-2 rounded px-2 py-1 hover:bg-gray-100 relative">
+    <div className="group flex items-center gap-2 rounded px-2 py-1 hover:bg-muted relative">
       {user && <UserAvatar user={user} size="sm" />}
-      <span className="flex-1 truncate text-sm text-gray-800">{displayName}</span>
+      <span className="flex-1 truncate text-sm text-foreground">{displayName}</span>
       {BadgeIcon && <BadgeIcon className={`h-3.5 w-3.5 ${badge.color}`} />}
 
       {canKickMembers && member.role !== 'admin' && (
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className="p-0.5 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-gray-600"
+          className="p-0.5 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-muted-foreground"
         >
           <MoreVertical className="h-3.5 w-3.5" />
         </button>
       )}
 
       {showMenu && (
-        <div className="absolute right-0 top-full z-10 rounded-lg border border-gray-200 bg-white py-1 shadow-lg min-w-[120px]">
+        <div className="absolute right-0 top-full z-10 rounded-lg border border-border bg-card py-1 shadow-lg min-w-[120px]">
           {member.role === 'member' && (
             <button
               onClick={() => {
                 updateRole.mutate({ memberId: member.id, role: 'moderator', groupId });
                 setShowMenu(false);
               }}
-              className="w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+              className="w-full px-3 py-1.5 text-left text-sm text-foreground hover:bg-background"
             >
               Make Mod
             </button>
@@ -63,7 +63,7 @@ export function MemberItem({ member, groupId }: MemberItemProps) {
                 updateRole.mutate({ memberId: member.id, role: 'member', groupId });
                 setShowMenu(false);
               }}
-              className="w-full px-3 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+              className="w-full px-3 py-1.5 text-left text-sm text-foreground hover:bg-background"
             >
               Remove Mod
             </button>

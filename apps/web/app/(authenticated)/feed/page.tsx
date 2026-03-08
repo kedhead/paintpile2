@@ -42,18 +42,18 @@ export default function FeedPage() {
     <div className="mx-auto max-w-2xl space-y-4">
       <CreatePostForm />
 
-      <div className="rounded-lg border border-gray-200 bg-white">
+      <div className="rounded-lg border border-border bg-card">
         <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
 
       <div className="space-y-4">
         {feed.isLoading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : posts.length === 0 ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-            <p className="text-gray-500">
+          <div className="rounded-lg border border-border bg-card p-8 text-center">
+            <p className="text-muted-foreground">
               {activeTab === 'following'
                 ? 'Follow some painters to see their posts here!'
                 : 'No posts yet. Be the first to share!'}
@@ -67,7 +67,7 @@ export default function FeedPage() {
         <div ref={sentinelRef} className="h-4" />
         {feed.isFetchingNextPage && (
           <div className="flex justify-center py-4">
-            <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         )}
       </div>

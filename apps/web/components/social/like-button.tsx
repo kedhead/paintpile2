@@ -23,7 +23,7 @@ export function LikeButton({ targetId, targetType, initialCount }: LikeButtonPro
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-red-500"
+      className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-red-500"
     >
       <Heart
         className={`h-4 w-4 transition-transform active:scale-125 ${

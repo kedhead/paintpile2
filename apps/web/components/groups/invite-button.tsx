@@ -15,7 +15,7 @@ export function InviteButton({ groupId }: InviteButtonProps) {
     <>
       <button
         onClick={() => setShowInvite(true)}
-        className="mr-3 p-2 text-gray-400 hover:text-primary-600"
+        className="mr-3 p-2 text-muted-foreground hover:text-primary"
         title="Invite People"
       >
         <UserPlus className="h-4 w-4" />

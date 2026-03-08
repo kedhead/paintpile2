@@ -25,15 +25,15 @@ export default function UserProfilePage({
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (!profileUser) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-        <p className="text-gray-500">User not found</p>
+      <div className="rounded-lg border border-border bg-card p-8 text-center">
+        <p className="text-muted-foreground">User not found</p>
       </div>
     );
   }
@@ -41,7 +41,7 @@ export default function UserProfilePage({
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <ProfileHeader profileUser={profileUser} />
-      <h2 className="text-lg font-semibold text-gray-900">Posts</h2>
+      <h2 className="text-lg font-semibold text-foreground">Posts</h2>
       <ProfilePostGrid userId={userId} />
     </div>
   );

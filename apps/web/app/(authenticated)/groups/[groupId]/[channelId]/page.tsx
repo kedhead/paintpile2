@@ -49,7 +49,7 @@ export default function ChannelPage() {
   };
 
   if (!channel) {
-    return <div className="flex flex-1 items-center justify-center text-gray-400">Loading channel...</div>;
+    return <div className="flex flex-1 items-center justify-center text-muted-foreground">Loading channel...</div>;
   }
 
   if (channel.type === 'voice') {
@@ -67,7 +67,7 @@ export default function ChannelPage() {
         <ChannelHeader channel={channel} groupId={groupId} />
 
         {messagesLoading ? (
-          <div className="flex flex-1 items-center justify-center text-gray-400 text-sm">
+          <div className="flex flex-1 items-center justify-center text-muted-foreground text-sm">
             Loading messages...
           </div>
         ) : (
@@ -79,7 +79,7 @@ export default function ChannelPage() {
           />
         )}
 
-        <div className="flex items-center gap-2 border-t border-gray-200 bg-white">
+        <div className="flex items-center gap-2 border-t border-border bg-card">
           <div className="flex-1">
             <MessageInput onSend={handleSend} disabled={sendMessage.isPending} />
           </div>

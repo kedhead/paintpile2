@@ -12,7 +12,7 @@ export default function AuthenticatedLayout({
   const isGroupsRoute = pathname?.startsWith('/groups');
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <NavBar />
       {isGroupsRoute ? (
         children

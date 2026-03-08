@@ -39,12 +39,12 @@ export function CommentItem({ comment }: CommentItemProps) {
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
           {author && (
-            <Link href={`/profile/${author.id}`} className="text-xs font-medium text-gray-900 hover:underline">
+            <Link href={`/profile/${author.id}`} className="text-xs font-medium text-foreground hover:underline">
               {author.name || author.displayName || 'Painter'}
             </Link>
           )}
-          <span className="text-xs text-gray-400">{relativeTime(comment.created)}</span>
-          {comment.edited && <span className="text-xs text-gray-400">(edited)</span>}
+          <span className="text-xs text-muted-foreground">{relativeTime(comment.created)}</span>
+          {comment.edited && <span className="text-xs text-muted-foreground">(edited)</span>}
         </div>
 
         {editing ? (
@@ -52,17 +52,17 @@ export function CommentItem({ comment }: CommentItemProps) {
             <input
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="flex-1 rounded border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary-300"
+              className="flex-1 rounded border border-border px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary-300"
             />
             <button onClick={handleSaveEdit} className="p-1 text-green-600 hover:bg-green-50 rounded">
               <Check className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => setEditing(false)} className="p-1 text-gray-400 hover:bg-gray-100 rounded">
+            <button onClick={() => setEditing(false)} className="p-1 text-muted-foreground hover:bg-muted rounded">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
         ) : (
-          <p className="text-sm text-gray-700">{comment.content}</p>
+          <p className="text-sm text-foreground">{comment.content}</p>
         )}
       </div>
 
@@ -70,13 +70,13 @@ export function CommentItem({ comment }: CommentItemProps) {
         <div className="flex shrink-0 gap-0.5">
           <button
             onClick={() => { setEditContent(comment.content); setEditing(true); }}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
           >
             <Pencil className="h-3 w-3" />
           </button>
           <button
             onClick={() => deleteComment.mutate(comment.id)}
-            className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+            className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-500"
           >
             <Trash2 className="h-3 w-3" />
           </button>

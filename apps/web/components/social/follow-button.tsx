@@ -15,7 +15,7 @@ export function FollowButton({ targetUserId }: FollowButtonProps) {
 
   if (isLoading) {
     return (
-      <button disabled className="rounded-full border border-gray-200 px-4 py-1.5 text-sm">
+      <button disabled className="rounded-full border border-border px-4 py-1.5 text-sm">
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
       </button>
     );
@@ -35,7 +35,7 @@ export function FollowButton({ targetUserId }: FollowButtonProps) {
         className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
           hovering
             ? 'border-red-200 bg-red-50 text-red-600'
-            : 'border-gray-200 bg-white text-gray-700'
+            : 'border-border bg-card text-foreground'
         }`}
       >
         {hovering ? 'Unfollow' : 'Following'}
@@ -47,7 +47,7 @@ export function FollowButton({ targetUserId }: FollowButtonProps) {
     <button
       onClick={handleClick}
       disabled={toggleFollow.isPending}
-      className="rounded-full bg-primary-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+      className="rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/80 disabled:opacity-50"
     >
       Follow
     </button>

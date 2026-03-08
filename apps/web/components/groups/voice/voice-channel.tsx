@@ -48,7 +48,7 @@ export function VoiceChannel({ groupId, channelId, channelName }: VoiceChannelPr
 
   if (!livekitUrl) {
     return (
-      <div className="flex flex-1 items-center justify-center text-gray-400">
+      <div className="flex flex-1 items-center justify-center text-muted-foreground">
         Voice chat is not configured. Set NEXT_PUBLIC_LIVEKIT_URL to enable.
       </div>
     );
@@ -58,8 +58,8 @@ export function VoiceChannel({ groupId, channelId, channelName }: VoiceChannelPr
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">{channelName}</h3>
-          <p className="text-sm text-gray-500">Click to join this voice channel</p>
+          <h3 className="text-lg font-semibold text-foreground mb-1">{channelName}</h3>
+          <p className="text-sm text-muted-foreground">Click to join this voice channel</p>
         </div>
         <button
           onClick={connect}
@@ -99,9 +99,9 @@ function VoiceRoomContent({
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
-      <div className="border-b border-gray-200 px-4 py-3">
-        <h3 className="font-semibold text-gray-900">{channelName}</h3>
-        <p className="text-xs text-gray-400">{participants.length} connected</p>
+      <div className="border-b border-border px-4 py-3">
+        <h3 className="font-semibold text-foreground">{channelName}</h3>
+        <p className="text-xs text-muted-foreground">{participants.length} connected</p>
       </div>
 
       {/* Participant grid */}

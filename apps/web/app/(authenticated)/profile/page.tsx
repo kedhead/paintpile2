@@ -13,9 +13,9 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <ProfileHeader profileUser={user} />
-      <h2 className="text-lg font-semibold text-gray-900">Projects</h2>
+      <h2 className="text-lg font-semibold text-foreground">Projects</h2>
       <ProfileProjectGrid userId={user.id} />
-      <h2 className="text-lg font-semibold text-gray-900">Posts</h2>
+      <h2 className="text-lg font-semibold text-foreground">Posts</h2>
       <ProfilePostGrid userId={user.id} />
     </div>
   );

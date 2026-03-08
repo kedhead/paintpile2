@@ -32,9 +32,9 @@ export function AIActionBar({ projectId, imageUrl }: AIActionBarProps) {
 
   if (!imageUrl) {
     return (
-      <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-center">
-        <Sparkles className="mx-auto h-5 w-5 text-gray-400" />
-        <p className="mt-1 text-sm text-gray-500">Upload a cover photo to unlock AI features</p>
+      <div className="rounded-lg border border-dashed border-border bg-background p-4 text-center">
+        <Sparkles className="mx-auto h-5 w-5 text-muted-foreground" />
+        <p className="mt-1 text-sm text-muted-foreground">Upload a cover photo to unlock AI features</p>
       </div>
     );
   }
@@ -111,8 +111,8 @@ export function AIActionBar({ projectId, imageUrl }: AIActionBarProps) {
             disabled={isAnyLoading}
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
               activePanel === action.key
-                ? 'border-primary-300 bg-primary-50 text-primary-700'
-                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                ? 'border-primary-300 bg-primary/10 text-primary'
+                : 'border-border bg-card text-foreground hover:bg-background'
             }`}
           >
             {action.loading ? (
@@ -121,28 +121,28 @@ export function AIActionBar({ projectId, imageUrl }: AIActionBarProps) {
               <action.icon className="h-3.5 w-3.5" />
             )}
             {action.label}
-            <span className="text-gray-400">({action.credits})</span>
+            <span className="text-muted-foreground">({action.credits})</span>
           </button>
         ))}
 
         <button
           onClick={handleUpscale}
           disabled={isAnyLoading || upscale.isPending}
-          className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground hover:bg-background disabled:opacity-50"
         >
           {upscale.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ZoomIn className="h-3.5 w-3.5" />}
           Upscale
-          <span className="text-gray-400">(10)</span>
+          <span className="text-muted-foreground">(10)</span>
         </button>
 
         <button
           onClick={() => setShowRecolor(true)}
           disabled={isAnyLoading}
-          className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground hover:bg-background disabled:opacity-50"
         >
           <Paintbrush className="h-3.5 w-3.5" />
           Recolor
-          <span className="text-gray-400">(20)</span>
+          <span className="text-muted-foreground">(20)</span>
         </button>
       </div>
 
@@ -173,9 +173,9 @@ export function AIActionBar({ projectId, imageUrl }: AIActionBarProps) {
 
       {/* Upscale Result */}
       {upscaleResult && (
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <h3 className="mb-2 text-sm font-semibold text-gray-900">Upscaled Image</h3>
-          <a href={upscaleResult} target="_blank" rel="noopener noreferrer" className="text-xs text-primary-600 hover:underline">
+        <div className="rounded-lg border border-border bg-card p-4">
+          <h3 className="mb-2 text-sm font-semibold text-foreground">Upscaled Image</h3>
+          <a href={upscaleResult} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">
             Open full resolution
           </a>
           <img src={upscaleResult} alt="Upscaled" className="mt-2 w-full rounded-lg" />
@@ -184,8 +184,8 @@ export function AIActionBar({ projectId, imageUrl }: AIActionBarProps) {
 
       {/* Recolor Result */}
       {recolorResult && (
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <h3 className="mb-2 text-sm font-semibold text-gray-900">Recolored Image</h3>
+        <div className="rounded-lg border border-border bg-card p-4">
+          <h3 className="mb-2 text-sm font-semibold text-foreground">Recolored Image</h3>
           <img src={recolorResult} alt="Recolored" className="w-full rounded-lg" />
         </div>
       )}

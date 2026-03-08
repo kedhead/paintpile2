@@ -23,11 +23,11 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 export function TechniqueAdvisorPanel({ techniques, nextSteps, skillLevel }: TechniqueAdvisorPanelProps) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
+    <div className="rounded-lg border border-border bg-card p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-900">Technique Advice</h3>
+        <h3 className="text-sm font-semibold text-foreground">Technique Advice</h3>
         {skillLevel && (
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DIFFICULTY_COLORS[skillLevel] || 'bg-gray-100 text-gray-700'}`}>
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DIFFICULTY_COLORS[skillLevel] || 'bg-muted text-foreground'}`}>
             {skillLevel}
           </span>
         )}
@@ -35,18 +35,18 @@ export function TechniqueAdvisorPanel({ techniques, nextSteps, skillLevel }: Tec
 
       <div className="space-y-3">
         {techniques.map((t, i) => (
-          <div key={i} className="rounded-md border border-gray-100 p-3">
+          <div key={i} className="rounded-md border border-border p-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-900">{t.name}</span>
-              <span className={`rounded-full px-2 py-0.5 text-xs ${DIFFICULTY_COLORS[t.difficulty] || 'bg-gray-100 text-gray-600'}`}>
+              <span className="text-sm font-medium text-foreground">{t.name}</span>
+              <span className={`rounded-full px-2 py-0.5 text-xs ${DIFFICULTY_COLORS[t.difficulty] || 'bg-muted text-muted-foreground'}`}>
                 {t.difficulty}
               </span>
             </div>
-            <p className="mt-1 text-xs text-gray-500">{t.description}</p>
-            <p className="mt-1 text-xs text-gray-400">Apply to: {t.area}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t.description}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Apply to: {t.area}</p>
             <ol className="mt-2 list-inside list-decimal space-y-0.5">
               {t.steps.map((step, j) => (
-                <li key={j} className="text-xs text-gray-600">{step}</li>
+                <li key={j} className="text-xs text-muted-foreground">{step}</li>
               ))}
             </ol>
           </div>

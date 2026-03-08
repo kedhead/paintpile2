@@ -27,7 +27,7 @@ export function MessageList({ messages, currentUserId, onEdit, onDelete }: Messa
 
   if (messages.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-gray-400 text-sm">
+      <div className="flex flex-1 items-center justify-center text-muted-foreground text-sm">
         No messages yet. Be the first to say something!
       </div>
     );

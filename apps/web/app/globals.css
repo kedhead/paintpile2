@@ -3,7 +3,55 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: 220 15% 10%;
+    --foreground: 40 20% 94%;
+
+    --card: 220 15% 14%;
+    --card-foreground: 40 20% 94%;
+
+    --primary: 35 85% 55%;
+    --primary-foreground: 220 15% 10%;
+
+    --secondary: 220 10% 20%;
+    --secondary-foreground: 40 20% 94%;
+
+    --muted: 220 10% 20%;
+    --muted-foreground: 220 10% 65%;
+
+    --accent: 220 10% 20%;
+    --accent-foreground: 40 20% 94%;
+
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 40 20% 94%;
+
+    --border: 220 10% 24%;
+    --input: 220 10% 24%;
+    --ring: 35 85% 55%;
+
+    --radius: 0.5rem;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
   }
 }

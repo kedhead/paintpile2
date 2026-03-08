@@ -22,12 +22,12 @@ export function UserCard({ user, showFollowButton = false, currentUserId }: User
       <div className="min-w-0 flex-1">
         <Link
           href={`/profile/${user.id}`}
-          className="block truncate text-sm font-medium text-gray-900 hover:underline"
+          className="block truncate text-sm font-medium text-foreground hover:underline"
         >
           {user.name || user.displayName || 'Painter'}
         </Link>
         {user.username && (
-          <p className="truncate text-xs text-gray-500">@{user.username}</p>
+          <p className="truncate text-xs text-muted-foreground">@{user.username}</p>
         )}
       </div>
       {showFollowButton && !isOwnProfile && (

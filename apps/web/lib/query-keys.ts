@@ -57,4 +57,27 @@ export const queryKeys = {
     all: ['aiQuota'] as const,
     user: (userId: string) => [...queryKeys.aiQuota.all, userId] as const,
   },
+  paints: {
+    all: ['paints'] as const,
+    database: () => [...queryKeys.paints.all, 'database'] as const,
+    inventory: () => [...queryKeys.paints.all, 'inventory'] as const,
+    custom: () => [...queryKeys.paints.all, 'custom'] as const,
+  },
+  recipes: {
+    all: ['recipes'] as const,
+    my: () => [...queryKeys.recipes.all, 'my'] as const,
+    public: () => [...queryKeys.recipes.all, 'public'] as const,
+    detail: (recipeId: string) => [...queryKeys.recipes.all, 'detail', recipeId] as const,
+  },
+  armies: {
+    all: ['armies'] as const,
+    my: () => [...queryKeys.armies.all, 'my'] as const,
+    detail: (armyId: string) => [...queryKeys.armies.all, 'detail', armyId] as const,
+    members: (armyId: string) => [...queryKeys.armies.all, 'members', armyId] as const,
+  },
+  pile: {
+    all: ['pile'] as const,
+    items: () => [...queryKeys.pile.all, 'items'] as const,
+    stats: () => [...queryKeys.pile.all, 'stats'] as const,
+  },
 };

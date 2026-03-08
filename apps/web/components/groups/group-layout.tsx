@@ -78,7 +78,7 @@ export function GroupLayout({ children }: GroupLayoutProps) {
         {/* Mobile channel toggle */}
         {groupId && (
           <button
-            className="md:hidden flex items-center gap-2 border-b border-gray-200 px-3 py-2 text-sm text-gray-600"
+            className="md:hidden flex items-center gap-2 border-b border-border px-3 py-2 text-sm text-muted-foreground"
             onClick={() => setMobileChannelsOpen(!mobileChannelsOpen)}
           >
             Channels

@@ -15,16 +15,16 @@ export function VoiceParticipant({ participant }: VoiceParticipantProps) {
   return (
     <div
       className={`flex flex-col items-center gap-2 rounded-lg p-4 transition-colors ${
-        isSpeaking ? 'bg-green-50 ring-2 ring-green-400' : 'bg-gray-50'
+        isSpeaking ? 'bg-green-50 ring-2 ring-green-400' : 'bg-background'
       }`}
     >
       <div className="relative">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-primary-700 text-xl font-bold">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary text-xl font-bold">
           {displayName[0]?.toUpperCase()}
         </div>
         <div
           className={`absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full ${
-            isMuted ? 'bg-red-500' : 'bg-gray-700'
+            isMuted ? 'bg-red-500' : 'bg-card'
           }`}
         >
           {isMuted ? (
@@ -34,7 +34,7 @@ export function VoiceParticipant({ participant }: VoiceParticipantProps) {
           )}
         </div>
       </div>
-      <span className="text-xs font-medium text-gray-700 truncate max-w-full">{displayName}</span>
+      <span className="text-xs font-medium text-foreground truncate max-w-full">{displayName}</span>
     </div>
   );
 }

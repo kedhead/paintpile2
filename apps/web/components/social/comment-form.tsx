@@ -33,12 +33,12 @@ export function CommentForm({
         onChange={(e) => setContent(e.target.value)}
         placeholder={placeholder}
         maxLength={1000}
-        className="flex-1 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm placeholder:text-gray-400 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-300"
+        className="flex-1 rounded-full border border-border bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-300"
       />
       <button
         type="submit"
         disabled={!content.trim() || isPending}
-        className="rounded-full p-1.5 text-primary-600 hover:bg-primary-50 disabled:opacity-50"
+        className="rounded-full p-1.5 text-primary hover:bg-primary/10 disabled:opacity-50"
       >
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />

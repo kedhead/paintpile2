@@ -34,15 +34,15 @@ export function ProfileProjectGrid({ userId }: ProfileProjectGridProps) {
   if (query.isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (projects.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
-        <p className="text-sm text-gray-500">No public projects yet</p>
+      <div className="rounded-lg border border-border bg-card p-6 text-center">
+        <p className="text-sm text-muted-foreground">No public projects yet</p>
       </div>
     );
   }
@@ -57,7 +57,7 @@ export function ProfileProjectGrid({ userId }: ProfileProjectGridProps) {
       <div ref={sentinelRef} className="h-4" />
       {query.isFetchingNextPage && (
         <div className="flex justify-center py-4">
-          <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       )}
     </div>

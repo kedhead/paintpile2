@@ -5,8 +5,8 @@ import { NotificationList } from '../../../components/notifications/notification
 export default function NotificationsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-      <div className="rounded-lg border border-gray-200 bg-white py-2">
+      <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
+      <div className="rounded-lg border border-border bg-card py-2">
         <NotificationList />
       </div>
     </div>

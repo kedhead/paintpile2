@@ -29,14 +29,14 @@ export function CommentSection({ targetId, targetType, commentCount }: CommentSe
     <div className="mt-2">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <MessageCircle className="h-4 w-4" />
         <span>{commentCount} {commentCount === 1 ? 'comment' : 'comments'}</span>
       </button>
 
       {expanded && (
-        <div className="mt-2 space-y-1 border-t border-gray-100 pt-2">
+        <div className="mt-2 space-y-1 border-t border-border pt-2">
           {comments?.items?.map((comment) => (
             <CommentItem key={comment.id} comment={comment} />
           ))}

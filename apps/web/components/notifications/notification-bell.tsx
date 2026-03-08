@@ -11,7 +11,7 @@ export function NotificationBell() {
   return (
     <Link
       href="/notifications"
-      className="relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+      className="relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
     >
       <Bell className="h-4 w-4" />
       {unreadCount > 0 && (

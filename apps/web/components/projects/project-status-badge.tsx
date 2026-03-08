@@ -1,7 +1,7 @@
 'use client';
 
 const STATUS_STYLES = {
-  'not-started': 'bg-gray-100 text-gray-600',
+  'not-started': 'bg-muted text-muted-foreground',
   'in-progress': 'bg-blue-100 text-blue-700',
   completed: 'bg-green-100 text-green-700',
 } as const;

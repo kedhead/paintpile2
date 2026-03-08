@@ -29,12 +29,12 @@ export function ChannelSidebar({ groupId, channels, activeChannelId, onSelect }:
   });
 
   return (
-    <aside className="flex w-[200px] flex-col border-r border-gray-200 bg-gray-50 h-full">
+    <aside className="flex w-[200px] flex-col border-r border-border bg-background h-full">
       {/* Group header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-3 py-3">
-        <h2 className="truncate text-sm font-semibold text-gray-900">{group?.name || 'Loading...'}</h2>
+      <div className="flex items-center justify-between border-b border-border px-3 py-3">
+        <h2 className="truncate text-sm font-semibold text-foreground">{group?.name || 'Loading...'}</h2>
         {canManageChannels && (
-          <Link href={`/groups/${groupId}/settings`} className="text-gray-400 hover:text-gray-600">
+          <Link href={`/groups/${groupId}/settings`} className="text-muted-foreground hover:text-muted-foreground">
             <Settings className="h-4 w-4" />
           </Link>
         )}
@@ -46,8 +46,8 @@ export function ChannelSidebar({ groupId, channels, activeChannelId, onSelect }:
           <div key={category || '__uncategorized'}>
             {category && (
               <div className="flex items-center gap-1 px-2 pt-3 pb-1">
-                <ChevronDown className="h-3 w-3 text-gray-400" />
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {category}
                 </span>
               </div>
@@ -62,8 +62,8 @@ export function ChannelSidebar({ groupId, channels, activeChannelId, onSelect }:
                   onClick={onSelect}
                   className={`flex items-center gap-1.5 mx-1 rounded px-2 py-1 text-sm transition-colors ${
                     isActive
-                      ? 'bg-primary-50 text-primary-700 font-medium'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-primary/10 text-primary font-medium'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0 opacity-60" />
@@ -78,7 +78,7 @@ export function ChannelSidebar({ groupId, channels, activeChannelId, onSelect }:
         {canManageChannels && (
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-1.5 mx-1 rounded px-2 py-1 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-100 w-[calc(100%-8px)]"
+            className="flex items-center gap-1.5 mx-1 rounded px-2 py-1 text-sm text-muted-foreground hover:text-muted-foreground hover:bg-muted w-[calc(100%-8px)]"
           >
             <Plus className="h-4 w-4" />
             <span>Add Channel</span>

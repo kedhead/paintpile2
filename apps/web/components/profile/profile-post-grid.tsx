@@ -34,15 +34,15 @@ export function ProfilePostGrid({ userId }: ProfilePostGridProps) {
   if (feed.isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (posts.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-        <p className="text-gray-500">No posts yet</p>
+      <div className="rounded-lg border border-border bg-card p-8 text-center">
+        <p className="text-muted-foreground">No posts yet</p>
       </div>
     );
   }
@@ -55,7 +55,7 @@ export function ProfilePostGrid({ userId }: ProfilePostGridProps) {
       <div ref={sentinelRef} className="h-4" />
       {feed.isFetchingNextPage && (
         <div className="flex justify-center py-4">
-          <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       )}
     </div>

@@ -16,7 +16,7 @@ export function PostCard({ post }: PostCardProps) {
   const author = post.expand?.user as RecordModel | undefined;
 
   return (
-    <article className="rounded-lg border border-gray-200 bg-white p-4">
+    <article className="rounded-lg border border-border bg-card p-4">
       {/* Header */}
       <div className="flex items-center gap-3">
         {author && (
@@ -28,17 +28,17 @@ export function PostCard({ post }: PostCardProps) {
           {author && (
             <Link
               href={`/profile/${author.id}`}
-              className="text-sm font-medium text-gray-900 hover:underline"
+              className="text-sm font-medium text-foreground hover:underline"
             >
               {author.name || author.displayName || 'Painter'}
             </Link>
           )}
-          <p className="text-xs text-gray-500">{relativeTime(post.created)}</p>
+          <p className="text-xs text-muted-foreground">{relativeTime(post.created)}</p>
         </div>
       </div>
 
       {/* Content */}
-      <p className="mt-3 whitespace-pre-wrap text-sm text-gray-800">{post.content}</p>
+      <p className="mt-3 whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
 
       {/* Images */}
       <PostImageGrid post={post} />
@@ -49,7 +49,7 @@ export function PostCard({ post }: PostCardProps) {
           {post.tags.map((tag: string) => (
             <span
               key={tag}
-              className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
+              className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
             >
               #{tag}
             </span>
@@ -58,7 +58,7 @@ export function PostCard({ post }: PostCardProps) {
       )}
 
       {/* Actions */}
-      <div className="mt-3 flex items-center gap-4 border-t border-gray-100 pt-3">
+      <div className="mt-3 flex items-center gap-4 border-t border-border pt-3">
         <LikeButton targetId={post.id} targetType="post" initialCount={post.like_count || 0} />
       </div>
 

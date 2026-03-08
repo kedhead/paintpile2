@@ -34,7 +34,7 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
   };
 
   return (
-    <div className="border-t border-gray-200 bg-white p-3">
+    <div className="border-t border-border bg-card p-3">
       <div className="flex items-end gap-2">
         <textarea
           ref={textareaRef}
@@ -44,12 +44,12 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
           placeholder="Type a message..."
           disabled={disabled}
           rows={1}
-          className="flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-primary-500 focus:outline-none disabled:opacity-50"
+          className="flex-1 resize-none rounded-lg border border-border px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none disabled:opacity-50"
         />
         <button
           onClick={handleSend}
           disabled={disabled || !content.trim()}
-          className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white transition-colors hover:bg-primary-700 disabled:opacity-40"
+          className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white transition-colors hover:bg-primary/80 disabled:opacity-40"
         >
           <SendHorizontal className="h-4 w-4" />
         </button>

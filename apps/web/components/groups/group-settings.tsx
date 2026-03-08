@@ -41,24 +41,24 @@ export function GroupSettings({ group }: GroupSettingsProps) {
     <div className="mx-auto max-w-lg p-6">
       <button
         onClick={() => router.push(`/groups/${group.id}`)}
-        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to group
       </button>
 
-      <h1 className="text-xl font-bold text-gray-900 mb-6">Group Settings</h1>
+      <h1 className="text-xl font-bold text-foreground mb-6">Group Settings</h1>
 
       <form onSubmit={handleSave} className="space-y-4">
         {/* Icon */}
         <div className="flex items-center gap-4">
-          <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 hover:border-primary-400 overflow-hidden">
+          <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-border hover:border-primary-400 overflow-hidden">
             {icon ? (
               <img src={URL.createObjectURL(icon)} alt="" className="h-full w-full object-cover" />
             ) : iconUrl ? (
               <img src={iconUrl} alt="" className="h-full w-full object-cover" />
             ) : (
-              <Upload className="h-5 w-5 text-gray-400" />
+              <Upload className="h-5 w-5 text-muted-foreground" />
             )}
             <input
               type="file"
@@ -67,36 +67,36 @@ export function GroupSettings({ group }: GroupSettingsProps) {
               onChange={(e) => setIcon(e.target.files?.[0] || null)}
             />
           </label>
-          <span className="text-sm text-gray-500">Click to change icon</span>
+          <span className="text-sm text-muted-foreground">Click to change icon</span>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={100}
             required
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={500}
             rows={3}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none resize-none"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none resize-none"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Invite Code</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Invite Code</label>
           <div className="flex items-center gap-2">
-            <code className="flex-1 rounded bg-gray-100 px-3 py-2 text-sm text-gray-800">
+            <code className="flex-1 rounded bg-muted px-3 py-2 text-sm text-foreground">
               {group.invite_code || 'None'}
             </code>
             <button
@@ -104,7 +104,7 @@ export function GroupSettings({ group }: GroupSettingsProps) {
               onClick={() => navigator.clipboard.writeText(
                 `${window.location.origin}/groups/join/${group.invite_code}`
               )}
-              className="rounded-lg px-3 py-2 text-sm text-primary-600 hover:bg-primary-50"
+              className="rounded-lg px-3 py-2 text-sm text-primary hover:bg-primary/10"
             >
               Copy Link
             </button>
@@ -114,7 +114,7 @@ export function GroupSettings({ group }: GroupSettingsProps) {
         <button
           type="submit"
           disabled={updateGroup.isPending}
-          className="w-full rounded-lg bg-primary-600 px-4 py-2 text-sm text-white hover:bg-primary-700 disabled:opacity-50"
+          className="w-full rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/80 disabled:opacity-50"
         >
           {updateGroup.isPending ? 'Saving...' : 'Save Changes'}
         </button>
@@ -125,7 +125,7 @@ export function GroupSettings({ group }: GroupSettingsProps) {
         <h3 className="text-sm font-semibold text-red-700 mb-2">Danger Zone</h3>
         {showDelete ? (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Are you sure?</span>
+            <span className="text-sm text-muted-foreground">Are you sure?</span>
             <button
               onClick={handleDelete}
               disabled={deleteGroup.isPending}
@@ -135,7 +135,7 @@ export function GroupSettings({ group }: GroupSettingsProps) {
             </button>
             <button
               onClick={() => setShowDelete(false)}
-              className="rounded px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+              className="rounded px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted"
             >
               Cancel
             </button>

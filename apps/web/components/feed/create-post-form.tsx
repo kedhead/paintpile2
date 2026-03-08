@@ -47,7 +47,7 @@ export function CreatePostForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="rounded-lg border border-gray-200 bg-white p-4"
+      className="rounded-lg border border-border bg-card p-4"
     >
       <div className="flex gap-3">
         <UserAvatar user={user} size="md" />
@@ -57,7 +57,7 @@ export function CreatePostForm() {
             placeholder="What are you painting?"
             rows={expanded ? 3 : 1}
             onFocus={() => setExpanded(true)}
-            className="w-full resize-none rounded-md border-0 bg-gray-50 px-3 py-2 text-sm placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full resize-none rounded-md border-0 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.content && (
             <p className="mt-1 text-xs text-red-500">{errors.content.message}</p>
@@ -74,14 +74,14 @@ export function CreatePostForm() {
                     reset();
                     setImages([]);
                   }}
-                  className="rounded-md px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100"
+                  className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createPost.isPending}
-                  className="flex items-center gap-1.5 rounded-md bg-primary-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/80 disabled:opacity-50"
                 >
                   {createPost.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

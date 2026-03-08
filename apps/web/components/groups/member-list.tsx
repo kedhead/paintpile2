@@ -17,7 +17,7 @@ export function MemberList({ members, groupId }: MemberListProps) {
     if (items.length === 0) return null;
     return (
       <div className="mb-3">
-        <h4 className="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <h4 className="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {title} — {items.length}
         </h4>
         {items.map((member) => (
@@ -28,7 +28,7 @@ export function MemberList({ members, groupId }: MemberListProps) {
   };
 
   return (
-    <aside className="hidden lg:flex w-[200px] flex-col border-l border-gray-200 bg-gray-50 overflow-y-auto py-3">
+    <aside className="hidden lg:flex w-[200px] flex-col border-l border-border bg-background overflow-y-auto py-3">
       {renderSection('Admin', admins)}
       {renderSection('Moderators', mods)}
       {renderSection('Members', regulars)}

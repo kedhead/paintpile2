@@ -41,7 +41,7 @@ export function UserAvatar({ user, size = 'md', className = '' }: UserAvatarProp
 
   return (
     <div
-      className={`${sizes[size]} flex items-center justify-center rounded-full bg-primary-100 font-bold text-primary-700 ${className}`}
+      className={`${sizes[size]} flex items-center justify-center rounded-full bg-primary/20 font-bold text-primary ${className}`}
     >
       {initial}
     </div>

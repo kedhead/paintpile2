@@ -65,7 +65,7 @@ export function ImageUpload({ files, onChange, max = 10 }: ImageUploadProps) {
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
           onClick={() => inputRef.current?.click()}
-          className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-600"
+          className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground hover:border-border hover:text-muted-foreground"
         >
           <ImagePlus className="h-4 w-4" />
           <span>Add images ({files.length}/{max})</span>
