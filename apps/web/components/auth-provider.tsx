@@ -31,6 +31,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(() => {
     pb.authStore.clear();
+    // Clear the pb_auth cookie so middleware redirects to login
+    document.cookie = 'pb_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    window.location.href = '/auth/login';
   }, [pb]);
 
   return (
