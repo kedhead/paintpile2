@@ -17,12 +17,12 @@ interface CritiqueCardProps {
 }
 
 const GRADE_COLORS: Record<string, string> = {
-  S: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  A: 'bg-green-100 text-green-800 border-green-300',
-  B: 'bg-blue-100 text-blue-800 border-blue-300',
+  S: 'bg-yellow-900/30 text-yellow-800 border-yellow-300',
+  A: 'bg-green-900/30 text-green-800 border-green-300',
+  B: 'bg-blue-900/30 text-blue-800 border-blue-300',
   C: 'bg-muted text-foreground border-border',
   D: 'bg-orange-100 text-orange-800 border-orange-300',
-  F: 'bg-red-100 text-red-800 border-red-300',
+  F: 'bg-red-900/30 text-red-800 border-red-300',
 };
 
 export function CritiqueCard({ critique }: CritiqueCardProps) {
@@ -71,11 +71,11 @@ export function CritiqueCard({ critique }: CritiqueCardProps) {
       {/* Strengths */}
       {critique.technical_strengths?.length > 0 && (
         <div>
-          <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-green-700">Strengths</h4>
+          <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-green-400">Strengths</h4>
           <ul className="space-y-1">
             {critique.technical_strengths.map((s, i) => (
               <li key={i} className="flex items-start gap-1.5 text-sm text-muted-foreground">
-                <CheckCircle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-500" />
+                <CheckCircle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-green-400" />
                 {s}
               </li>
             ))}

@@ -54,7 +54,7 @@ export function CommentItem({ comment }: CommentItemProps) {
               onChange={(e) => setEditContent(e.target.value)}
               className="flex-1 rounded border border-border px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary-300"
             />
-            <button onClick={handleSaveEdit} className="p-1 text-green-600 hover:bg-green-50 rounded">
+            <button onClick={handleSaveEdit} className="p-1 text-green-400 hover:bg-green-900/30 rounded">
               <Check className="h-3.5 w-3.5" />
             </button>
             <button onClick={() => setEditing(false)} className="p-1 text-muted-foreground hover:bg-muted rounded">
@@ -76,7 +76,7 @@ export function CommentItem({ comment }: CommentItemProps) {
           </button>
           <button
             onClick={() => deleteComment.mutate(comment.id)}
-            className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-500"
+            className="rounded p-1 text-muted-foreground hover:bg-red-900/30 hover:text-red-400"
           >
             <Trash2 className="h-3 w-3" />
           </button>

@@ -93,7 +93,7 @@ export function RecipeResult({ recipe }: RecipeResultProps) {
                   <p className="mt-0.5 text-xs text-muted-foreground">Technique: {step.technique}</p>
                 )}
                 {step.tips?.map((tip, i) => (
-                  <p key={i} className="mt-0.5 text-xs italic text-blue-600">{tip}</p>
+                  <p key={i} className="mt-0.5 text-xs italic text-blue-400">{tip}</p>
                 ))}
               </div>
             </div>

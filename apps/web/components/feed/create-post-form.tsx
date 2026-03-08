@@ -60,7 +60,7 @@ export function CreatePostForm() {
             className="w-full resize-none rounded-md border-0 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.content && (
-            <p className="mt-1 text-xs text-red-500">{errors.content.message}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.content.message}</p>
           )}
 
           {expanded && (

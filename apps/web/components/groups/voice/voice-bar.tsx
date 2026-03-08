@@ -23,14 +23,14 @@ export function VoiceBar({ channelName, groupName, muted, onToggleMute, onDiscon
         <button
           onClick={onToggleMute}
           className={`flex h-8 w-8 items-center justify-center rounded-full ${
-            muted ? 'bg-red-500' : 'bg-muted hover:bg-background0'
+            muted ? 'bg-red-900/300' : 'bg-muted hover:bg-background0'
           }`}
         >
           {muted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
         </button>
         <button
           onClick={onDisconnect}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500 hover:bg-red-600"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-red-900/300 hover:bg-red-600"
         >
           <PhoneOff className="h-4 w-4" />
         </button>

@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from './auth-provider';
 import {
   Home, User, Palette, LogOut, Users, Shield,
-  ChefHat, Boxes, Sun, MoreHorizontal,
+  ChefHat, Boxes, Sun, MoreHorizontal, Settings,
 } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
 
@@ -23,6 +23,7 @@ const moreNavItems = [
   { href: '/pile', label: 'Pile', icon: Boxes },
   { href: '/tools/lighting-ref', label: 'Lighting', icon: Sun },
   { href: '/profile', label: 'Profile', icon: User },
+  { href: '/admin', label: 'Admin', icon: Settings },
 ];
 
 export function NavBar() {

@@ -52,7 +52,7 @@ export function ImageUpload({ files, onChange, max = 10 }: ImageUploadProps) {
               <button
                 type="button"
                 onClick={() => removeFile(i)}
-                className="absolute -right-1 -top-1 rounded-full bg-red-500 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute -right-1 -top-1 rounded-full bg-red-900/300 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <X className="h-3 w-3" />
               </button>

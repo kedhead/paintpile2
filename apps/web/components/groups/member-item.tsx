@@ -13,8 +13,8 @@ interface MemberItemProps {
 }
 
 const roleBadge = {
-  admin: { icon: Crown, color: 'text-yellow-500' },
-  moderator: { icon: Shield, color: 'text-blue-500' },
+  admin: { icon: Crown, color: 'text-yellow-400' },
+  moderator: { icon: Shield, color: 'text-blue-400' },
   member: { icon: null, color: '' },
 };
 
@@ -73,7 +73,7 @@ export function MemberItem({ member, groupId }: MemberItemProps) {
               kickMember.mutate({ memberId: member.id, groupId });
               setShowMenu(false);
             }}
-            className="w-full px-3 py-1.5 text-left text-sm text-red-600 hover:bg-red-50"
+            className="w-full px-3 py-1.5 text-left text-sm text-red-400 hover:bg-red-900/30"
           >
             Kick
           </button>

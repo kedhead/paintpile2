@@ -70,7 +70,7 @@ export function GroupSidebar({ groups, activeGroupId, loading }: GroupSidebarPro
       {/* Create group */}
       <button
         onClick={() => setShowCreate(true)}
-        className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card text-green-600 transition-all hover:rounded-xl hover:bg-green-50"
+        className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card text-green-400 transition-all hover:rounded-xl hover:bg-green-900/30"
         title="Create Group"
       >
         <Plus className="h-5 w-5" />

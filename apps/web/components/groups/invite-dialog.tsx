@@ -57,14 +57,14 @@ export function InviteDialog({ groupId, onClose }: InviteDialogProps) {
                 className="p-1 text-muted-foreground hover:text-primary"
               >
                 {copied === invite.code ? (
-                  <Check className="h-4 w-4 text-green-500" />
+                  <Check className="h-4 w-4 text-green-400" />
                 ) : (
                   <Copy className="h-4 w-4" />
                 )}
               </button>
               <button
                 onClick={() => deleteInvite.mutate({ inviteId: invite.id, groupId })}
-                className="p-1 text-muted-foreground hover:text-red-500"
+                className="p-1 text-muted-foreground hover:text-red-400"
               >
                 <X className="h-4 w-4" />
               </button>

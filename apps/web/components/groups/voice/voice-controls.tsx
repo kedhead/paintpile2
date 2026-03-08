@@ -40,7 +40,7 @@ export function VoiceControls({ room, onDisconnect }: VoiceControlsProps) {
       <button
         onClick={toggleMute}
         className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-          muted ? 'bg-red-100 text-red-600' : 'bg-muted text-foreground hover:bg-muted'
+          muted ? 'bg-red-900/30 text-red-400' : 'bg-muted text-foreground hover:bg-muted'
         }`}
         title={muted ? 'Unmute' : 'Mute'}
       >
@@ -50,7 +50,7 @@ export function VoiceControls({ room, onDisconnect }: VoiceControlsProps) {
       <button
         onClick={toggleDeafen}
         className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-          deafened ? 'bg-red-100 text-red-600' : 'bg-muted text-foreground hover:bg-muted'
+          deafened ? 'bg-red-900/30 text-red-400' : 'bg-muted text-foreground hover:bg-muted'
         }`}
         title={deafened ? 'Undeafen' : 'Deafen'}
       >
@@ -59,7 +59,7 @@ export function VoiceControls({ room, onDisconnect }: VoiceControlsProps) {
 
       <button
         onClick={disconnect}
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-red-900/300 text-white hover:bg-red-600 transition-colors"
         title="Disconnect"
       >
         <PhoneOff className="h-5 w-5" />

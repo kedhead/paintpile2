@@ -34,7 +34,7 @@ export function FollowButton({ targetUserId }: FollowButtonProps) {
         disabled={toggleFollow.isPending}
         className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
           hovering
-            ? 'border-red-200 bg-red-50 text-red-600'
+            ? 'border-red-200 bg-red-900/30 text-red-400'
             : 'border-border bg-card text-foreground'
         }`}
       >

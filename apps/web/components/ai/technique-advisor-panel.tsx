@@ -15,10 +15,10 @@ interface TechniqueAdvisorPanelProps {
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-  beginner: 'bg-green-100 text-green-700',
-  intermediate: 'bg-blue-100 text-blue-700',
-  advanced: 'bg-purple-100 text-purple-700',
-  expert: 'bg-red-100 text-red-700',
+  beginner: 'bg-green-900/30 text-green-400',
+  intermediate: 'bg-blue-900/30 text-blue-400',
+  advanced: 'bg-purple-900/30 text-purple-400',
+  expert: 'bg-red-900/30 text-red-400',
 };
 
 export function TechniqueAdvisorPanel({ techniques, nextSteps, skillLevel }: TechniqueAdvisorPanelProps) {
@@ -54,9 +54,9 @@ export function TechniqueAdvisorPanel({ techniques, nextSteps, skillLevel }: Tec
       </div>
 
       {nextSteps && (
-        <div className="rounded-md bg-blue-50 p-3">
+        <div className="rounded-md bg-blue-900/30 p-3">
           <p className="text-xs font-medium text-blue-800">Next Steps</p>
-          <p className="mt-0.5 text-xs text-blue-700">{nextSteps}</p>
+          <p className="mt-0.5 text-xs text-blue-400">{nextSteps}</p>
         </div>
       )}
     </div>

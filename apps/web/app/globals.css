@@ -36,6 +36,29 @@
     @apply bg-background text-foreground antialiased;
   }
 
+  /* Form elements: dark backgrounds with readable text */
+  input,
+  textarea,
+  select {
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--foreground));
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Color input needs different treatment */
+  input[type="color"] {
+    background-color: transparent;
+  }
+
+  /* Range inputs */
+  input[type="range"] {
+    background-color: transparent;
+  }
+
   /* Custom scrollbar for dark theme */
   ::-webkit-scrollbar {
     width: 8px;

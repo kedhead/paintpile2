@@ -84,7 +84,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             </button>
             <button
               onClick={handleDelete}
-              className="rounded-lg p-2 text-muted-foreground hover:bg-red-50 hover:text-red-500"
+              className="rounded-lg p-2 text-muted-foreground hover:bg-red-900/30 hover:text-red-400"
             >
               <Trash2 className="h-4 w-4" />
             </button>

@@ -68,7 +68,7 @@ export function MessageItem({ message, isOwn, compact, onEdit, onDelete }: Messa
               rows={1}
               autoFocus
             />
-            <button onClick={handleSaveEdit} className="p-1 text-green-600 hover:text-green-700">
+            <button onClick={handleSaveEdit} className="p-1 text-green-400 hover:text-green-400">
               <Check className="h-4 w-4" />
             </button>
             <button
@@ -101,7 +101,7 @@ export function MessageItem({ message, isOwn, compact, onEdit, onDelete }: Messa
           </button>
           <button
             onClick={() => onDelete(message.id)}
-            className="p-1 text-muted-foreground hover:text-red-500"
+            className="p-1 text-muted-foreground hover:text-red-400"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>

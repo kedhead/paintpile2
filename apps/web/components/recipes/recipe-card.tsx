@@ -5,9 +5,9 @@ import type { RecordModel } from 'pocketbase';
 import { ChefHat, Layers, Clock } from 'lucide-react';
 
 const DIFFICULTY_STYLES: Record<string, string> = {
-  beginner: 'bg-green-500/20 text-green-400 border-green-500/30',
-  intermediate: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  advanced: 'bg-red-500/20 text-red-400 border-red-500/30',
+  beginner: 'bg-green-900/300/20 text-green-400 border-green-500/30',
+  intermediate: 'bg-yellow-900/300/20 text-yellow-400 border-yellow-500/30',
+  advanced: 'bg-red-900/300/20 text-red-400 border-red-500/30',
 };
 
 interface RecipeCardProps {

@@ -122,7 +122,7 @@ export function GroupSettings({ group }: GroupSettingsProps) {
 
       {/* Danger zone */}
       <div className="mt-8 rounded-lg border border-red-200 p-4">
-        <h3 className="text-sm font-semibold text-red-700 mb-2">Danger Zone</h3>
+        <h3 className="text-sm font-semibold text-red-400 mb-2">Danger Zone</h3>
         {showDelete ? (
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Are you sure?</span>
@@ -143,7 +143,7 @@ export function GroupSettings({ group }: GroupSettingsProps) {
         ) : (
           <button
             onClick={() => setShowDelete(true)}
-            className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
+            className="flex items-center gap-1 text-sm text-red-400 hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
             Delete this group

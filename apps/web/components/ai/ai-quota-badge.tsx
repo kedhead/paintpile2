@@ -14,7 +14,7 @@ export function AIQuotaBadge() {
   const remaining = Math.max(0, limit - used);
 
   return (
-    <div className="flex items-center gap-1.5 rounded-full bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700">
+    <div className="flex items-center gap-1.5 rounded-full bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-400">
       <Sparkles className="h-3 w-3" />
       {remaining} credits
     </div>

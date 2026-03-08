@@ -15,7 +15,7 @@ export function VoiceParticipant({ participant }: VoiceParticipantProps) {
   return (
     <div
       className={`flex flex-col items-center gap-2 rounded-lg p-4 transition-colors ${
-        isSpeaking ? 'bg-green-50 ring-2 ring-green-400' : 'bg-background'
+        isSpeaking ? 'bg-green-900/30 ring-2 ring-green-400' : 'bg-background'
       }`}
     >
       <div className="relative">
@@ -24,7 +24,7 @@ export function VoiceParticipant({ participant }: VoiceParticipantProps) {
         </div>
         <div
           className={`absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full ${
-            isMuted ? 'bg-red-500' : 'bg-card'
+            isMuted ? 'bg-red-900/300' : 'bg-card'
           }`}
         >
           {isMuted ? (
