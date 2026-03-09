@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useState } from 'react';
+import { useParams, usePathname } from 'next/navigation';
 import type { RecordModel } from 'pocketbase';
 import { useMyGroups } from '../../hooks/use-groups';
 import { useGroupChannels } from '../../hooks/use-group-channels';
@@ -14,22 +14,13 @@ interface GroupLayoutProps {
 
 export function GroupLayout({ children }: GroupLayoutProps) {
   const params = useParams();
-  const router = useRouter();
+  const pathname = usePathname();
   const groupId = params?.groupId as string | undefined;
   const channelId = params?.channelId as string | undefined;
+  const isSettingsRoute = pathname?.endsWith('/settings');
   const { data: myGroups, isLoading: groupsLoading } = useMyGroups();
   const { data: channels } = useGroupChannels(groupId || null);
   const [mobileChannelsOpen, setMobileChannelsOpen] = useState(false);
-
-  // Auto-redirect to first text channel
-  useEffect(() => {
-    if (groupId && channels && channels.length > 0 && !channelId) {
-      const firstText = channels.find((c: RecordModel) => c.type === 'text');
-      if (firstText) {
-        router.replace(`/groups/${groupId}/${firstText.id}`);
-      }
-    }
-  }, [groupId, channels, channelId, router]);
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden">
@@ -40,8 +31,8 @@ export function GroupLayout({ children }: GroupLayoutProps) {
         loading={groupsLoading}
       />
 
-      {/* Channel sidebar - desktop */}
-      {groupId && (
+      {/* Channel sidebar - desktop (hidden on settings page) */}
+      {groupId && !isSettingsRoute && (
         <>
           <div className="hidden md:block">
             <ChannelSidebar
@@ -76,7 +67,7 @@ export function GroupLayout({ children }: GroupLayoutProps) {
       {/* Main content */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Mobile channel toggle */}
-        {groupId && (
+        {groupId && !isSettingsRoute && (
           <button
             className="md:hidden flex items-center gap-2 border-b border-border px-3 py-2 text-sm text-muted-foreground"
             onClick={() => setMobileChannelsOpen(!mobileChannelsOpen)}
