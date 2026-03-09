@@ -7,6 +7,8 @@ import { useAuth } from './auth-provider';
 import {
   Home, User, Palette, LogOut, Users, Shield,
   ChefHat, Boxes, Sun, MoreHorizontal, Settings,
+  Activity, BookOpen, Newspaper, Globe, BarChart3,
+  Trophy, Award, Crosshair,
 } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
 
@@ -21,7 +23,23 @@ const moreNavItems = [
   { href: '/paints', label: 'Paints', icon: Palette },
   { href: '/recipes', label: 'Recipes', icon: ChefHat },
   { href: '/pile', label: 'Pile', icon: Boxes },
-  { href: '/tools/lighting-ref', label: 'Lighting', icon: Sun },
+  { href: '/community', label: 'Community', icon: Globe },
+  { href: '/activity', label: 'Activity', icon: Activity },
+  { href: '/diary', label: 'Diary', icon: BookOpen },
+  { href: '/news', label: 'News', icon: Newspaper },
+  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/challenges', label: 'Challenges', icon: Trophy },
+  { href: '/badges', label: 'Badges', icon: Award },
+  { href: '/brag-board', label: 'Brag Board', icon: Award },
+];
+
+const toolsItems = [
+  { href: '/tools/lighting-ref', label: 'Lighting Ref', icon: Sun },
+  { href: '/tools/color-matcher', label: 'Color Matcher', icon: Crosshair },
+  { href: '/tools/paint-mixer', label: 'Paint Mixer', icon: Palette },
+];
+
+const bottomItems = [
   { href: '/profile', label: 'Profile', icon: User },
   { href: '/admin', label: 'Admin', icon: Settings },
 ];
@@ -33,7 +51,8 @@ export function NavBar() {
 
   if (!user) return null;
 
-  const isMoreActive = moreNavItems.some(({ href }) => pathname.startsWith(href));
+  const allMoreItems = [...moreNavItems, ...toolsItems, ...bottomItems];
+  const isMoreActive = allMoreItems.some(({ href }) => pathname.startsWith(href));
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card">
@@ -81,8 +100,49 @@ export function NavBar() {
                   className="fixed inset-0 z-40"
                   onClick={() => setMoreOpen(false)}
                 />
-                <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-md border border-border bg-card py-1 shadow-lg">
+                <div className="absolute right-0 top-full z-50 mt-1 max-h-[70vh] w-52 overflow-y-auto rounded-md border border-border bg-card py-1 shadow-lg">
                   {moreNavItems.map(({ href, label, icon: Icon }) => {
+                    const isActive = pathname.startsWith(href);
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        onClick={() => setMoreOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+                          isActive
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {label}
+                      </Link>
+                    );
+                  })}
+
+                  <div className="my-1 border-t border-border" />
+                  <p className="px-4 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Tools</p>
+                  {toolsItems.map(({ href, label, icon: Icon }) => {
+                    const isActive = pathname.startsWith(href);
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        onClick={() => setMoreOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+                          isActive
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {label}
+                      </Link>
+                    );
+                  })}
+
+                  <div className="my-1 border-t border-border" />
+                  {bottomItems.map(({ href, label, icon: Icon }) => {
                     const isActive = pathname.startsWith(href);
                     return (
                       <Link

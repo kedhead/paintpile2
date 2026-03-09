@@ -3,6 +3,7 @@
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
+import { logActivity } from './use-activities';
 
 const PAGE_SIZE = 20;
 
@@ -38,15 +39,23 @@ export function useArmy(armyId: string | null) {
 }
 
 export function useCreateArmy() {
-  const { pb } = useAuth();
+  const { pb, user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
       return pb.collection('armies').create(formData);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.armies.all });
+      if (user) {
+        logActivity(pb, user.id, {
+          type: 'army_created',
+          target_id: data.id,
+          target_type: 'army',
+          metadata: { target_name: data.name },
+        });
+      }
     },
   });
 }

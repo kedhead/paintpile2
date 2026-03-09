@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 import { createNotification } from './use-notifications';
+import { logActivity } from './use-activities';
 
 export function useIsFollowing(targetUserId: string) {
   const { pb, user } = useAuth();
@@ -69,6 +70,14 @@ export function useToggleFollow() {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(targetUserId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(user!.id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.following() });
+      // Log activity for new follows
+      if (!isFollowing && user) {
+        logActivity(pb, user.id, {
+          type: 'user_followed',
+          target_id: targetUserId,
+          target_type: 'user',
+        });
+      }
     },
   });
 }

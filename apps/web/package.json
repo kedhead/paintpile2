@@ -17,6 +17,7 @@
     "@paintpile/shared": "workspace:*",
     "@paintpile/ui": "workspace:*",
     "@tanstack/react-query": "^5.64.0",
+    "html2canvas": "^1.4.1",
     "livekit-client": "^2.8.0",
     "livekit-server-sdk": "^2.9.0",
     "lucide-react": "^0.469.0",

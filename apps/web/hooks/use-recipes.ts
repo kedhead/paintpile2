@@ -3,6 +3,7 @@
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
+import { logActivity } from './use-activities';
 
 const PAGE_SIZE = 20;
 
@@ -90,8 +91,16 @@ export function useCreateRecipe() {
         techniques: JSON.stringify(data.techniques || []),
       });
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.all });
+      if (user) {
+        logActivity(pb, user.id, {
+          type: 'recipe_created',
+          target_id: result.id,
+          target_type: 'recipe',
+          metadata: { target_name: result.name },
+        });
+      }
     },
   });
 }

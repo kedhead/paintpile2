@@ -3,9 +3,9 @@ import { validatePBAuth, validateAndDeductCredits, createAnthropicClient, fetchI
 
 export async function POST(req: NextRequest) {
   try {
-    const { projectId, imageUrl, pbToken } = await req.json();
+    const { projectId, imageUrl, imageUrls, pbToken } = await req.json();
 
-    if (!projectId || !imageUrl || !pbToken) {
+    if (!projectId || (!imageUrl && !imageUrls?.length) || !pbToken) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -13,7 +13,30 @@ export async function POST(req: NextRequest) {
     const { creditsUsed } = await validateAndDeductCredits(pb, userId, 'paintSuggestions');
 
     const anthropic = createAnthropicClient();
-    const { base64, mediaType } = await fetchImageAsBase64(imageUrl);
+
+    // Support multi-photo critique (up to 4 images)
+    const urls: string[] = imageUrls?.length ? imageUrls.slice(0, 4) : [imageUrl];
+    const angleLabels = ['Front', 'Left', 'Right', 'Back'];
+
+    const imageContent = await Promise.all(
+      urls.map(async (url: string, i: number) => {
+        const { base64, mediaType } = await fetchImageAsBase64(url);
+        return [
+          {
+            type: 'image' as const,
+            source: { type: 'base64' as const, media_type: mediaType as 'image/jpeg', data: base64 },
+          },
+          ...(urls.length > 1 ? [{
+            type: 'text' as const,
+            text: `[${angleLabels[i] || `Angle ${i + 1}`}]`,
+          }] : []),
+        ];
+      })
+    );
+
+    const multiAngleNote = urls.length > 1
+      ? `\n\nYou are viewing ${urls.length} angles of the same miniature. Consider all angles in your critique, noting consistency across views.`
+      : '';
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -22,13 +45,10 @@ export async function POST(req: NextRequest) {
         {
           role: 'user',
           content: [
-            {
-              type: 'image',
-              source: { type: 'base64', media_type: mediaType as 'image/jpeg', data: base64 },
-            },
+            ...imageContent.flat(),
             {
               type: 'text',
-              text: `You are an expert miniature painting critic. Analyze this painted miniature photo and provide a detailed critique.
+              text: `You are an expert miniature painting critic. Analyze this painted miniature photo and provide a detailed critique.${multiAngleNote}
 
 Respond with ONLY valid JSON in this exact format:
 {

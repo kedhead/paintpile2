@@ -5,6 +5,7 @@ import type { ListResult, RecordModel } from 'pocketbase';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 import { createNotification } from './use-notifications';
+import { logActivity } from './use-activities';
 
 export function useHasLiked(targetId: string) {
   const { pb, user } = useAuth();
@@ -94,9 +95,18 @@ export function useToggleLike() {
         } catch {}
       }
     },
-    onSettled: (_data, _err, { targetId }) => {
+    onSettled: (_data, _err, { targetId, targetType, liked }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.likes.check(targetId, user!.id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+      // Log activity for new likes
+      if (!liked && user) {
+        const activityType = targetType === 'army' ? 'army_liked' : targetType === 'recipe' ? 'recipe_liked' : 'project_liked';
+        logActivity(pb, user.id, {
+          type: activityType as 'project_liked' | 'army_liked' | 'recipe_liked',
+          target_id: targetId,
+          target_type: targetType,
+        });
+      }
     },
   });
 }

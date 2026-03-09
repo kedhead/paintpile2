@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, LayoutGrid, Columns } from 'lucide-react';
 import { useMyProjects, usePublicProjects } from '../../../hooks/use-projects';
 import { ProjectList } from '../../../components/projects/project-list';
+import { ProjectKanban } from '../../../components/projects/project-kanban';
 import { CreateProjectDialog } from '../../../components/projects/create-project-dialog';
 
 export default function ProjectsPage() {
   const [tab, setTab] = useState<'my' | 'discover'>('my');
+  const [viewMode, setViewMode] = useState<'grid' | 'kanban'>('grid');
   const [showCreate, setShowCreate] = useState(false);
   const myProjects = useMyProjects();
   const publicProjects = usePublicProjects();
@@ -16,13 +18,33 @@ export default function ProjectsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Projects</h1>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/80"
-        >
-          <Plus className="h-4 w-4" />
-          New Project
-        </button>
+        <div className="flex items-center gap-2">
+          {tab === 'my' && (
+            <div className="flex rounded-lg border border-border">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`rounded-l-lg p-2 ${viewMode === 'grid' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                title="Grid view"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('kanban')}
+                className={`rounded-r-lg p-2 ${viewMode === 'kanban' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                title="Kanban view"
+              >
+                <Columns className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/80"
+          >
+            <Plus className="h-4 w-4" />
+            New Project
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -46,10 +68,14 @@ export default function ProjectsPage() {
       </div>
 
       {tab === 'my' ? (
-        <ProjectList
-          query={myProjects}
-          emptyMessage="No projects yet. Create your first painting project!"
-        />
+        viewMode === 'kanban' ? (
+          <ProjectKanban />
+        ) : (
+          <ProjectList
+            query={myProjects}
+            emptyMessage="No projects yet. Create your first painting project!"
+          />
+        )
       ) : (
         <ProjectList
           query={publicProjects}

@@ -3,6 +3,7 @@
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
+import { logActivity } from './use-activities';
 
 const PAGE_SIZE = 20;
 
@@ -74,30 +75,47 @@ export function useUserProjects(userId: string) {
 }
 
 export function useCreateProject() {
-  const { pb } = useAuth();
+  const { pb, user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
       return pb.collection('projects').create(formData);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      if (user) {
+        logActivity(pb, user.id, {
+          type: 'project_created',
+          target_id: data.id,
+          target_type: 'project',
+          metadata: { target_name: data.name },
+        });
+      }
     },
   });
 }
 
 export function useUpdateProject() {
-  const { pb } = useAuth();
+  const { pb, user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ projectId, data }: { projectId: string; data: FormData | Record<string, unknown> }) => {
       return pb.collection('projects').update(projectId, data);
     },
-    onSuccess: (_data, variables) => {
+    onSuccess: (result, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(variables.projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.my() });
+      // Log completion activity
+      if (user && result.status === 'completed') {
+        logActivity(pb, user.id, {
+          type: 'project_completed',
+          target_id: result.id,
+          target_type: 'project',
+          metadata: { target_name: result.name },
+        });
+      }
     },
   });
 }

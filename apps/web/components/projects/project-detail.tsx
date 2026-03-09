@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { RecordModel } from 'pocketbase';
-import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, Clock, ChefHat } from 'lucide-react';
 import { useAuth } from '../auth-provider';
 import { useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { ProjectStatusBadge } from './project-status-badge';
@@ -12,6 +12,11 @@ import { CommentSection } from '../social/comment-section';
 import { AIActionBar } from '../ai/ai-action-bar';
 import { AIQuotaBadge } from '../ai/ai-quota-badge';
 import { getFileUrl, relativeTime } from '../../lib/pb-helpers';
+import { PhotoGallery } from './photo-gallery';
+import { PhotoUpload } from './photo-upload';
+import { ProjectPaintLibrary } from './project-paint-library';
+import { ProjectTimeline } from './project-timeline';
+import { ProjectRecipesList } from './project-recipes-list';
 
 interface ProjectDetailProps {
   project: RecordModel;
@@ -28,6 +33,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const [editName, setEditName] = useState(project.name);
   const [editDescription, setEditDescription] = useState(project.description || '');
   const [editStatus, setEditStatus] = useState(project.status || 'not-started');
+  const [activeTab, setActiveTab] = useState<'photos' | 'paints' | 'timeline' | 'recipes'>('photos');
 
   const coverPhoto = project.cover_photo
     ? getFileUrl(project, project.cover_photo, '800x600')
@@ -173,6 +179,47 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           ))}
         </div>
       )}
+
+      {/* Tabbed Sections */}
+      <div className="space-y-3">
+        <div className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
+          {[
+            { key: 'photos' as const, label: 'Photos', icon: Camera },
+            { key: 'paints' as const, label: 'Paints', icon: Palette },
+            { key: 'timeline' as const, label: 'Timeline', icon: Clock },
+            { key: 'recipes' as const, label: 'Recipes', icon: ChefHat },
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                activeTab === key
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'photos' && (
+          <div className="space-y-3">
+            <PhotoGallery projectId={project.id} isOwner={isOwner} />
+            {isOwner && <PhotoUpload projectId={project.id} />}
+          </div>
+        )}
+        {activeTab === 'paints' && (
+          <ProjectPaintLibrary projectId={project.id} isOwner={isOwner} />
+        )}
+        {activeTab === 'timeline' && (
+          <ProjectTimeline projectId={project.id} />
+        )}
+        {activeTab === 'recipes' && (
+          <ProjectRecipesList projectId={project.id} isOwner={isOwner} />
+        )}
+      </div>
 
       {/* AI Features */}
       {isOwner && (

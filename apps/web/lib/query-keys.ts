@@ -80,4 +80,52 @@ export const queryKeys = {
     items: () => [...queryKeys.pile.all, 'items'] as const,
     stats: () => [...queryKeys.pile.all, 'stats'] as const,
   },
+  photos: {
+    all: ['photos'] as const,
+    byProject: (projectId: string) => [...queryKeys.photos.all, 'project', projectId] as const,
+    detail: (photoId: string) => [...queryKeys.photos.all, 'detail', photoId] as const,
+  },
+  activities: {
+    all: ['activities'] as const,
+    feed: (type?: string) => [...queryKeys.activities.all, 'feed', type || 'all'] as const,
+    byUser: (userId: string) => [...queryKeys.activities.all, 'user', userId] as const,
+  },
+  diary: {
+    all: ['diary'] as const,
+    my: (search?: string, tag?: string) => [...queryKeys.diary.all, 'my', search || '', tag || ''] as const,
+    detail: (entryId: string) => [...queryKeys.diary.all, 'detail', entryId] as const,
+  },
+  news: {
+    all: ['news'] as const,
+    list: () => [...queryKeys.news.all, 'list'] as const,
+    detail: (newsId: string) => [...queryKeys.news.all, 'detail', newsId] as const,
+  },
+  projectPaints: {
+    all: ['projectPaints'] as const,
+    byProject: (projectId: string) => [...queryKeys.projectPaints.all, 'project', projectId] as const,
+  },
+  timeline: {
+    all: ['timeline'] as const,
+    byProject: (projectId: string) => [...queryKeys.timeline.all, 'project', projectId] as const,
+  },
+  projectRecipes: {
+    all: ['projectRecipes'] as const,
+    byProject: (projectId: string) => [...queryKeys.projectRecipes.all, 'project', projectId] as const,
+  },
+  savedRecipes: {
+    all: ['savedRecipes'] as const,
+    my: () => [...queryKeys.savedRecipes.all, 'my'] as const,
+    check: (recipeId: string) => [...queryKeys.savedRecipes.all, 'check', recipeId] as const,
+  },
+  badges: {
+    all: ['badges'] as const,
+    list: () => [...queryKeys.badges.all, 'list'] as const,
+    user: (userId: string) => [...queryKeys.badges.all, 'user', userId] as const,
+  },
+  challenges: {
+    all: ['challenges'] as const,
+    list: () => [...queryKeys.challenges.all, 'list'] as const,
+    detail: (challengeId: string) => [...queryKeys.challenges.all, 'detail', challengeId] as const,
+    entries: (challengeId: string) => [...queryKeys.challenges.all, 'entries', challengeId] as const,
+  },
 };
