@@ -8,15 +8,18 @@ import { PaintSuggestionsPanel } from './paint-suggestions-panel';
 import { TechniqueAdvisorPanel } from './technique-advisor-panel';
 import { RecipeResult } from './recipe-result';
 import { RecolorDialog } from './recolor-dialog';
+import { ShareScoreButton } from '../brag-board/share-score-button';
+import { SaveRecolorToDiaryButton } from './save-recolor-to-diary-button';
 
 interface AIActionBarProps {
   projectId: string;
+  projectName: string;
   imageUrl: string | null;
 }
 
 type AIPanel = 'critique' | 'suggestions' | 'technique' | 'recipe' | null;
 
-export function AIActionBar({ projectId, imageUrl }: AIActionBarProps) {
+export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarProps) {
   const [activePanel, setActivePanel] = useState<AIPanel>(null);
   const [showRecolor, setShowRecolor] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,7 +151,16 @@ export function AIActionBar({ projectId, imageUrl }: AIActionBarProps) {
 
       {/* Results Panels */}
       {activePanel === 'critique' && results.critique && (
-        <CritiqueCard critique={results.critique} />
+        <div className="space-y-3">
+          <div id={`critique-card-${projectId}`}>
+            <CritiqueCard critique={results.critique} />
+          </div>
+          <ShareScoreButton
+            projectId={projectId}
+            projectName={projectName}
+            critique={results.critique}
+          />
+        </div>
       )}
 
       {activePanel === 'suggestions' && results.suggestions && (
@@ -184,9 +196,13 @@ export function AIActionBar({ projectId, imageUrl }: AIActionBarProps) {
 
       {/* Recolor Result */}
       {recolorResult && (
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div className="rounded-lg border border-border bg-card p-4 space-y-3">
           <h3 className="mb-2 text-sm font-semibold text-foreground">Recolored Image</h3>
           <img src={recolorResult} alt="Recolored" className="w-full rounded-lg" />
+          <SaveRecolorToDiaryButton
+            projectName={projectName}
+            recolorImageUrl={recolorResult}
+          />
         </div>
       )}
 

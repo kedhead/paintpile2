@@ -230,6 +230,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           </div>
           <AIActionBar
             projectId={project.id}
+            projectName={project.name}
             imageUrl={coverPhoto ? getFileUrl(project, project.cover_photo) : null}
           />
         </div>

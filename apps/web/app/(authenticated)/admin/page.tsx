@@ -1,9 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Shield, Users, Palette, Database, Download, Trash2, Loader2 } from 'lucide-react';
-import { useAuth } from '../../../components/auth-provider';
+import { Users, Palette, Database, Download, Trash2, Shield, Award, Trophy, Newspaper, Globe } from 'lucide-react';
 
 const adminTools = [
   {
@@ -23,6 +21,30 @@ const adminTools = [
     description: 'Import paint data from the miniature-paints GitHub repository',
     icon: Database,
     href: '/admin/import-github-paints',
+  },
+  {
+    title: 'Scrape Paints',
+    description: 'Scrape paint data from manufacturer websites',
+    icon: Globe,
+    href: '/admin/scrape-paints',
+  },
+  {
+    title: 'Manage Badges',
+    description: 'Create, edit, and manage achievement badges',
+    icon: Award,
+    href: '/admin/badges',
+  },
+  {
+    title: 'Manage Challenges',
+    description: 'Create and manage hobby challenges',
+    icon: Trophy,
+    href: '/admin/challenges',
+  },
+  {
+    title: 'Manage News',
+    description: 'Create, edit, and publish news posts',
+    icon: Newspaper,
+    href: '/admin/news',
   },
   {
     title: 'Clear Paint Database',
@@ -45,26 +67,6 @@ const adminTools = [
 ];
 
 export default function AdminDashboard() {
-  const { pb, user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function check() {
-      try {
-        const record = await pb.collection('users').getOne(user!.id);
-        setIsAdmin(record.role === 'admin');
-      } catch {
-        setIsAdmin(false);
-      }
-      setLoading(false);
-    }
-    if (user) check();
-  }, [user, pb]);
-
-  if (loading) return <div className="flex items-center justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
-  if (!isAdmin) return <div className="text-center py-16"><Shield className="w-12 h-12 text-destructive mx-auto mb-4" /><h1 className="text-2xl font-bold text-foreground">Access Denied</h1><p className="text-muted-foreground mt-2">You do not have admin privileges.</p></div>;
-
   return (
     <div className="space-y-6">
       <div>
