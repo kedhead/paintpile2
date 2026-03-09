@@ -1,26 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Shield, Loader2 } from 'lucide-react';
 import { useAuth } from '../../../components/auth-provider';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { pb, user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function check() {
-      try {
-        const record = await pb.collection('users').getOne(user!.id);
-        setIsAdmin(record.role === 'admin');
-      } catch {
-        setIsAdmin(false);
-      }
-      setLoading(false);
-    }
-    if (user) check();
-  }, [user, pb]);
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -30,7 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!isAdmin) {
+  if (!user || user.role !== 'admin') {
     return (
       <div className="text-center py-16">
         <Shield className="w-12 h-12 text-destructive mx-auto mb-4" />
