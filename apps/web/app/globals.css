@@ -3,7 +3,43 @@
 @tailwind utilities;
 
 @layer base {
+  /* ─── Light mode ─── */
   :root {
+    --background: 250 20% 97%;
+    --foreground: 250 15% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 250 15% 12%;
+
+    --primary: 310 75% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 250 15% 92%;
+    --secondary-foreground: 250 15% 12%;
+
+    --muted: 250 12% 92%;
+    --muted-foreground: 250 8% 45%;
+
+    --accent: 145 60% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 250 15% 88%;
+    --input: 250 15% 88%;
+    --ring: 310 75% 48%;
+
+    --radius: 0.5rem;
+
+    --neon-green: 145 55% 38%;
+    --neon-blue: 200 70% 42%;
+    --neon-orange: 30 80% 48%;
+    --neon-pink: 310 75% 48%;
+  }
+
+  /* ─── Dark mode (original neon theme) ─── */
+  .dark {
     --background: 250 15% 8%;
     --foreground: 60 10% 94%;
 
@@ -29,9 +65,6 @@
     --input: 250 12% 22%;
     --ring: 310 85% 58%;
 
-    --radius: 0.5rem;
-
-    /* Extra palette from logo */
     --neon-green: 145 70% 50%;
     --neon-blue: 200 85% 55%;
     --neon-orange: 30 90% 55%;
@@ -66,7 +99,7 @@
     background-color: transparent;
   }
 
-  /* Custom scrollbar for dark theme */
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;

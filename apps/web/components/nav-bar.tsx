@@ -11,6 +11,7 @@ import {
   Trophy, Award, Crosshair,
 } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
+import { ThemeToggle } from './theme-toggle';
 
 const mainNavItems = [
   { href: '/feed', label: 'Feed', icon: Home },
@@ -165,6 +166,7 @@ export function NavBar() {
             )}
           </div>
 
+          <ThemeToggle />
           <NotificationBell />
 
           <button
