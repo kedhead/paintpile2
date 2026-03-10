@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { RecordModel } from 'pocketbase';
-import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, Clock, ChefHat, Share2, Check, Link2 } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, Clock, ChefHat, Share2, Check, Link2, Award } from 'lucide-react';
 import { useAuth } from '../auth-provider';
 import { useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { ProjectStatusBadge } from './project-status-badge';
@@ -40,6 +40,25 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const coverPhoto = project.cover_photo
     ? getFileUrl(project, project.cover_photo, '800x600')
     : null;
+
+  const critique = (() => {
+    try {
+      if (!project.last_critique) return null;
+      const raw = typeof project.last_critique === 'string'
+        ? JSON.parse(project.last_critique)
+        : project.last_critique;
+      return raw;
+    } catch { return null; }
+  })();
+
+  const gradeColors: Record<string, string> = {
+    S: 'text-amber-400 border-amber-400 bg-amber-400/10',
+    A: 'text-green-400 border-green-400 bg-green-400/10',
+    B: 'text-blue-400 border-blue-400 bg-blue-400/10',
+    C: 'text-gray-400 border-gray-400 bg-gray-400/10',
+    D: 'text-orange-400 border-orange-400 bg-orange-400/10',
+    F: 'text-red-400 border-red-400 bg-red-400/10',
+  };
 
   const handleDelete = async () => {
     if (!confirm('Delete this project? This cannot be undone.')) return;
@@ -213,6 +232,25 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           {project.paint_count || 0} paints
         </span>
       </div>
+
+      {/* Critique Grade */}
+      {critique && critique.grade && (
+        <div className={`flex items-center gap-3 rounded-lg border p-3 ${gradeColors[critique.grade] || 'text-muted-foreground border-border bg-muted'}`}>
+          <div className="flex h-12 w-12 flex-shrink-0 flex-col items-center justify-center rounded-full border-2 border-current">
+            <span className="text-lg font-black">{critique.grade}</span>
+            <span className="text-[9px] font-semibold">{critique.score}/100</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 text-sm font-semibold">
+              <Award className="h-4 w-4" />
+              AI Critique
+            </div>
+            {critique.analysis && (
+              <p className="mt-0.5 text-xs opacity-80 line-clamp-2">{critique.analysis}</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Description */}
       {editing ? (

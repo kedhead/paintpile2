@@ -54,10 +54,10 @@ export async function POST(req: NextRequest) {
       {
         input: {
           image: resizedDataUrl,
-          prompt: `Recolor this miniature: ${prompt}`,
-          num_inference_steps: 30,
-          image_guidance_scale: 1.5,
-          guidance_scale: 7.5,
+          prompt: `Change the colors of this painted miniature figure. Apply the following color changes while preserving all details, shading, highlights, and texture: ${prompt}`,
+          num_inference_steps: 50,
+          image_guidance_scale: 1.2,
+          guidance_scale: 9,
         },
       }
     );

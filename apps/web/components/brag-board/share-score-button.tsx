@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Share2, Download, Loader2 } from 'lucide-react';
-import { useCreateActivity } from '../../hooks/use-activities';
 import { useAuth } from '../auth-provider';
 
 interface ShareScoreButtonProps {
@@ -12,22 +11,40 @@ interface ShareScoreButtonProps {
 }
 
 export function ShareScoreButton({ projectId, projectName, critique }: ShareScoreButtonProps) {
-  const { user } = useAuth();
-  const createActivity = useCreateActivity();
+  const { pb, user } = useAuth();
   const [shared, setShared] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleShare = async () => {
     if (!user) return;
-    await createActivity.mutateAsync({
-      type: 'project_critique_shared',
-      target_id: projectId,
-      target_type: 'project',
-      metadata: {
-        project_name: projectName,
-        critique,
-      },
-    });
-    setShared(true);
+    setLoading(true);
+    try {
+      // Check if an activity already exists for this project critique
+      const existing = await pb.collection('activities').getList(1, 1, {
+        filter: `user="${user.id}" && type="project_critique_shared" && target_id="${projectId}"`,
+        requestKey: null,
+      });
+
+      const payload = {
+        user: user.id,
+        type: 'project_critique_shared',
+        target_id: projectId,
+        target_type: 'project',
+        metadata: JSON.stringify({ project_name: projectName, critique }),
+        visibility: 'public',
+      };
+
+      if (existing.items.length > 0) {
+        // Update existing activity instead of creating duplicate
+        await pb.collection('activities').update(existing.items[0].id, payload);
+      } else {
+        await pb.collection('activities').create(payload);
+      }
+      setShared(true);
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
+    setLoading(false);
   };
 
   const handleDownload = async () => {
@@ -35,7 +52,7 @@ export function ShareScoreButton({ projectId, projectName, critique }: ShareScor
       const html2canvas = (await import('html2canvas')).default;
       const element = document.getElementById(`critique-card-${projectId}`);
       if (!element) return;
-      const canvas = await html2canvas(element, { backgroundColor: '#151a23' });
+      const canvas = await html2canvas(element, { backgroundColor: '#14111e' });
       const link = document.createElement('a');
       link.download = `critique-${projectName.replace(/\s+/g, '-')}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -49,14 +66,14 @@ export function ShareScoreButton({ projectId, projectName, critique }: ShareScor
     <div className="flex items-center gap-2">
       <button
         onClick={handleShare}
-        disabled={shared || createActivity.isPending}
+        disabled={shared || loading}
         className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium ${
           shared
             ? 'bg-green-500/20 text-green-400'
             : 'border border-border bg-card text-foreground hover:bg-muted'
         }`}
       >
-        {createActivity.isPending ? (
+        {loading ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
         ) : (
           <Share2 className="h-3.5 w-3.5" />
