@@ -7,8 +7,7 @@ import { useAuth } from '../../../../components/auth-provider';
 
 const MANUFACTURERS = [
   'Citadel',
-  'Vallejo Game Color',
-  'Vallejo Model Color',
+  'Vallejo',
   'Army Painter',
   'Scale75',
   'P3',
@@ -16,14 +15,18 @@ const MANUFACTURERS = [
   'AK Interactive',
   'Kimera',
   'Monument',
-  'ProAcryl',
+  'Green Stuff World',
+  'Turbo Dork',
+  'Tamiya',
+  'Foundry',
+  'Warcolours',
 ];
 
 export default function ImportGitHubPaintsPage() {
   const { pb } = useAuth();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [importing, setImporting] = useState(false);
-  const [results, setResults] = useState<Record<string, { created: number; failed: number; error?: string }> | null>(null);
+  const [results, setResults] = useState<Record<string, { created: number; skipped: number; failed: number; error?: string }> | null>(null);
   const [error, setError] = useState('');
 
   function toggleManufacturer(name: string) {
@@ -139,6 +142,9 @@ export default function ImportGitHubPaintsPage() {
                   ) : (
                     <>
                       <span className="text-primary">{result.created} created</span>
+                      {result.skipped > 0 && (
+                        <span className="text-muted-foreground">{result.skipped} skipped</span>
+                      )}
                       {result.failed > 0 && (
                         <span className="text-destructive">{result.failed} failed</span>
                       )}
