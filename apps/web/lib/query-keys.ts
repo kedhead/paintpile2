@@ -100,6 +100,10 @@ export const queryKeys = {
     list: () => [...queryKeys.news.all, 'list'] as const,
     detail: (newsId: string) => [...queryKeys.news.all, 'detail', newsId] as const,
   },
+  paintSets: {
+    all: ['paintSets'] as const,
+    list: (brand?: string) => [...queryKeys.paintSets.all, 'list', brand || ''] as const,
+  },
   projectPaints: {
     all: ['projectPaints'] as const,
     byProject: (projectId: string) => [...queryKeys.projectPaints.all, 'project', projectId] as const,

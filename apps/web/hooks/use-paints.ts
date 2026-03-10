@@ -108,30 +108,86 @@ export function usePaintBrands() {
   return useQuery({
     queryKey: [...queryKeys.paints.all, 'brands'],
     queryFn: async () => {
-      // Fetch enough records (sorted by brand) to cover all distinct brands
-      // With ~14 brands and ~4700 paints, sampling 500 sorted records covers them all
-      const page = await pb.collection('paints').getList(1, 500, {
+      const all = await pb.collection('paints').getFullList({
         fields: 'brand',
         sort: 'brand',
+        batch: 500,
       });
       const brands = new Set<string>();
-      for (const r of page.items) {
+      for (const r of all) {
         if (r.brand) brands.add(r.brand);
-      }
-      // If there are more pages, the last brand in our sample might be incomplete
-      // Fetch a sample from the end too
-      if (page.totalPages > 1) {
-        const lastPage = await pb.collection('paints').getList(page.totalPages, 500, {
-          fields: 'brand',
-          sort: 'brand',
-        });
-        for (const r of lastPage.items) {
-          if (r.brand) brands.add(r.brand);
-        }
       }
       return Array.from(brands).sort();
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function usePaintSets(brand?: string) {
+  const { pb } = useAuth();
+
+  return useQuery({
+    queryKey: queryKeys.paintSets.list(brand),
+    queryFn: async () => {
+      const filter = brand ? `brand="${brand}"` : '';
+      return pb.collection('paint_sets').getFullList({
+        sort: 'brand,set_name',
+        filter,
+      });
+    },
+  });
+}
+
+export function useAddSetToInventory() {
+  const { pb, user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (paintNames: string[]) => {
+      // Find all matching paints by name
+      const results = { added: 0, skipped: 0, notFound: 0 };
+
+      for (const name of paintNames) {
+        try {
+          // Find paint by name (fuzzy match)
+          const matches = await pb.collection('paints').getList(1, 1, {
+            filter: `name="${name.replace(/"/g, '\\"')}"`,
+            requestKey: null,
+          });
+
+          if (matches.items.length === 0) {
+            results.notFound++;
+            continue;
+          }
+
+          const paintId = matches.items[0].id;
+
+          // Check if already in inventory
+          const existing = await pb.collection('user_paints').getList(1, 1, {
+            filter: `user="${user!.id}" && paint="${paintId}"`,
+            requestKey: null,
+          });
+
+          if (existing.items.length > 0) {
+            results.skipped++;
+            continue;
+          }
+
+          await pb.collection('user_paints').create({
+            user: user!.id,
+            paint: paintId,
+          });
+          results.added++;
+        } catch {
+          results.notFound++;
+        }
+      }
+
+      return results;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.paints.inventory() });
+    },
   });
 }
 
