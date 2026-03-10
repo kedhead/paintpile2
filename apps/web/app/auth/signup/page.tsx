@@ -51,7 +51,7 @@ export default function SignupPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <img src="/logosmall.png" alt="Paintpile" className="mx-auto h-16 w-auto mb-4" />
+          <img src="/logofull.png" alt="Paintpile" className="mx-auto h-36 w-auto mb-2" />
           <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
           <p className="mt-1 text-sm text-muted-foreground">Join the miniature painting community</p>
         </div>
