@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { RecordModel } from 'pocketbase';
-import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, Clock, ChefHat } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, Clock, ChefHat, Share2, Check, Link2 } from 'lucide-react';
 import { useAuth } from '../auth-provider';
 import { useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { ProjectStatusBadge } from './project-status-badge';
@@ -34,6 +34,8 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const [editDescription, setEditDescription] = useState(project.description || '');
   const [editStatus, setEditStatus] = useState(project.status || 'not-started');
   const [activeTab, setActiveTab] = useState<'photos' | 'paints' | 'timeline' | 'recipes'>('photos');
+  const [showShare, setShowShare] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const coverPhoto = project.cover_photo
     ? getFileUrl(project, project.cover_photo, '800x600')
@@ -114,6 +116,66 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           </div>
         )}
       </div>
+
+      {/* Share panel */}
+      {showShare && project.is_public && (
+        <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground">Share this project</h3>
+            <button onClick={() => setShowShare(false)} className="text-muted-foreground hover:text-foreground text-xs">Close</button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={`${window.location.origin}/share/project/${project.id}`}
+              className="flex-1 rounded-lg border border-border bg-muted px-3 py-2 text-xs text-foreground"
+            />
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/share/project/${project.id}`);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-medium text-white hover:bg-primary/80"
+            >
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my miniature painting project "${project.name}" on Paintpile!`)}&url=${encodeURIComponent(`${window.location.origin}/share/project/${project.id}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 rounded-lg border border-border py-2 text-center text-xs font-medium text-foreground hover:bg-muted"
+            >
+              X / Twitter
+            </a>
+            <a
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/share/project/${project.id}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 rounded-lg border border-border py-2 text-center text-xs font-medium text-foreground hover:bg-muted"
+            >
+              Facebook
+            </a>
+            <a
+              href={`https://www.reddit.com/submit?url=${encodeURIComponent(`${window.location.origin}/share/project/${project.id}`)}&title=${encodeURIComponent(project.name)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 rounded-lg border border-border py-2 text-center text-xs font-medium text-foreground hover:bg-muted"
+            >
+              Reddit
+            </a>
+          </div>
+        </div>
+      )}
+      {showShare && !project.is_public && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-400">
+          Make your project public first to share it. Edit the project and enable &ldquo;Public&rdquo;.
+        </div>
+      )}
 
       {/* Cover Photo */}
       {coverPhoto && (
@@ -239,6 +301,13 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
       {/* Actions */}
       <div className="flex items-center gap-4 border-t border-border pt-3">
         <LikeButton targetId={project.id} targetType="project" initialCount={project.like_count || 0} />
+        <button
+          onClick={() => setShowShare(!showShare)}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <Share2 className="h-4 w-4" />
+          Share
+        </button>
       </div>
 
       {/* Comments */}
