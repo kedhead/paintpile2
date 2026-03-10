@@ -147,8 +147,8 @@ export default async function ShareProjectPage({
       {/* Top banner */}
       <div className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <Link href="/" className="text-lg font-bold text-foreground">
-            Paint<span className="text-primary">pile</span>
+          <Link href="/" className="flex items-center">
+            <img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" />
           </Link>
           <Link
             href="/auth/signup"

@@ -38,6 +38,12 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        neon: {
+          green: 'hsl(var(--neon-green))',
+          blue: 'hsl(var(--neon-blue))',
+          orange: 'hsl(var(--neon-orange))',
+          pink: 'hsl(var(--neon-pink))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -55,8 +55,9 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">Sign in to Paintpile</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Welcome back, painter!</p>
+          <img src="/logosmall.png" alt="Paintpile" className="mx-auto h-16 w-auto mb-4" />
+          <h1 className="text-2xl font-bold text-foreground">Welcome back, painter!</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in to your account</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -6,8 +6,19 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Paintpile',
-  description: 'The community for miniature painters',
+  title: 'Paintpile - The Community for Miniature Painters',
+  description: 'Track your miniature painting projects, get AI-powered critiques, manage 4,700+ paints, share recipes, and connect with fellow hobbyists.',
+  openGraph: {
+    title: 'Paintpile - The Community for Miniature Painters',
+    description: 'Track your miniature painting projects, get AI-powered critiques, manage 4,700+ paints, and connect with fellow hobbyists.',
+    siteName: 'Paintpile',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Paintpile - The Community for Miniature Painters',
+    description: 'Track your miniature painting projects, get AI-powered critiques, and connect with fellow hobbyists.',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -17,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#151a23',
+  themeColor: '#14111e',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

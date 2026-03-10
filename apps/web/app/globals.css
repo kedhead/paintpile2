@@ -4,32 +4,38 @@
 
 @layer base {
   :root {
-    --background: 220 15% 10%;
-    --foreground: 40 20% 94%;
+    --background: 250 15% 8%;
+    --foreground: 60 10% 94%;
 
-    --card: 220 15% 14%;
-    --card-foreground: 40 20% 94%;
+    --card: 250 15% 12%;
+    --card-foreground: 60 10% 94%;
 
-    --primary: 35 85% 55%;
-    --primary-foreground: 220 15% 10%;
+    --primary: 310 85% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 10% 20%;
-    --secondary-foreground: 40 20% 94%;
+    --secondary: 250 12% 18%;
+    --secondary-foreground: 60 10% 94%;
 
-    --muted: 220 10% 20%;
-    --muted-foreground: 220 10% 65%;
+    --muted: 250 12% 18%;
+    --muted-foreground: 250 8% 58%;
 
-    --accent: 220 10% 20%;
-    --accent-foreground: 40 20% 94%;
+    --accent: 145 70% 50%;
+    --accent-foreground: 250 15% 8%;
 
     --destructive: 0 63% 50%;
-    --destructive-foreground: 40 20% 94%;
+    --destructive-foreground: 60 10% 94%;
 
-    --border: 220 10% 24%;
-    --input: 220 10% 24%;
-    --ring: 35 85% 55%;
+    --border: 250 12% 22%;
+    --input: 250 12% 22%;
+    --ring: 310 85% 58%;
 
     --radius: 0.5rem;
+
+    /* Extra palette from logo */
+    --neon-green: 145 70% 50%;
+    --neon-blue: 200 85% 55%;
+    --neon-orange: 30 90% 55%;
+    --neon-pink: 310 85% 58%;
   }
 
   body {

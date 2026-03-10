@@ -57,8 +57,8 @@ export function NavBar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <Link href="/feed" className="text-xl font-bold text-foreground">
-          Paint<span className="text-primary">pile</span>
+        <Link href="/feed" className="flex items-center gap-2">
+          <img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" />
         </Link>
 
         <nav className="flex items-center gap-1">
