@@ -55,7 +55,7 @@ export function NavBar() {
   const isMoreActive = allMoreItems.some(({ href }) => pathname.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card">
+    <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
         <Link href="/feed" className="flex items-center gap-2">
           <img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" />

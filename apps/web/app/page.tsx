@@ -3,6 +3,7 @@ import {
   Palette, Camera, Brain, Users, Award, ChefHat,
   MessageSquare, BarChart3, Share2, Zap, Shield, Sparkles,
 } from 'lucide-react';
+import { PaintSplatterBg } from '../components/paint-splatter-bg';
 
 const features = [
   {
@@ -94,12 +95,9 @@ const features = [
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
+      <PaintSplatterBg />
       {/* Hero */}
       <div className="relative overflow-hidden">
-        {/* Gradient splashes like paint drips */}
-        <div className="absolute top-0 left-1/4 h-64 w-64 rounded-full bg-neon-pink/8 blur-3xl" />
-        <div className="absolute top-20 right-1/4 h-48 w-48 rounded-full bg-neon-green/8 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-56 w-56 rounded-full bg-neon-blue/8 blur-3xl" />
 
         <div className="relative mx-auto max-w-5xl px-4 py-16 text-center sm:py-24">
           <img
