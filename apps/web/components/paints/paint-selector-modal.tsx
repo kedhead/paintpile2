@@ -111,7 +111,7 @@ export function PaintSelectorModal({ open, onClose, onSelect, excludeIds = [] }:
                 >
                   <div
                     className="h-10 w-full"
-                    style={{ backgroundColor: paint.color || '#888888' }}
+                    style={{ backgroundColor: paint.hex_color || paint.color || '#888888' }}
                   />
                   <div className="p-2">
                     <p className="text-xs text-muted-foreground truncate">{paint.brand}</p>

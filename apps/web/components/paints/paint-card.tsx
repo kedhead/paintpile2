@@ -15,7 +15,7 @@ export function PaintCard({ paint, owned, onToggleOwned }: PaintCardProps) {
       {/* Color Swatch */}
       <div
         className="h-16 w-full"
-        style={{ backgroundColor: paint.color || '#888888' }}
+        style={{ backgroundColor: paint.hex_color || paint.color || '#888888' }}
       />
 
       {/* Info */}

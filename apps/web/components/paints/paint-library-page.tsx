@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Search, Plus, Palette } from 'lucide-react';
-import { usePaintDatabase, useMyInventory, useAddToInventory, useRemoveFromInventory } from '../../hooks/use-paints';
+import { usePaintDatabase, usePaintBrands, useMyInventory, useAddToInventory, useRemoveFromInventory } from '../../hooks/use-paints';
 import { PaintCard } from './paint-card';
 import { AddCustomPaintDialog } from './add-custom-paint-dialog';
 import type { RecordModel } from 'pocketbase';
@@ -14,6 +14,7 @@ export function PaintLibraryPage() {
   const [showCustomDialog, setShowCustomDialog] = useState(false);
 
   const paintsQuery = usePaintDatabase(search, brand);
+  const brandsQuery = usePaintBrands();
   const inventoryQuery = useMyInventory();
   const addToInventory = useAddToInventory();
   const removeFromInventory = useRemoveFromInventory();
@@ -55,13 +56,7 @@ export function PaintLibraryPage() {
     return paintsQuery.data.pages.flatMap((page) => page.items);
   }, [paintsQuery.data]);
 
-  // Collect all known brands for the dropdown
-  const brands = useMemo(() => {
-    const set = new Set<string>();
-    allPaints.forEach((p) => { if (p.brand) set.add(p.brand); });
-    inventoryPaints.forEach((p) => { if (p.brand) set.add(p.brand); });
-    return Array.from(set).sort();
-  }, [allPaints, inventoryPaints]);
+  const brands = brandsQuery.data || [];
 
   const handleToggleOwned = (paint: RecordModel) => {
     const inventoryId = inventoryMap.get(paint.id);

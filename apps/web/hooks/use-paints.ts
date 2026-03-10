@@ -88,7 +88,10 @@ export function useCreateCustomPaint() {
   return useMutation({
     mutationFn: async (data: { brand: string; name: string; color: string; type: string }) => {
       return pb.collection('paints').create({
-        ...data,
+        name: data.name,
+        brand: data.brand,
+        hex_color: data.color,
+        type: data.type,
         is_custom: true,
         created_by: user!.id,
       });
@@ -96,6 +99,39 @@ export function useCreateCustomPaint() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.paints.all });
     },
+  });
+}
+
+export function usePaintBrands() {
+  const { pb } = useAuth();
+
+  return useQuery({
+    queryKey: [...queryKeys.paints.all, 'brands'],
+    queryFn: async () => {
+      // Fetch enough records (sorted by brand) to cover all distinct brands
+      // With ~14 brands and ~4700 paints, sampling 500 sorted records covers them all
+      const page = await pb.collection('paints').getList(1, 500, {
+        fields: 'brand',
+        sort: 'brand',
+      });
+      const brands = new Set<string>();
+      for (const r of page.items) {
+        if (r.brand) brands.add(r.brand);
+      }
+      // If there are more pages, the last brand in our sample might be incomplete
+      // Fetch a sample from the end too
+      if (page.totalPages > 1) {
+        const lastPage = await pb.collection('paints').getList(page.totalPages, 500, {
+          fields: 'brand',
+          sort: 'brand',
+        });
+        for (const r of lastPage.items) {
+          if (r.brand) brands.add(r.brand);
+        }
+      }
+      return Array.from(brands).sort();
+    },
+    staleTime: 5 * 60 * 1000,
   });
 }
 

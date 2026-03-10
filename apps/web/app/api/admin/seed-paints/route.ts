@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         await pb.collection('paints').create({
           name: paint.name,
           brand: paint.brand,
-          color: paint.color,
+          hex_color: paint.color,
           type: paint.type,
           is_custom: false,
         });
