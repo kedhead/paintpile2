@@ -36,8 +36,8 @@ export default function ChannelPage() {
   const channel = channels?.find((c: RecordModel) => c.id === channelId);
   const messages = messagesData?.items || [];
 
-  const handleSend = (content: string) => {
-    sendMessage.mutate({ channelId, content });
+  const handleSend = (content: string, files?: File[]) => {
+    sendMessage.mutate({ channelId, content, files });
   };
 
   const handleEdit = (messageId: string, content: string) => {
@@ -79,7 +79,7 @@ export default function ChannelPage() {
           />
         )}
 
-        <div className="flex items-center gap-2 border-t border-border bg-card">
+        <div className="flex items-center gap-2 bg-card">
           <div className="flex-1">
             <MessageInput onSend={handleSend} disabled={sendMessage.isPending} />
           </div>

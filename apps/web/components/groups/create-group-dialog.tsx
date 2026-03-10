@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Globe, Lock } from 'lucide-react';
 import { useCreateGroup } from '../../hooks/use-groups';
 
 interface CreateGroupDialogProps {
@@ -15,6 +15,7 @@ export function CreateGroupDialog({ onClose }: CreateGroupDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [icon, setIcon] = useState<File | null>(null);
+  const [isPublic, setIsPublic] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +25,7 @@ export function CreateGroupDialog({ onClose }: CreateGroupDialogProps) {
       name: name.trim(),
       description: description.trim() || undefined,
       icon: icon || undefined,
+      isPublic,
     });
 
     onClose();
@@ -88,6 +90,39 @@ export function CreateGroupDialog({ onClose }: CreateGroupDialogProps) {
               rows={3}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none resize-none"
             />
+          </div>
+
+          {/* Public/Private toggle */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">Visibility</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setIsPublic(true)}
+                className={`flex-1 flex items-center gap-2 rounded-lg border p-3 text-left transition-colors ${
+                  isPublic ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Globe className={`h-4 w-4 ${isPublic ? 'text-primary' : 'text-muted-foreground'}`} />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Public</p>
+                  <p className="text-xs text-muted-foreground">Anyone can find and join</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsPublic(false)}
+                className={`flex-1 flex items-center gap-2 rounded-lg border p-3 text-left transition-colors ${
+                  !isPublic ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Lock className={`h-4 w-4 ${!isPublic ? 'text-primary' : 'text-muted-foreground'}`} />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Private</p>
+                  <p className="text-xs text-muted-foreground">Invite only</p>
+                </div>
+              </button>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

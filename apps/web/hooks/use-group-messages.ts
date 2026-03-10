@@ -31,17 +31,21 @@ export function useSendGroupMessage() {
     mutationFn: async ({
       channelId,
       content,
-      image,
+      files,
     }: {
       channelId: string;
       content: string;
-      image?: File;
+      files?: File[];
     }) => {
       const formData = new FormData();
       formData.append('channel', channelId);
       formData.append('content', content);
       formData.append('user', user!.id);
-      if (image) formData.append('image', image);
+      if (files) {
+        for (const file of files) {
+          formData.append('image', file);
+        }
+      }
 
       return pb.collection('group_messages').create(formData, { expand: 'user' });
     },

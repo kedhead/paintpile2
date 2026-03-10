@@ -51,14 +51,14 @@ export function useCreateGroup() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ name, description, icon }: { name: string; description?: string; icon?: File }) => {
+    mutationFn: async ({ name, description, icon, isPublic = true }: { name: string; description?: string; icon?: File; isPublic?: boolean }) => {
       const formData = new FormData();
       formData.append('name', name);
       if (description) formData.append('description', description);
       if (icon) formData.append('icon', icon);
       formData.append('owner', user!.id);
       formData.append('member_count', '1');
-      formData.append('is_public', 'true');
+      formData.append('is_public', String(isPublic));
       formData.append('invite_code', crypto.randomUUID().slice(0, 8));
 
       const group = await pb.collection('groups').create(formData);

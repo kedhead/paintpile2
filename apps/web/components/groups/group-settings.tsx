@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Trash2, Upload } from 'lucide-react';
+import { ArrowLeft, Trash2, Upload, Globe, Lock } from 'lucide-react';
 import type { RecordModel } from 'pocketbase';
 import { useUpdateGroup, useDeleteGroup } from '../../hooks/use-groups';
 import { getFileUrl } from '../../lib/pb-helpers';
@@ -18,6 +18,7 @@ export function GroupSettings({ group }: GroupSettingsProps) {
   const [name, setName] = useState(group.name);
   const [description, setDescription] = useState(group.description || '');
   const [icon, setIcon] = useState<File | null>(null);
+  const [isPublic, setIsPublic] = useState(group.is_public !== false);
   const [showDelete, setShowDelete] = useState(false);
 
   const iconUrl = group.icon ? getFileUrl(group, group.icon) : null;
@@ -27,6 +28,7 @@ export function GroupSettings({ group }: GroupSettingsProps) {
     const formData = new FormData();
     formData.append('name', name.trim());
     formData.append('description', description.trim());
+    formData.append('is_public', String(isPublic));
     if (icon) formData.append('icon', icon);
 
     await updateGroup.mutateAsync({ groupId: group.id, data: formData });
@@ -91,6 +93,39 @@ export function GroupSettings({ group }: GroupSettingsProps) {
             rows={3}
             className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none resize-none"
           />
+        </div>
+
+        {/* Visibility */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">Visibility</label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setIsPublic(true)}
+              className={`flex-1 flex items-center gap-2 rounded-lg border p-3 text-left transition-colors ${
+                isPublic ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <Globe className={`h-4 w-4 ${isPublic ? 'text-primary' : 'text-muted-foreground'}`} />
+              <div>
+                <p className="text-sm font-medium text-foreground">Public</p>
+                <p className="text-xs text-muted-foreground">Anyone can find and join</p>
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPublic(false)}
+              className={`flex-1 flex items-center gap-2 rounded-lg border p-3 text-left transition-colors ${
+                !isPublic ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <Lock className={`h-4 w-4 ${!isPublic ? 'text-primary' : 'text-muted-foreground'}`} />
+              <div>
+                <p className="text-sm font-medium text-foreground">Private</p>
+                <p className="text-xs text-muted-foreground">Invite only</p>
+              </div>
+            </button>
+          </div>
         </div>
 
         <div>

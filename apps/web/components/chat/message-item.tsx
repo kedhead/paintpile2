@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Pencil, Trash2, X, Check } from 'lucide-react';
 import type { RecordModel } from 'pocketbase';
 import { UserAvatar } from '../social/user-avatar';
-import { relativeTime } from '../../lib/pb-helpers';
+import { relativeTime, getFileUrl } from '../../lib/pb-helpers';
 
 interface MessageItemProps {
   message: RecordModel;
@@ -14,12 +14,23 @@ interface MessageItemProps {
   onDelete: (messageId: string) => void;
 }
 
+function isVideoFile(filename: string): boolean {
+  return /\.(mp4|webm|mov)$/i.test(filename);
+}
+
 export function MessageItem({ message, isOwn, compact, onEdit, onDelete }: MessageItemProps) {
   const [editing, setEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
 
   const user = message.expand?.user as RecordModel | undefined;
   const displayName = user?.name || user?.displayName || 'Unknown';
+
+  // Handle both single file (string) and multiple files (array)
+  const attachments: string[] = Array.isArray(message.image)
+    ? message.image
+    : message.image
+      ? [message.image]
+      : [];
 
   const handleSaveEdit = () => {
     const trimmed = editContent.trim();
@@ -82,12 +93,55 @@ export function MessageItem({ message, isOwn, compact, onEdit, onDelete }: Messa
             </button>
           </div>
         ) : (
-          <p className="text-sm text-foreground whitespace-pre-wrap break-words">
-            {message.content}
-            {message.edited && (
-              <span className="ml-1 text-xs text-muted-foreground">(edited)</span>
+          <>
+            {message.content && (
+              <p className="text-sm text-foreground whitespace-pre-wrap break-words">
+                {message.content}
+                {message.edited && (
+                  <span className="ml-1 text-xs text-muted-foreground">(edited)</span>
+                )}
+              </p>
             )}
-          </p>
+
+            {/* Attachments */}
+            {attachments.length > 0 && (
+              <div className={`mt-1 flex flex-wrap gap-2 ${!message.content && message.edited ? '' : ''}`}>
+                {attachments.map((filename) => {
+                  const url = getFileUrl(message, filename);
+                  if (isVideoFile(filename)) {
+                    return (
+                      <video
+                        key={filename}
+                        src={url}
+                        controls
+                        className="max-w-sm max-h-72 rounded-lg border border-border"
+                        preload="metadata"
+                      />
+                    );
+                  }
+                  return (
+                    <a
+                      key={filename}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={url}
+                        alt=""
+                        className="max-w-sm max-h-72 rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
+                        loading="lazy"
+                      />
+                    </a>
+                  );
+                })}
+              </div>
+            )}
+
+            {!message.content && !attachments.length && message.edited && (
+              <span className="text-xs text-muted-foreground">(edited)</span>
+            )}
+          </>
         )}
       </div>
 
