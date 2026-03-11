@@ -5,7 +5,6 @@ import { NavBar } from '../../components/nav-bar';
 import { usePresence } from '../../hooks/use-presence';
 import { WelcomeBackModal } from '../../components/welcome-back/welcome-back-modal';
 import { InstallPrompt } from '../../components/pwa/install-prompt';
-import { PaintSplatterBg } from '../../components/paint-splatter-bg';
 
 export default function AuthenticatedLayout({
   children,
@@ -20,7 +19,6 @@ export default function AuthenticatedLayout({
 
   return (
     <div className="min-h-screen bg-background">
-      <PaintSplatterBg />
       <NavBar />
       {isGroupsRoute ? (
         children

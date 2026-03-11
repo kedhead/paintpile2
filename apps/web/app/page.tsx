@@ -3,7 +3,6 @@ import {
   Palette, Camera, Brain, Users, Award, ChefHat,
   MessageSquare, BarChart3, Share2, Zap, Shield, Sparkles,
 } from 'lucide-react';
-import { PaintSplatterBg } from '../components/paint-splatter-bg';
 
 const features = [
   {
@@ -95,7 +94,6 @@ const features = [
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      <PaintSplatterBg />
       {/* Hero */}
       <div className="relative overflow-hidden">
 

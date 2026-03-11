@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@paintpile/shared';
 import { getClient } from '../../../lib/pocketbase';
-import { PaintSplatterBg } from '../../../components/paint-splatter-bg';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,7 +53,6 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <PaintSplatterBg />
       <div className="relative z-10 w-full max-w-sm space-y-6">
         <div className="text-center">
           <img src="/logofull.png" alt="Paintpile" className="mx-auto h-36 w-auto mb-2" />
