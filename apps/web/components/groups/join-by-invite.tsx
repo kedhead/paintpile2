@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useInviteByCode } from '../../hooks/use-group-invites';
 import { useJoinGroup } from '../../hooks/use-group-members';
-import type { RecordModel } from 'pocketbase';
+import { useAuth } from '../auth-provider';
+import { useState } from 'react';
 
 interface JoinByInviteProps {
   code: string;
@@ -11,15 +12,26 @@ interface JoinByInviteProps {
 
 export function JoinByInvite({ code }: JoinByInviteProps) {
   const router = useRouter();
-  const { data: invite, isLoading } = useInviteByCode(code);
+  const { data: group, isLoading } = useInviteByCode(code);
   const joinGroup = useJoinGroup();
-
-  const group = invite?.expand?.group as RecordModel | undefined;
+  const { user } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
   const handleJoin = async () => {
-    if (!invite) return;
-    await joinGroup.mutateAsync(invite.group);
-    router.push(`/groups/${invite.group}`);
+    if (!group) return;
+    setError(null);
+    try {
+      await joinGroup.mutateAsync(group.id);
+      router.push(`/groups/${group.id}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to join group';
+      if (msg.includes('unique') || msg.includes('already')) {
+        // Already a member, just redirect
+        router.push(`/groups/${group.id}`);
+      } else {
+        setError(msg);
+      }
+    }
   };
 
   if (isLoading) {
@@ -30,7 +42,7 @@ export function JoinByInvite({ code }: JoinByInviteProps) {
     );
   }
 
-  if (!invite || !group) {
+  if (!group) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <h2 className="text-xl font-bold text-foreground mb-2">Invalid Invite</h2>
@@ -55,6 +67,9 @@ export function JoinByInvite({ code }: JoinByInviteProps) {
         <p className="text-sm text-muted-foreground mb-1 text-center max-w-xs">{group.description}</p>
       )}
       <p className="text-xs text-muted-foreground mb-6">{group.member_count || 0} members</p>
+      {error && (
+        <p className="mb-4 text-sm text-red-400">{error}</p>
+      )}
       <button
         onClick={handleJoin}
         disabled={joinGroup.isPending}

@@ -26,11 +26,11 @@ export function useInviteByCode(code: string | null) {
   return useQuery({
     queryKey: queryKeys.groups.inviteByCode(code || ''),
     queryFn: async () => {
-      const invites = await pb.collection('group_invites').getFullList({
-        filter: `code = "${code}"`,
-        expand: 'group',
+      // Look up by invite_code on the groups collection directly
+      const groups = await pb.collection('groups').getFullList({
+        filter: `invite_code = "${code}"`,
       });
-      return invites[0] || null;
+      return groups[0] || null;
     },
     enabled: !!code,
   });

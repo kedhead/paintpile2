@@ -26,17 +26,30 @@ export function useJoinGroup() {
 
   return useMutation({
     mutationFn: async (groupId: string) => {
+      // Check if already a member
+      const existing = await pb.collection('group_members').getList(1, 1, {
+        filter: `group = "${groupId}" && user = "${user!.id}"`,
+        requestKey: null,
+      });
+      if (existing.items.length > 0) {
+        return existing.items[0]; // Already joined
+      }
+
       const membership = await pb.collection('group_members').create({
         group: groupId,
         user: user!.id,
         role: 'member',
       });
 
-      // Increment member count
-      const group = await pb.collection('groups').getOne(groupId);
-      await pb.collection('groups').update(groupId, {
-        member_count: (group.member_count || 0) + 1,
-      });
+      // Increment member count (non-critical, don't fail join if this errors)
+      try {
+        const group = await pb.collection('groups').getOne(groupId);
+        await pb.collection('groups').update(groupId, {
+          member_count: (group.member_count || 0) + 1,
+        });
+      } catch {
+        // Owner-only update rule may block this — that's OK
+      }
 
       return membership;
     },
