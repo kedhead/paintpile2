@@ -158,6 +158,6 @@
 
 /* Dark mode: spray paint background */
 .dark .bg-background {
-  background: hsl(250 15% 8% / 0.4) url('/background.png') center / cover fixed no-repeat !important;
+  background: hsl(250 15% 8% / 0.55) url('/background.png') center / cover fixed no-repeat !important;
   background-blend-mode: overlay;
 }
