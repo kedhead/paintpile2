@@ -157,7 +157,7 @@
 }
 
 /* Dark mode: spray paint background */
-.dark body {
+.dark .bg-background {
   background: hsl(var(--background)) url('/background.png') center / cover fixed no-repeat !important;
   background-blend-mode: darken;
 }
