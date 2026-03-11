@@ -4,9 +4,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
 /**
- * Fixed-position spray-paint splatter decorations using AI-generated images.
- * Dark mode: vibrant splatters via screen blend mode.
- * Light mode: subtle pastel splatters via multiply blend mode.
+ * Fixed-position spray-paint splatter decorations using AI-generated transparent PNGs.
  */
 export function PaintSplatterBg() {
   const { resolvedTheme } = useTheme();
@@ -19,7 +17,7 @@ export function PaintSplatterBg() {
 
   const splatters = [
     {
-      src: '/splatters/splatter-pink-1.webp',
+      src: '/splatters/splatter-pink-1.png',
       style: {
         top: '-10%',
         left: '-8%',
@@ -28,7 +26,7 @@ export function PaintSplatterBg() {
       },
     },
     {
-      src: '/splatters/splatter-blue-1.webp',
+      src: '/splatters/splatter-blue-1.png',
       style: {
         top: '20%',
         right: '-12%',
@@ -37,7 +35,7 @@ export function PaintSplatterBg() {
       },
     },
     {
-      src: '/splatters/splatter-purple-1.webp',
+      src: '/splatters/splatter-purple-1.png',
       style: {
         bottom: '-8%',
         left: '2%',
@@ -46,7 +44,7 @@ export function PaintSplatterBg() {
       },
     },
     {
-      src: '/splatters/splatter-pink-2.webp',
+      src: '/splatters/splatter-pink-2.png',
       style: {
         bottom: '-15%',
         right: '-5%',
@@ -66,9 +64,8 @@ export function PaintSplatterBg() {
           className="absolute"
           style={{
             ...style,
-            mixBlendMode: dark ? 'screen' : 'multiply',
-            opacity: dark ? 0.35 : 0.15,
-            filter: dark ? 'blur(2px) saturate(1.3)' : 'blur(4px) saturate(0.6) brightness(1.8)',
+            opacity: dark ? 0.4 : 0.2,
+            filter: dark ? 'blur(1px) saturate(1.4)' : 'blur(2px) saturate(0.5) brightness(1.5)',
           }}
         />
       ))}
