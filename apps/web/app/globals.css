@@ -157,12 +157,9 @@
 }
 
 /* Dark mode: spray paint background */
-.dark body {
-  background-image:
-    linear-gradient(hsl(250 15% 8% / 0.55), hsl(250 15% 8% / 0.55)),
-    url('/background.png');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+@layer utilities {
+  .dark body.bg-background {
+    background: hsl(var(--background)) url('/background.png') center / cover fixed no-repeat;
+    background-blend-mode: darken;
+  }
 }
