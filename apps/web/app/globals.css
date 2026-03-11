@@ -75,15 +75,6 @@
     @apply bg-background text-foreground antialiased;
   }
 
-  .dark body {
-    background-image:
-      linear-gradient(hsl(250 15% 8% / 0.55), hsl(250 15% 8% / 0.55)),
-      url('/background.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-  }
 
 
   /* Form elements: dark backgrounds with readable text */
@@ -163,4 +154,15 @@
       hsl(185 30% 22% / 0.1) 100%
     ) 1;
   }
+}
+
+/* Dark mode: spray paint background */
+.dark body {
+  background-image:
+    linear-gradient(hsl(250 15% 8% / 0.55), hsl(250 15% 8% / 0.55)),
+    url('/background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
