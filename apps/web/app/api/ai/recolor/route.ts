@@ -18,10 +18,10 @@ async function fetchAndResizeImage(imageUrl: string): Promise<string> {
   if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
     resized = await sharp(buffer)
       .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 85 })
+      .jpeg({ quality: 90 })
       .toBuffer();
   } else {
-    resized = await sharp(buffer).jpeg({ quality: 85 }).toBuffer();
+    resized = await sharp(buffer).jpeg({ quality: 90 }).toBuffer();
   }
 
   const base64 = resized.toString('base64');
@@ -44,20 +44,20 @@ export async function POST(req: NextRequest) {
     const { pb, userId } = await validatePBAuth(pbToken);
     const { creditsUsed } = await validateAndDeductCredits(pb, userId, 'recolor');
 
-    // Resize image to prevent CUDA OOM on Replicate
+    // Resize image for Replicate
     const resizedDataUrl = await fetchAndResizeImage(imageUrl);
 
     const replicate = new Replicate({ auth: apiToken });
 
+    // Use google/nano-banana (Gemini 2.5 Flash Image) — same model as original Paintpile
     const output = await replicate.run(
-      'timothybrooks/instruct-pix2pix:30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23f',
+      'google/nano-banana',
       {
         input: {
-          image: resizedDataUrl,
-          prompt: `Change the colors of this painted miniature figure. Apply the following color changes while preserving all details, shading, highlights, and texture: ${prompt}`,
-          num_inference_steps: 50,
-          image_guidance_scale: 1.2,
-          guidance_scale: 9,
+          prompt: prompt,
+          image_input: [resizedDataUrl],
+          aspect_ratio: 'match_input_image',
+          output_format: 'jpg',
         },
       }
     );
