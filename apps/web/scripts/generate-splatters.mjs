@@ -17,20 +17,20 @@ const replicate = new Replicate({
 
 const prompts = [
   {
-    name: 'splatter-pink-1',
-    prompt: 'Photorealistic hot pink and magenta spray paint splatter on a pure black background. Drips, fine mist particles, and organic paint splash shapes. High detail, 8K resolution, studio photography of actual paint. No text, no objects, just paint splatter.',
+    name: 'splatter-corner-tl',
+    prompt: 'A high-resolution artistic spray paint splatter in the top-left corner on a pure black background. Vibrant hot pink and electric blue wet paint with realistic fuzzy overspray edges and vertical paint drips. Clean modern flat graphic design style, 8k resolution. Only paint in the corner, rest is black negative space. No text, no objects.',
   },
   {
-    name: 'splatter-blue-1',
-    prompt: 'Photorealistic electric blue and cyan spray paint splatter on a pure black background. Drips, fine mist particles, and organic paint splash shapes. High detail, 8K resolution, studio photography of actual paint. No text, no objects, just paint splatter.',
+    name: 'splatter-corner-tr',
+    prompt: 'A high-resolution artistic spray paint splatter in the top-right corner on a pure black background. Electric blue and crisp white wet paint with realistic fuzzy overspray edges and vertical paint drips. Clean modern flat graphic design style, 8k resolution. Only paint in the corner, rest is black negative space. No text, no objects.',
   },
   {
-    name: 'splatter-purple-1',
-    prompt: 'Photorealistic purple and violet spray paint splatter on a pure black background. Drips, fine mist particles, and organic paint splash shapes. High detail, 8K resolution, studio photography of actual paint. No text, no objects, just paint splatter.',
+    name: 'splatter-corner-bl',
+    prompt: 'A high-resolution artistic spray paint splatter in the bottom-left corner on a pure black background. Vibrant pink and white wet paint with realistic fuzzy overspray edges and vertical paint drips. Clean modern flat graphic design style, 8k resolution. Only paint in the corner, rest is black negative space. No text, no objects.',
   },
   {
-    name: 'splatter-pink-2',
-    prompt: 'Photorealistic neon pink spray paint explosion on a pure black background, paint droplets flying outward, realistic fluid dynamics, macro photography style, 8K ultra detailed. No text, no objects.',
+    name: 'splatter-corner-br',
+    prompt: 'A high-resolution artistic spray paint splatter in the bottom-right corner on a pure black background. Electric blue and vibrant pink wet paint with realistic fuzzy overspray edges and vertical paint drips. Clean modern flat graphic design style, 8k resolution. Only paint in the corner, rest is black negative space. No text, no objects.',
   },
 ];
 
@@ -51,7 +51,8 @@ async function generate() {
         input: {
           prompt,
           width: 1440,
-          height: 1440,
+          height: 816,
+          aspect_ratio: '16:9',
           output_format: 'webp',
           output_quality: 90,
         },

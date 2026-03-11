@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 /**
  * Fixed-position spray-paint splatter decorations using AI-generated transparent PNGs.
+ * Splatters are positioned in each corner, leaving clean center space for content.
  */
 export function PaintSplatterBg() {
   const { resolvedTheme } = useTheme();
@@ -17,39 +18,39 @@ export function PaintSplatterBg() {
 
   const splatters = [
     {
-      src: '/splatters/splatter-pink-1.png',
+      src: '/splatters/splatter-corner-tl.png',
       style: {
-        top: '-10%',
-        left: '-8%',
-        width: '50vw',
-        maxWidth: 700,
+        top: '-5%',
+        left: '-5%',
+        width: '55vw',
+        maxWidth: 750,
       },
     },
     {
-      src: '/splatters/splatter-blue-1.png',
+      src: '/splatters/splatter-corner-tr.png',
       style: {
-        top: '20%',
-        right: '-12%',
+        top: '-3%',
+        right: '-8%',
         width: '40vw',
         maxWidth: 550,
       },
     },
     {
-      src: '/splatters/splatter-purple-1.png',
+      src: '/splatters/splatter-corner-bl.png',
       style: {
-        bottom: '-8%',
-        left: '2%',
-        width: '38vw',
-        maxWidth: 500,
+        bottom: '-5%',
+        left: '-3%',
+        width: '50vw',
+        maxWidth: 680,
       },
     },
     {
-      src: '/splatters/splatter-pink-2.png',
+      src: '/splatters/splatter-corner-br.png',
       style: {
-        bottom: '-15%',
+        bottom: '-8%',
         right: '-5%',
-        width: '45vw',
-        maxWidth: 620,
+        width: '50vw',
+        maxWidth: 680,
       },
     },
   ];
@@ -64,8 +65,8 @@ export function PaintSplatterBg() {
           className="absolute"
           style={{
             ...style,
-            opacity: dark ? 0.4 : 0.2,
-            filter: dark ? 'blur(1px) saturate(1.4)' : 'blur(2px) saturate(0.5) brightness(1.5)',
+            opacity: dark ? 0.45 : 0.25,
+            filter: dark ? 'saturate(1.4)' : 'blur(1px) saturate(0.7) brightness(1.3)',
           }}
         />
       ))}

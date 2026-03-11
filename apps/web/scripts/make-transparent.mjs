@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dir = path.join(__dirname, '..', 'public', 'splatters');
 
-const files = fs.readdirSync(dir).filter((f) => f.endsWith('.webp'));
+const files = fs.readdirSync(dir).filter((f) => f.endsWith('.webp') && f.includes('corner'));
 
 async function makeTransparent(filename) {
   const inputPath = path.join(dir, filename);
