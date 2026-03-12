@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { RecordModel } from 'pocketbase';
-import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, ChefHat, Share2, Check, Link2, Award } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, ChefHat, Share2, Check, Link2, Award, Globe, Lock } from 'lucide-react';
 import { useAuth } from '../auth-provider';
 import { useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { ProjectStatusBadge } from './project-status-badge';
@@ -32,6 +32,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const [editName, setEditName] = useState(project.name);
   const [editDescription, setEditDescription] = useState(project.description || '');
   const [editStatus, setEditStatus] = useState(project.status || 'not-started');
+  const [editPublic, setEditPublic] = useState(project.is_public ?? false);
   const [activeTab, setActiveTab] = useState<'photos' | 'paints' | 'recipes'>('photos');
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -72,6 +73,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         name: editName.trim(),
         description: editDescription.trim(),
         status: editStatus,
+        is_public: editPublic,
       },
     });
     setEditing(false);
@@ -150,17 +152,37 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
       {/* Status + Stats */}
       <div className="flex items-center gap-4">
         {editing ? (
-          <select
-            value={editStatus}
-            onChange={(e) => setEditStatus(e.target.value)}
-            className="rounded-lg border border-border px-2 py-1 text-sm focus:border-primary focus:outline-none"
-          >
-            <option value="not-started">Not Started</option>
-            <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
+          <>
+            <select
+              value={editStatus}
+              onChange={(e) => setEditStatus(e.target.value)}
+              className="rounded-lg border border-border px-2 py-1 text-sm focus:border-primary focus:outline-none"
+            >
+              <option value="not-started">Not Started</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => setEditPublic(!editPublic)}
+              className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-sm ${
+                editPublic
+                  ? 'border-green-500/30 bg-green-500/10 text-green-400'
+                  : 'border-border bg-muted text-muted-foreground'
+              }`}
+            >
+              {editPublic ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+              {editPublic ? 'Public' : 'Private'}
+            </button>
+          </>
         ) : (
-          <ProjectStatusBadge status={project.status || 'not-started'} />
+          <>
+            <ProjectStatusBadge status={project.status || 'not-started'} />
+            <span className={`flex items-center gap-1 text-sm ${project.is_public ? 'text-green-400' : 'text-muted-foreground'}`}>
+              {project.is_public ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+              {project.is_public ? 'Public' : 'Private'}
+            </span>
+          </>
         )}
         <span className="flex items-center gap-1 text-sm text-muted-foreground">
           <ImageIcon className="h-3.5 w-3.5" />
