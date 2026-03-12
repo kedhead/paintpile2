@@ -2,6 +2,7 @@
 
 import type { RecordModel } from 'pocketbase';
 import { Award, Star, Trash2 } from 'lucide-react';
+import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../auth-provider';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../lib/query-keys';
@@ -37,7 +38,7 @@ export function BragCard({ activity }: BragCardProps) {
     : (activity.metadata || {});
 
   const critique = metadata.critique || {};
-  const userName = activity.expand?.user?.name || activity.expand?.user?.displayName || 'Painter';
+  const userName = getDisplayName(activity.expand?.user);
   const grade = critique.grade || '?';
   const score = critique.score || 0;
   const gradeStyle = gradeColors[grade] || 'text-muted-foreground border-border';

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Pencil, Trash2, X, Check } from 'lucide-react';
 import type { RecordModel } from 'pocketbase';
+import { getDisplayName } from '@paintpile/shared';
 import { UserAvatar } from '../social/user-avatar';
 import { relativeTime, getFileUrl } from '../../lib/pb-helpers';
 
@@ -23,7 +24,7 @@ export function MessageItem({ message, isOwn, compact, onEdit, onDelete }: Messa
   const [editContent, setEditContent] = useState(message.content);
 
   const user = message.expand?.user as RecordModel | undefined;
-  const displayName = user?.name || user?.displayName || 'Unknown';
+  const displayName = getDisplayName(user, 'Unknown');
 
   // Handle both single file (string) and multiple files (array)
   const attachments: string[] = Array.isArray(message.image)

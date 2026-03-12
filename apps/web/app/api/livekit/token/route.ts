@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AccessToken } from 'livekit-server-sdk';
 import PocketBase from 'pocketbase';
+import { getDisplayName } from '@paintpile/shared';
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.LIVEKIT_API_KEY;
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await pb.collection('users').authRefresh();
     const userId = user.record.id;
-    const displayName = user.record.name || user.record.displayName || 'User';
+    const displayName = getDisplayName(user.record, 'User');
 
     // Verify user is a member of the group
     const memberships = await pb.collection('group_members').getFullList({

@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)",
+      "Bash(grep:*)",
+      "Bash(grep \"\"name\"\": \"\"badges\"\"\\\\|\"\"name\"\": \"\"challenges\"\"\\\\|\"\"name\"\": \"\"news\"\":*)",
+      "Bash(ls:*)",
+      "Bash(xargs:*)",
+      "Read(//c/Users/ked4/.ssh/**)",
+      "Bash(ssh:*)",
+      "Bash(git:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(curl:*)",
+      "WebFetch(domain:stitch.withgoogle.com)",
+      "Bash(pnpm add:*)",
+      "Bash(find apps/web -type f -name \"*splat*\" -o -name \"*background*\" -o -name \"*decor*\" 2>/dev/null | head -20)",
+      "Bash(find /K/AI-Projects/paintpile2 -maxdepth 3 -type f \\\\\\( -name \".env*\" -o -name \"README*\" \\\\\\) 2>/dev/null | head -20)",
+      "Bash(cd K:/AI-Projects/paintpile2/apps/web && node scripts/generate-splatters.mjs)",
+      "Bash(cd K:/AI-Projects/paintpile2/apps/web && node scripts/make-transparent.mjs)",
+      "Bash(ls K:/AI-Projects/paintpile2/apps/web/app/\\\\\\(authenticated\\\\\\)/)",
+      "Bash(find \"K:\\\\AI-Projects\\\\paintpile2\\\\apps\\\\web\" -name \"*setting*\" -o -name \"*edit*\" -type f 2>/dev/null | grep -E \"\\\\.\\(tsx|ts\\)$\")",
+      "Bash(find \"K:\\\\AI-Projects\\\\paintpile2\" -name \"schema*\" -o -name \"*pb*\" -type f 2>/dev/null | grep -E \"\\\\.\\(sql|json|ts|js\\)$\" | head -20)",
+      "Bash(npx turbo:*)"
+    ]
+  }
+}

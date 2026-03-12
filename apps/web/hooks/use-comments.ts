@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 import { createNotification } from './use-notifications';
@@ -53,10 +54,10 @@ export function useCreateComment() {
             user: post.user,
             type: 'comment',
             actor_id: user!.id,
-            actor_name: user!.name || user!.displayName || 'Someone',
+            actor_name: getDisplayName(user!, 'Someone'),
             target_id: targetId,
             target_type: 'post',
-            message: `${user!.name || 'Someone'} commented on your post`,
+            message: `${getDisplayName(user!, 'Someone')} commented on your post`,
             action_url: `/feed`,
           });
         } catch {}

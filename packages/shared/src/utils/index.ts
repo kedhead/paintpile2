@@ -17,3 +17,15 @@ export function formatRelativeTime(isoString: string): string {
 export function generateId(): string {
   return crypto.randomUUID();
 }
+
+/**
+ * Returns a public display name for a user, preferring username over real name.
+ */
+export function getDisplayName(
+  user: Record<string, unknown> | null | undefined,
+  fallback = 'Painter'
+): string {
+  if (!user) return fallback;
+  if (user.username) return `@${user.username}`;
+  return (user.name as string) || (user.displayName as string) || fallback;
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 import { createNotification } from './use-notifications';
@@ -54,10 +55,10 @@ export function useToggleFollow() {
           user: targetUserId,
           type: 'follow',
           actor_id: user!.id,
-          actor_name: user!.name || user!.displayName || 'Someone',
+          actor_name: getDisplayName(user!, 'Someone'),
           target_id: user!.id,
           target_type: 'user',
-          message: `${user!.name || 'Someone'} started following you`,
+          message: `${getDisplayName(user!, 'Someone')} started following you`,
           action_url: `/profile/${user!.id}`,
         });
       }

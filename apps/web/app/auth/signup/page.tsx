@@ -33,6 +33,7 @@ export default function SignupPage() {
         password: data.password,
         passwordConfirm: data.confirmPassword,
         name: data.displayName,
+        username: data.username,
       });
 
       // Auto-login after signup
@@ -70,6 +71,21 @@ export default function SignupPage() {
               className="mt-1 block w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-ring"
             />
             {errors.displayName && <p className="mt-1 text-xs text-red-400">{errors.displayName.message}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium text-foreground">Username</label>
+            <div className="relative mt-1">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">@</span>
+              <input
+                id="username"
+                type="text"
+                {...register('username')}
+                placeholder="my_username"
+                className="block w-full rounded-md border border-border pl-7 pr-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+            {errors.username && <p className="mt-1 text-xs text-red-400">{errors.username.message}</p>}
           </div>
 
           <div>

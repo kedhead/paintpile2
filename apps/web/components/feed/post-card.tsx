@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
+import { getDisplayName } from '@paintpile/shared';
 import { UserAvatar } from '../social/user-avatar';
 import { LikeButton } from '../social/like-button';
 import { CommentSection } from '../social/comment-section';
@@ -30,7 +31,7 @@ export function PostCard({ post }: PostCardProps) {
               href={`/profile/${author.id}`}
               className="text-sm font-medium text-foreground hover:underline"
             >
-              {author.name || author.displayName || 'Painter'}
+              {getDisplayName(author)}
             </Link>
           )}
           <p className="text-xs text-muted-foreground">{relativeTime(post.created)}</p>

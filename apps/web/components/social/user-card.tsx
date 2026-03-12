@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
+import { getDisplayName } from '@paintpile/shared';
 import { UserAvatar } from './user-avatar';
 import { FollowButton } from './follow-button';
 
@@ -24,11 +25,8 @@ export function UserCard({ user, showFollowButton = false, currentUserId }: User
           href={`/profile/${user.id}`}
           className="block truncate text-sm font-medium text-foreground hover:underline"
         >
-          {user.name || user.displayName || 'Painter'}
+          {getDisplayName(user)}
         </Link>
-        {user.username && (
-          <p className="truncate text-xs text-muted-foreground">@{user.username}</p>
-        )}
       </div>
       {showFollowButton && !isOwnProfile && (
         <FollowButton targetUserId={user.id} />

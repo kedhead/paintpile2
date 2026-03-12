@@ -6,6 +6,7 @@ import {
   Palette, Shield, ChefHat, Heart, UserPlus, MessageSquare,
   Sparkles, Trophy, UserCheck,
 } from 'lucide-react';
+import { getDisplayName } from '@paintpile/shared';
 import { UserAvatar } from '../social/user-avatar';
 import { relativeTime } from '../../lib/pb-helpers';
 
@@ -57,7 +58,7 @@ export function ActivityItem({ activity }: ActivityItemProps) {
         <Icon className={`h-4 w-4 flex-shrink-0 ${config.color}`} />
         <div className="min-w-0 flex-1">
           <p className="text-sm text-foreground">
-            <span className="font-medium">{user?.name || user?.displayName || 'Someone'}</span>{' '}
+            <span className="font-medium">{getDisplayName(user, 'Someone')}</span>{' '}
             <span className="text-muted-foreground">{config.label}</span>
             {metadata.target_name && (
               <>
@@ -86,7 +87,7 @@ export function ActivityItem({ activity }: ActivityItemProps) {
           <div className="flex items-center gap-2">
             <Icon className={`h-4 w-4 ${config.color}`} />
             <p className="text-sm text-foreground">
-              <span className="font-medium">{user?.name || user?.displayName || 'Someone'}</span>{' '}
+              <span className="font-medium">{getDisplayName(user, 'Someone')}</span>{' '}
               <span className="text-muted-foreground">{config.label}</span>
             </p>
             <span className="text-xs text-muted-foreground">{relativeTime(activity.created)}</span>

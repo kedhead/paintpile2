@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
 import { Pencil, Trash2, X, Check } from 'lucide-react';
+import { getDisplayName } from '@paintpile/shared';
 import { UserAvatar } from './user-avatar';
 import { useAuth } from '../auth-provider';
 import { useEditComment, useDeleteComment } from '../../hooks/use-comments';
@@ -40,7 +41,7 @@ export function CommentItem({ comment }: CommentItemProps) {
         <div className="flex items-baseline gap-2">
           {author && (
             <Link href={`/profile/${author.id}`} className="text-xs font-medium text-foreground hover:underline">
-              {author.name || author.displayName || 'Painter'}
+              {getDisplayName(author)}
             </Link>
           )}
           <span className="text-xs text-muted-foreground">{relativeTime(comment.created)}</span>

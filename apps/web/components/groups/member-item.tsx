@@ -3,6 +3,7 @@
 import type { RecordModel } from 'pocketbase';
 import { Shield, Crown, MoreVertical } from 'lucide-react';
 import { useState } from 'react';
+import { getDisplayName } from '@paintpile/shared';
 import { UserAvatar } from '../social/user-avatar';
 import { useMyGroupRole } from '../../hooks/use-my-role';
 import { useUpdateMemberRole, useKickMember } from '../../hooks/use-group-members';
@@ -25,7 +26,7 @@ export function MemberItem({ member, groupId }: MemberItemProps) {
   const [showMenu, setShowMenu] = useState(false);
 
   const user = member.expand?.user as RecordModel | undefined;
-  const displayName = user?.name || user?.displayName || 'Unknown';
+  const displayName = getDisplayName(user, 'Unknown');
   const badge = roleBadge[member.role as keyof typeof roleBadge] || roleBadge.member;
   const BadgeIcon = badge.icon;
 

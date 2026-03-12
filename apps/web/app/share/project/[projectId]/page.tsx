@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Palette, Image as ImageIcon, Clock, ArrowRight, User } from 'lucide-react';
 import PocketBase from 'pocketbase';
+import { getDisplayName } from '@paintpile/shared';
 
 const PB_URL = process.env.NEXT_PUBLIC_POCKETBASE_URL || 'http://127.0.0.1:8090';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://thepaintpile.com';
@@ -34,7 +35,7 @@ export async function generateMetadata({
     return { title: 'Project Not Found - Paintpile' };
   }
 
-  const userName = project.expand?.user?.name || project.expand?.user?.displayName || 'A painter';
+  const userName = getDisplayName(project.expand?.user, 'A painter');
   const title = `${project.name} by ${userName} - Paintpile`;
   const description = project.description
     || `Check out this miniature painting project on Paintpile!`;
@@ -119,7 +120,7 @@ export default async function ShareProjectPage({
     );
   }
 
-  const userName = project.expand?.user?.name || project.expand?.user?.displayName || 'A painter';
+  const userName = getDisplayName(project.expand?.user, 'A painter');
   const coverUrl = project.cover_photo
     ? getImageUrl(project.collectionId, project.id, project.cover_photo)
     : null;

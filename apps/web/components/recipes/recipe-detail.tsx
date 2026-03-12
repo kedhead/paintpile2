@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { RecordModel } from 'pocketbase';
 import { ArrowLeft, Edit2, Trash2, Clock, ChefHat } from 'lucide-react';
+import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../auth-provider';
 import { useDeleteRecipe } from '../../hooks/use-recipes';
 import { RecipeForm } from './recipe-form';
@@ -66,7 +67,7 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
           <h1 className="truncate text-xl font-bold text-foreground">{recipe.name}</h1>
           {recipe.expand?.user && (
             <p className="text-xs text-muted-foreground">
-              by {recipe.expand.user.name || recipe.expand.user.username}
+              by {getDisplayName(recipe.expand.user)}
             </p>
           )}
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { getDisplayName } from '@paintpile/shared';
 import { getAvatarUrl } from '../../lib/pb-helpers';
 import type { RecordModel } from 'pocketbase';
 
@@ -24,8 +25,8 @@ interface UserAvatarProps {
 
 export function UserAvatar({ user, size = 'md', className = '' }: UserAvatarProps) {
   const avatarUrl = getAvatarUrl(user, thumbSizes[size]);
-  const name = user.name || user.displayName || user.email || '?';
-  const initial = name[0]?.toUpperCase() || '?';
+  const name = getDisplayName(user, user.email || '?');
+  const initial = (name.startsWith('@') ? name[1] : name[0])?.toUpperCase() || '?';
 
   if (avatarUrl) {
     return (

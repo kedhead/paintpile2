@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import type { ListResult, RecordModel } from 'pocketbase';
+import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 import { createNotification } from './use-notifications';
@@ -86,10 +87,10 @@ export function useToggleLike() {
             user: post.user,
             type: 'like',
             actor_id: user!.id,
-            actor_name: user!.name || user!.displayName || 'Someone',
+            actor_name: getDisplayName(user!, 'Someone'),
             target_id: targetId,
             target_type: 'post',
-            message: `${user!.name || 'Someone'} liked your post`,
+            message: `${getDisplayName(user!, 'Someone')} liked your post`,
             action_url: `/feed`,
           });
         } catch {}
