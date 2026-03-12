@@ -202,8 +202,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           <img
             src={coverPhoto}
             alt={project.name}
-            className="w-full object-cover"
-            style={{ maxHeight: '400px' }}
+            className="w-full object-contain"
           />
         </div>
       )}

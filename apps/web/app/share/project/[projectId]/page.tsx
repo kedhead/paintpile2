@@ -168,8 +168,7 @@ export default async function ShareProjectPage({
             <img
               src={coverUrl}
               alt={project.name}
-              className="w-full object-cover"
-              style={{ maxHeight: '500px' }}
+              className="w-full object-contain"
             />
           </div>
         )}
