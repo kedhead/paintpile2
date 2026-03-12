@@ -95,11 +95,29 @@ export function useArmyMembers(armyId: string | null) {
   return useInfiniteQuery({
     queryKey: queryKeys.armies.members(armyId || ''),
     queryFn: async ({ pageParam = 1 }) => {
-      return pb.collection('army_members').getList(pageParam, PAGE_SIZE, {
+      // Fetch members without expand to avoid viewRule issues on projects
+      const members = await pb.collection('army_members').getList(pageParam, PAGE_SIZE, {
         sort: '-created',
         filter: `army="${armyId}"`,
-        expand: 'project',
       });
+
+      // Batch-fetch the referenced projects individually
+      const projectIds = members.items.map((m) => m.project).filter(Boolean);
+      if (projectIds.length > 0) {
+        const filter = projectIds.map((id) => `id="${id}"`).join(' || ');
+        try {
+          const projects = await pb.collection('projects').getFullList({ filter, requestKey: null });
+          const projectMap = new Map(projects.map((p) => [p.id, p]));
+          members.items = members.items.map((m) => ({
+            ...m,
+            expand: { ...m.expand, project: projectMap.get(m.project) },
+          }));
+        } catch {
+          // Projects may have been deleted — continue without expand
+        }
+      }
+
+      return members;
     },
     getNextPageParam: (lastPage) =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
