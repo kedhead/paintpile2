@@ -36,7 +36,7 @@ export function useUploadPhoto() {
       const formData = new FormData();
       formData.append('user', user!.id);
       formData.append('project', projectId);
-      formData.append('file', file);
+      formData.append('image', file);
       if (caption) formData.append('caption', caption);
 
       // Get image dimensions
