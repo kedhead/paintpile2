@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { RecordModel } from 'pocketbase';
 import { Palette, Plus, Trash2, Loader2 } from 'lucide-react';
 import { useProjectPaints, useAddProjectPaint, useRemoveProjectPaint } from '../../hooks/use-project-paints';
+import { PaintSelectorModal } from '../paints/paint-selector-modal';
 
 interface ProjectPaintLibraryProps {
   projectId: string;
@@ -15,7 +16,14 @@ export function ProjectPaintLibrary({ projectId, isOwner }: ProjectPaintLibraryP
   const addPaint = useAddProjectPaint();
   const removePaint = useRemoveProjectPaint();
   const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+
+  const existingPaintIds = paints.map((pp: RecordModel) => pp.paint || pp.expand?.paint?.id).filter(Boolean);
+
+  const handleSelectPaints = async (paintIds: string[]) => {
+    for (const paintId of paintIds) {
+      await addPaint.mutateAsync({ projectId, paintId });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -74,6 +82,13 @@ export function ProjectPaintLibrary({ projectId, isOwner }: ProjectPaintLibraryP
           })}
         </div>
       )}
+
+      <PaintSelectorModal
+        open={showSearch}
+        onClose={() => setShowSearch(false)}
+        onSelect={handleSelectPaints}
+        excludeIds={existingPaintIds}
+      />
     </div>
   );
 }
