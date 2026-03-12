@@ -69,7 +69,7 @@ export function PhotoUpload({ projectId }: PhotoUploadProps) {
       for (const photo of pending) {
         await uploadPhoto.mutateAsync({
           projectId,
-          file: photo.image,
+          file: photo.file,
           caption: photo.caption || undefined,
         });
       }
