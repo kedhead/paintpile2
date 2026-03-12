@@ -120,44 +120,40 @@
   }
 }
 
-/* Dark mode: subtle teal glow on cards for depth separation */
+/* Dark mode: glowing borders on cards */
 @layer components {
   .dark .bg-card {
     box-shadow:
-      0 0 0 1px hsl(185 30% 24% / 0.45),
-      0 1px 3px hsl(185 40% 15% / 0.15);
+      0 0 0 1px hsl(185 45% 32% / 0.5),
+      0 0 8px hsl(185 50% 30% / 0.15),
+      0 1px 3px hsl(185 40% 15% / 0.2);
   }
-  /* Slightly brighter glow on card hover */
   .dark .bg-card:hover {
     box-shadow:
-      0 0 0 1px hsl(185 35% 28% / 0.55),
-      0 2px 8px hsl(185 40% 18% / 0.2);
+      0 0 0 1px hsl(185 50% 38% / 0.65),
+      0 0 15px hsl(185 55% 35% / 0.25),
+      0 2px 8px hsl(185 45% 20% / 0.3);
   }
 
   /* Nav bar bottom glow line */
   .dark header.border-b {
     border-image: linear-gradient(
       90deg,
-      hsl(185 40% 28% / 0.15) 0%,
-      hsl(185 50% 35% / 0.5) 30%,
-      hsl(185 50% 35% / 0.5) 70%,
-      hsl(185 40% 28% / 0.15) 100%
+      hsl(185 50% 35% / 0.1) 0%,
+      hsl(185 60% 45% / 0.6) 30%,
+      hsl(185 60% 45% / 0.6) 70%,
+      hsl(185 50% 35% / 0.1) 100%
     ) 1;
   }
 
-  /* Horizontal dividers get a subtle teal tint */
+  /* Horizontal dividers get a teal glow */
   .dark .border-t {
     border-image: linear-gradient(
       90deg,
-      hsl(185 30% 22% / 0.1) 0%,
-      hsl(185 35% 28% / 0.4) 50%,
-      hsl(185 30% 22% / 0.1) 100%
+      hsl(185 40% 28% / 0.05) 0%,
+      hsl(185 50% 38% / 0.5) 50%,
+      hsl(185 40% 28% / 0.05) 100%
     ) 1;
   }
 }
 
-/* Dark mode: spray paint background */
-.dark .bg-background {
-  background: hsl(250 15% 8% / 0.55) url('/background.png') center / cover fixed no-repeat !important;
-  background-blend-mode: overlay;
-}
