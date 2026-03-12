@@ -139,7 +139,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
 
       {/* Cover Photo */}
       {coverPhoto && (
-        <div className="overflow-hidden rounded-lg">
+        <div className="overflow-hidden rounded-lg bg-card">
           <img
             src={coverPhoto}
             alt={project.name}

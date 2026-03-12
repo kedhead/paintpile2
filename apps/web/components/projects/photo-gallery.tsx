@@ -48,7 +48,7 @@ export function PhotoGallery({ projectId, isOwner }: PhotoGalleryProps) {
             <button
               key={photo.id}
               onClick={() => setLightboxIndex(index)}
-              className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
+              className="group relative aspect-square overflow-hidden rounded-lg bg-card"
             >
               <img
                 src={getFileUrl(photo, photo.file, '300x300')}

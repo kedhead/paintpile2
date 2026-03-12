@@ -164,7 +164,7 @@ export default async function ShareProjectPage({
       <div className="mx-auto max-w-3xl px-4 py-8 space-y-6">
         {/* Cover photo */}
         {coverUrl && (
-          <div className="overflow-hidden rounded-xl">
+          <div className="overflow-hidden rounded-xl bg-card">
             <img
               src={coverUrl}
               alt={project.name}
