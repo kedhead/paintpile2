@@ -21,6 +21,7 @@ const CATEGORIES = [
   'glow-effect',
   'gem',
   'base-terrain',
+  'other',
 ] as const;
 
 const INGREDIENT_ROLES = [

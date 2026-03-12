@@ -23,7 +23,9 @@
       "Bash(ls K:/AI-Projects/paintpile2/apps/web/app/\\\\\\(authenticated\\\\\\)/)",
       "Bash(find \"K:\\\\AI-Projects\\\\paintpile2\\\\apps\\\\web\" -name \"*setting*\" -o -name \"*edit*\" -type f 2>/dev/null | grep -E \"\\\\.\\(tsx|ts\\)$\")",
       "Bash(find \"K:\\\\AI-Projects\\\\paintpile2\" -name \"schema*\" -o -name \"*pb*\" -type f 2>/dev/null | grep -E \"\\\\.\\(sql|json|ts|js\\)$\" | head -20)",
-      "Bash(npx turbo:*)"
+      "Bash(npx turbo:*)",
+      "Bash(curl -s \"http://65.75.201.180:8090/api/collections/users\" -H \"Content-Type: application/json\" 2>&1 | python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(f['name'], f['type']\\) for f in d.get\\('schema',d.get\\('fields',[]\\)\\)]\" 2>&1)",
+      "Bash(curl -s \"http://65.75.201.180:8090/api/collections/users\" 2>&1 | python3 -c \"import sys,json; print\\(json.dumps\\(json.load\\(sys.stdin\\), indent=2\\)\\)\" 2>&1 | head -80)"
     ]
   }
 }

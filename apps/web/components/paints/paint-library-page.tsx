@@ -120,7 +120,7 @@ export function PaintLibraryPage() {
       const paintNames: string[] = typeof set.paint_names === 'string'
         ? JSON.parse(set.paint_names)
         : set.paint_names || [];
-      const result = await addSetToInventory.mutateAsync(paintNames);
+      const result = await addSetToInventory.mutateAsync({ paintNames, brand: set.brand });
       setSetResult({ setId: set.id, ...result });
     } catch {
       // handled by mutation

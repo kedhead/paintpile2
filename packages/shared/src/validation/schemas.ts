@@ -118,7 +118,7 @@ export const recipeSchema = z.object({
     'skin-tone', 'metallic', 'fabric', 'leather', 'armor', 'weapon',
     'wood', 'stone', 'nmm', 'osl', 'weathering', 'glow-effect',
     'gem', 'base-terrain', 'other',
-  ], { required_error: 'Please select a category' }),
+  ], { required_error: 'Please select a category' }).or(z.string().min(1)),
   difficulty: z.enum(['beginner', 'intermediate', 'advanced'], {
     required_error: 'Please select difficulty',
   }),

@@ -143,15 +143,19 @@ export function useAddSetToInventory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (paintNames: string[]) => {
-      // Find all matching paints by name
+    mutationFn: async ({ paintNames, brand }: { paintNames: string[]; brand?: string }) => {
+      // Find all matching paints by name and brand
       const results = { added: 0, skipped: 0, notFound: 0 };
 
       for (const name of paintNames) {
         try {
-          // Find paint by name (fuzzy match)
+          // Find paint by name, filtered by brand if provided
+          const escapedName = name.replace(/"/g, '\\"');
+          const filter = brand
+            ? `name="${escapedName}" && brand~"${brand.replace(/"/g, '\\"')}"`
+            : `name="${escapedName}"`;
           const matches = await pb.collection('paints').getList(1, 1, {
-            filter: `name="${name.replace(/"/g, '\\"')}"`,
+            filter,
             requestKey: null,
           });
 

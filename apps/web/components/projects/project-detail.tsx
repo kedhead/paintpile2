@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { RecordModel } from 'pocketbase';
-import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, Clock, ChefHat, Share2, Check, Link2, Award } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, ChefHat, Share2, Check, Link2, Award } from 'lucide-react';
 import { useAuth } from '../auth-provider';
 import { useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { ProjectStatusBadge } from './project-status-badge';
@@ -15,7 +15,6 @@ import { getFileUrl, relativeTime } from '../../lib/pb-helpers';
 import { PhotoGallery } from './photo-gallery';
 import { PhotoUpload } from './photo-upload';
 import { ProjectPaintLibrary } from './project-paint-library';
-import { ProjectTimeline } from './project-timeline';
 import { ProjectRecipesList } from './project-recipes-list';
 
 interface ProjectDetailProps {
@@ -33,7 +32,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const [editName, setEditName] = useState(project.name);
   const [editDescription, setEditDescription] = useState(project.description || '');
   const [editStatus, setEditStatus] = useState(project.status || 'not-started');
-  const [activeTab, setActiveTab] = useState<'photos' | 'paints' | 'timeline' | 'recipes'>('photos');
+  const [activeTab, setActiveTab] = useState<'photos' | 'paints' | 'recipes'>('photos');
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -226,7 +225,6 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           {[
             { key: 'photos' as const, label: 'Photos', icon: Camera },
             { key: 'paints' as const, label: 'Paints', icon: Palette },
-            { key: 'timeline' as const, label: 'Timeline', icon: Clock },
             { key: 'recipes' as const, label: 'Recipes', icon: ChefHat },
           ].map(({ key, label, icon: Icon }) => (
             <button
@@ -252,9 +250,6 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         )}
         {activeTab === 'paints' && (
           <ProjectPaintLibrary projectId={project.id} isOwner={isOwner} />
-        )}
-        {activeTab === 'timeline' && (
-          <ProjectTimeline projectId={project.id} />
         )}
         {activeTab === 'recipes' && (
           <ProjectRecipesList projectId={project.id} isOwner={isOwner} />
