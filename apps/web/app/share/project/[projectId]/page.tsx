@@ -196,7 +196,7 @@ export default async function ShareProjectPage({
         )}
 
         {/* Tags */}
-        {project.tags?.length > 0 && (
+        {Array.isArray(project.tags) && project.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {project.tags.map((tag: string) => (
               <span

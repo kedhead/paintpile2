@@ -105,7 +105,7 @@ export function ArmyDetail({ army }: ArmyDetailProps) {
       )}
 
       {/* Tags */}
-      {army.tags?.length > 0 && (
+      {Array.isArray(army.tags) && army.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {army.tags.map((tag: string) => (
             <span

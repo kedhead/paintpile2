@@ -44,7 +44,7 @@ export function PostCard({ post }: PostCardProps) {
       <PostImageGrid post={post} />
 
       {/* Tags */}
-      {post.tags?.length > 0 && (
+      {Array.isArray(post.tags) && post.tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {post.tags.map((tag: string) => (
             <span
