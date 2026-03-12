@@ -79,7 +79,7 @@ function KanbanCard({
       <Link href={`/projects/${project.id}`} className="text-sm font-medium text-foreground hover:text-primary">
         {project.name}
       </Link>
-      {project.tags?.length > 0 && (
+      {Array.isArray(project.tags) && project.tags.length > 0 && (
         <div className="mt-1 flex flex-wrap gap-1">
           {project.tags.slice(0, 2).map((tag: string) => (
             <span key={tag} className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">

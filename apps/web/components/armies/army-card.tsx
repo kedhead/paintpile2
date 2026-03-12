@@ -58,7 +58,7 @@ export function ArmyCard({ army }: ArmyCardProps) {
           </div>
 
           {/* Tags */}
-          {army.tags?.length > 0 && (
+          {Array.isArray(army.tags) && army.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {army.tags.slice(0, 3).map((tag: string) => (
                 <span

@@ -60,7 +60,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
 
           {/* Tags */}
-          {project.tags?.length > 0 && (
+          {Array.isArray(project.tags) && project.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {project.tags.slice(0, 3).map((tag: string) => (
                 <span
