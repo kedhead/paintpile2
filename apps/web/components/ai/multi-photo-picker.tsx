@@ -35,7 +35,7 @@ export function MultiPhotoPicker({ photos, selected, onToggle, maxSelection = 4 
               }`}
             >
               <img
-                src={getFileUrl(photo, photo.file, '150x150')}
+                src={getFileUrl(photo, photo.image, '150x150')}
                 alt={photo.caption || 'Photo'}
                 className="h-full w-full object-cover"
               />

@@ -96,7 +96,7 @@ export function PhotoLightbox({
       {/* Image */}
       <div className="relative max-h-[85vh] max-w-[90vw]">
         <img
-          src={getFileUrl(photo, photo.file)}
+          src={getFileUrl(photo, photo.image)}
           alt={photo.caption || 'Project photo'}
           className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
         />

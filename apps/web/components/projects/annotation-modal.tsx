@@ -73,7 +73,7 @@ export function AnnotationModal({ photo, projectId, onClose }: AnnotationModalPr
       <div className="flex flex-1 items-center justify-center p-4">
         <div className="relative max-h-[85vh] max-w-[70vw]">
           <img
-            src={getFileUrl(photo, photo.file)}
+            src={getFileUrl(photo, photo.image)}
             alt={photo.caption || 'Photo'}
             className="max-h-[85vh] max-w-[70vw] cursor-crosshair rounded-lg object-contain"
             onClick={handleImageClick}

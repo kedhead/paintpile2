@@ -51,7 +51,7 @@ export function PhotoGallery({ projectId, isOwner }: PhotoGalleryProps) {
               className="group relative aspect-square overflow-hidden rounded-lg bg-card"
             >
               <img
-                src={getFileUrl(photo, photo.file, '300x300')}
+                src={getFileUrl(photo, photo.image, '300x300')}
                 alt={photo.caption || 'Project photo'}
                 className="h-full w-full object-cover transition-transform group-hover:scale-105"
               />
