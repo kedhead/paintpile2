@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
+import { Film } from 'lucide-react';
 import { getDisplayName } from '@paintpile/shared';
 import { UserAvatar } from '../social/user-avatar';
 import { LikeButton } from '../social/like-button';
 import { CommentSection } from '../social/comment-section';
-import { PostImageGrid } from './post-image-grid';
+import { PostMediaGrid } from './post-media-grid';
 import { relativeTime } from '../../lib/pb-helpers';
 
 interface PostCardProps {
@@ -15,6 +16,7 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   const author = post.expand?.user as RecordModel | undefined;
+  const hasVideos = Array.isArray(post.videos) && post.videos.length > 0;
 
   return (
     <article className="rounded-lg border border-border bg-card p-4">
@@ -34,15 +36,22 @@ export function PostCard({ post }: PostCardProps) {
               {getDisplayName(author)}
             </Link>
           )}
-          <p className="text-xs text-muted-foreground">{relativeTime(post.created)}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-xs text-muted-foreground">{relativeTime(post.created)}</p>
+            {hasVideos && (
+              <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                <Film className="h-3 w-3" />
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Content */}
       <p className="mt-3 whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
 
-      {/* Images */}
-      <PostImageGrid post={post} />
+      {/* Media (images + videos + text overlays) */}
+      <PostMediaGrid post={post} />
 
       {/* Tags */}
       {Array.isArray(post.tags) && post.tags.length > 0 && (

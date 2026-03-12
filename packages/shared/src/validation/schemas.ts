@@ -47,11 +47,28 @@ export const profileSchema = z.object({
   bio: z.string().max(200, 'Bio is too long').optional(),
 });
 
+// Text Overlay Schema
+export const textOverlaySchema = z.object({
+  id: z.string(),
+  text: z.string().min(1).max(200),
+  imageIndex: z.number().int().min(0),
+  x: z.number().min(0).max(100),
+  y: z.number().min(0).max(100),
+  fontSize: z.number().min(8).max(120),
+  fontFamily: z.string(),
+  color: z.string(),
+  strokeColor: z.string().optional(),
+  rotation: z.number().optional(),
+  opacity: z.number().min(0).max(1).optional(),
+  effect: z.enum(['none', 'shadow', 'outline', 'glow', 'neon']).optional(),
+});
+
 // Post Schemas
 export const postSchema = z.object({
   content: z.string().min(1, 'Post content is required').max(2000, 'Post is too long'),
   tags: z.array(z.string().min(1).max(20)).max(10).optional(),
   isPublic: z.boolean().default(true),
+  textOverlays: z.array(textOverlaySchema).max(20).optional(),
 });
 
 // Comment Schemas
