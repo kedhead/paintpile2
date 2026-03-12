@@ -2,8 +2,11 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { RecordModel } from 'pocketbase';
-import { X, ChevronLeft, ChevronRight, Trash2, PenTool } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Trash2, PenTool, ImageIcon, Loader2 } from 'lucide-react';
 import { useDeletePhoto } from '../../hooks/use-photos';
+import { useAuth } from '../auth-provider';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../lib/query-keys';
 import { getFileUrl, relativeTime } from '../../lib/pb-helpers';
 import { AnnotationMarker } from './annotation-marker';
 import type { PhotoAnnotation } from '../../hooks/use-photos';
@@ -27,7 +30,25 @@ export function PhotoLightbox({
 }: PhotoLightboxProps) {
   const [index, setIndex] = useState(initialIndex);
   const deletePhoto = useDeletePhoto();
+  const { pb } = useAuth();
+  const queryClient = useQueryClient();
   const [showAnnotations, setShowAnnotations] = useState(true);
+
+  const setCover = useMutation({
+    mutationFn: async (photoRecord: RecordModel) => {
+      const url = getFileUrl(photoRecord, photoRecord.image);
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const file = new File([blob], photoRecord.image, { type: blob.type });
+      const formData = new FormData();
+      formData.append('cover_photo', file);
+      return pb.collection('projects').update(projectId, formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+    },
+  });
 
   const photo = photos[index];
   const annotations: PhotoAnnotation[] = photo?.annotations
@@ -129,6 +150,21 @@ export function PhotoLightbox({
               }`}
             >
               {annotations.length} annotation{annotations.length !== 1 ? 's' : ''}
+            </button>
+          )}
+          {isOwner && (
+            <button
+              onClick={() => setCover.mutate(photo)}
+              disabled={setCover.isPending}
+              className="rounded-full bg-white/20 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/30 flex items-center gap-1.5"
+              title="Set as cover photo"
+            >
+              {setCover.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ImageIcon className="h-3.5 w-3.5" />
+              )}
+              {setCover.isSuccess ? 'Cover set!' : 'Set as Cover'}
             </button>
           )}
           {isOwner && onAnnotate && (
