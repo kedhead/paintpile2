@@ -49,12 +49,15 @@ export async function POST(req: NextRequest) {
 
     const replicate = new Replicate({ auth: apiToken });
 
+    // Enhance the prompt to strictly preserve geometry and prevent rotation
+    const enhancedPrompt = `${prompt.trim()}. Very important: Strictly preserve the exact original image geometry, pose, shape, and background. Do not rotate the model or change its outline. Only change the colors as requested.`;
+
     // Use google/nano-banana (Gemini 2.5 Flash Image) — same model as original Paintpile
     const output = await replicate.run(
       'google/nano-banana',
       {
         input: {
-          prompt: prompt,
+          prompt: enhancedPrompt,
           image_input: [resizedDataUrl],
           aspect_ratio: 'match_input_image',
           output_format: 'jpg',
