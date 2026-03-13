@@ -5,9 +5,12 @@ import { Loader2 } from 'lucide-react';
 import { useAuth } from '../../../components/auth-provider';
 import { useDiscoverFeed, useFollowingFeed } from '../../../hooks/use-posts';
 import { useFollowingIds } from '../../../hooks/use-follows';
+import { useLiveStreams } from '../../../hooks/use-live-streams';
 import { CreatePostForm } from '../../../components/feed/create-post-form';
 import { PostCard } from '../../../components/feed/post-card';
 import { FeedTabs } from '../../../components/feed/feed-tabs';
+import { GoLiveButton } from '../../../components/feed/go-live-button';
+import { LiveStreamCard } from '../../../components/feed/live-stream-card';
 
 export default function FeedPage() {
   const { user } = useAuth();
@@ -17,6 +20,7 @@ export default function FeedPage() {
   const { data: followingIds = [] } = useFollowingIds(user?.id || '');
   const discover = useDiscoverFeed();
   const following = useFollowingFeed(followingIds);
+  const { data: liveStreams = [] } = useLiveStreams();
 
   const feed = activeTab === 'discover' ? discover : following;
   const posts = feed.data?.pages.flatMap((p) => p.items) || [];
@@ -40,7 +44,24 @@ export default function FeedPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <CreatePostForm />
+      {/* Create post + Go Live row */}
+      <div className="flex items-start gap-3">
+        <div className="flex-1">
+          <CreatePostForm />
+        </div>
+        <div className="pt-1">
+          <GoLiveButton />
+        </div>
+      </div>
+
+      {/* Live Streams */}
+      {liveStreams.length > 0 && (
+        <div className="space-y-2">
+          {liveStreams.map((stream) => (
+            <LiveStreamCard key={stream.id} stream={stream} />
+          ))}
+        </div>
+      )}
 
       <div className="rounded-lg border border-border bg-card">
         <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
