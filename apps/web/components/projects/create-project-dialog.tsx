@@ -19,6 +19,7 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
   const [status, setStatus] = useState<string>('not-started');
   const [tags, setTags] = useState('');
   const [isPublic, setIsPublic] = useState(true);
+  const [addToShame, setAddToShame] = useState(false);
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,10 +33,9 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
     formData.append('is_public', String(isPublic));
     if (description.trim()) formData.append('description', description.trim());
     if (coverPhoto) formData.append('cover_photo', coverPhoto);
-    if (tags.trim()) {
-      const tagList = tags.split(',').map((t) => t.trim()).filter(Boolean);
-      tagList.forEach((tag) => formData.append('tags', tag));
-    }
+    const tagList = tags.trim() ? tags.split(',').map((t) => t.trim()).filter(Boolean) : [];
+    if (addToShame && !tagList.includes('shame')) tagList.push('shame');
+    tagList.forEach((tag) => formData.append('tags', tag));
 
     const project = await createProject.mutateAsync(formData);
     onClose();
@@ -129,6 +129,20 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
             />
             <p className="mt-1 text-xs text-muted-foreground">Comma separated</p>
           </div>
+
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <div
+              onClick={() => setAddToShame(!addToShame)}
+              className={`relative w-10 h-5 rounded-full transition-colors ${
+                addToShame ? 'bg-red-500' : 'bg-muted'
+              }`}
+            >
+              <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                addToShame ? 'translate-x-5' : 'translate-x-0'
+              }`} />
+            </div>
+            <span className="text-sm text-foreground">Add to Pile of Shame 📦</span>
+          </label>
 
           <label className="flex items-center gap-2 text-sm text-foreground">
             <input

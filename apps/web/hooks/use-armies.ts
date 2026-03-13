@@ -131,10 +131,11 @@ export function useAddArmyMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ armyId, projectId }: { armyId: string; projectId: string }) => {
+    mutationFn: async ({ armyId, projectId, unitCount = 1 }: { armyId: string; projectId: string; unitCount?: number }) => {
       return pb.collection('army_members').create({
         army: armyId,
         project: projectId,
+        unit_count: unitCount,
       });
     },
     onSuccess: (_data, variables) => {
