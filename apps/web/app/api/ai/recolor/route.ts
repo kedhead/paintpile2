@@ -63,7 +63,10 @@ export async function POST(req: NextRequest) {
         input: {
           prompt: enhancedPrompt,
           image_input: [resizedDataUrl],
-          aspect_ratio: 'match_input_image',
+          // Tell the AI to heavily favor the original image constraints
+          strength: 0.45,
+          prompt_strength: 0.6,
+          image_guidance_scale: 1.5,
           output_format: 'jpg',
         },
       }
