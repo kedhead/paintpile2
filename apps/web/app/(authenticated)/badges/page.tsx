@@ -1,7 +1,8 @@
 'use client';
 
-import { Award, Loader2 } from 'lucide-react';
-import { useAllBadges, useUserBadges } from '../../../hooks/use-badges';
+import { Award, Loader2, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useAllBadges, useUserBadges, useCheckBadges } from '../../../hooks/use-badges';
 import { useAuth } from '../../../components/auth-provider';
 import { BadgeCard } from '../../../components/badges/badge-card';
 
@@ -9,6 +10,16 @@ export default function BadgesPage() {
   const { user } = useAuth();
   const { data: allBadges = [], isLoading } = useAllBadges();
   const { data: userBadges = [] } = useUserBadges(user?.id || '');
+  const { mutate: checkBadges, isPending: isSyncing } = useCheckBadges();
+
+  const [hasSynced, setHasSynced] = useState(false);
+
+  useEffect(() => {
+    if (user && !hasSynced) {
+      checkBadges();
+      setHasSynced(true);
+    }
+  }, [user, hasSynced, checkBadges]);
 
   const earnedIds = new Set(userBadges.map((ub) => ub.badge));
   const totalPoints = userBadges.reduce((sum, ub) => {
@@ -48,6 +59,12 @@ export default function BadgesPage() {
 
       <p className="text-sm text-muted-foreground">
         Earned {userBadges.length} of {allBadges.filter((b) => !b.hidden).length} badges
+        {isSyncing && (
+          <span className="ml-2 inline-flex items-center gap-1 text-primary animate-pulse">
+            <RefreshCw className="h-3 w-3 animate-spin" />
+            Syncing...
+          </span>
+        )}
       </p>
 
       {Object.entries(categories).map(([category, badges]) => (

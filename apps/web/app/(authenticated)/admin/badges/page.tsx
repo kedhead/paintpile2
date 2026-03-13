@@ -223,6 +223,28 @@ export default function AdminBadgesPage() {
   const [showAIModal, setShowAIModal] = useState(false);
   const [showIconModal, setShowIconModal] = useState(false);
   const [iconPrompt, setIconPrompt] = useState('');
+  const [syncingAll, setSyncingAll] = useState(false);
+
+  const handleSyncAllUsers = async () => {
+    if (!confirm('Sync badges for all users? This might take a moment.')) return;
+    setSyncingAll(true);
+    try {
+      const users = await pb.collection('users').getFullList({ select: 'id' });
+      const { checkAndAwardBadges } = await import('../../../../lib/badge-checker');
+      
+      let count = 0;
+      for (const userRecord of users) {
+        await checkAndAwardBadges(pb, userRecord.id);
+        count++;
+      }
+      alert(`Successfully synced badges for ${count} users`);
+    } catch (error) {
+      console.error('Sync all error:', error);
+      alert('Failed to sync all users');
+    } finally {
+      setSyncingAll(false);
+    }
+  };
 
   const handleSeedBadges = async () => {
     setSeeding(true);
@@ -346,6 +368,14 @@ export default function AdminBadgesPage() {
           >
             <Plus className="h-4 w-4" />
             New Badge
+          </button>
+          <button
+            onClick={handleSyncAllUsers}
+            disabled={syncingAll}
+            className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+          >
+            {syncingAll ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            Sync All Users
           </button>
           <button
             onClick={handleSeedBadges}
