@@ -17,11 +17,15 @@ async function fetchAndResizeImage(imageUrl: string): Promise<string> {
   let resized: Buffer;
   if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
     resized = await sharp(buffer)
+      .rotate() // Auto-orient based on EXIF
       .resize(MAX_DIMENSION, MAX_DIMENSION, { fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: 90 })
       .toBuffer();
   } else {
-    resized = await sharp(buffer).jpeg({ quality: 90 }).toBuffer();
+    resized = await sharp(buffer)
+      .rotate() // Auto-orient based on EXIF
+      .jpeg({ quality: 90 })
+      .toBuffer();
   }
 
   const base64 = resized.toString('base64');
