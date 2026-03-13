@@ -4,6 +4,7 @@ import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tansta
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 import { logActivity } from './use-activities';
+import { useCheckBadges } from './use-badges';
 
 const PAGE_SIZE = 20;
 
@@ -41,6 +42,7 @@ export function useArmy(armyId: string | null) {
 export function useCreateArmy() {
   const { pb, user } = useAuth();
   const queryClient = useQueryClient();
+  const { mutate: checkBadges } = useCheckBadges();
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
@@ -55,6 +57,7 @@ export function useCreateArmy() {
           target_type: 'army',
           metadata: { target_name: data.name },
         });
+        checkBadges();
       }
     },
   });

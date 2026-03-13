@@ -29,8 +29,12 @@ export function BadgeCard({ badge, earned = false, earnedAt }: BadgeCardProps) {
       {!earned && (
         <Lock className="absolute right-2 top-2 h-3 w-3 text-muted-foreground" />
       )}
-      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-black/20">
-        <Award className="h-5 w-5" style={{ color: earned ? badge.color : 'var(--muted-foreground)' }} />
+      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-black/20 overflow-hidden">
+        {badge.icon?.startsWith('http') ? (
+          <img src={badge.icon} alt={badge.name} className="h-full w-full object-cover" />
+        ) : (
+          <Award className="h-5 w-5" style={{ color: earned ? badge.color : 'var(--muted-foreground)' }} />
+        )}
       </div>
       <h4 className="mt-2 text-xs font-bold text-foreground">{badge.name}</h4>
       <p className="mt-0.5 text-[10px] text-muted-foreground">{badge.description}</p>

@@ -4,6 +4,7 @@ import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tansta
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 import { logActivity } from './use-activities';
+import { useCheckBadges } from './use-badges';
 
 const PAGE_SIZE = 20;
 
@@ -77,6 +78,7 @@ export function useUserProjects(userId: string) {
 export function useCreateProject() {
   const { pb, user } = useAuth();
   const queryClient = useQueryClient();
+  const { mutate: checkBadges } = useCheckBadges();
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
@@ -91,6 +93,7 @@ export function useCreateProject() {
           target_type: 'project',
           metadata: { target_name: data.name },
         });
+        checkBadges();
       }
     },
   });
@@ -99,6 +102,7 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const { pb, user } = useAuth();
   const queryClient = useQueryClient();
+  const { mutate: checkBadges } = useCheckBadges();
 
   return useMutation({
     mutationFn: async ({ projectId, data }: { projectId: string; data: FormData | Record<string, unknown> }) => {
@@ -115,6 +119,7 @@ export function useUpdateProject() {
           target_type: 'project',
           metadata: { target_name: result.name },
         });
+        checkBadges();
       }
     },
   });

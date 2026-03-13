@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Award, Loader2, Upload, Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Award, Loader2, Upload, Plus, Pencil, Trash2, X, Sparkles, Wand2, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../../../components/auth-provider';
 import { useAllBadges } from '../../../../hooks/use-badges';
 import { BADGE_DEFINITIONS, type BadgeDefinition } from '../../../../lib/badge-definitions';
@@ -38,6 +38,179 @@ const EMPTY_FORM: BadgeFormData = {
   trigger_value: 1,
 };
 
+function AIGenerateBadgeDialog({
+  open,
+  onOpenChange,
+  onGenerated,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onGenerated: (data: Partial<BadgeFormData> & { icon_prompt?: string }) => void;
+}) {
+  const [prompt, setPrompt] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { pb } = useAuth();
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/ai/badge/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${pb.authStore.token}`,
+        },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to generate');
+      onGenerated(data.badge);
+      onOpenChange(false);
+      setPrompt('');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl border border-border">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-purple-500" />
+            AI Achievement Generator
+          </h2>
+          <button onClick={() => onOpenChange(false)}><X className="h-5 w-5" /></button>
+        </div>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">Describe the achievement you want to create.</p>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="e.g. Master of contrast who uses 5 different gray paints in one recipe"
+            className="w-full rounded-lg border border-border bg-background p-3 text-sm focus:border-primary focus:outline-none h-24"
+          />
+          {error && <p className="text-xs text-red-500">{error}</p>}
+          <button
+            onClick={handleGenerate}
+            disabled={loading || !prompt.trim()}
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-purple-600 py-2.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+            Generate Badge Ideas
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AIGenerateIconDialog({
+  open,
+  onOpenChange,
+  initialPrompt,
+  onIconGenerated,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialPrompt?: string;
+  onIconGenerated: (url: string) => void;
+}) {
+  const [prompt, setPrompt] = useState(initialPrompt || '');
+  const [loading, setLoading] = useState(false);
+  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { pb } = useAuth();
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return;
+    setLoading(true);
+    setError(null);
+    setGeneratedUrl(null);
+    try {
+      const res = await fetch('/api/ai/badge/generate-icon', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${pb.authStore.token}`,
+        },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to generate icon');
+      setGeneratedUrl(data.url);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-sm rounded-xl bg-card p-6 shadow-xl border border-border">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-blue-500" />
+            AI Icon Generator
+          </h2>
+          <button onClick={() => onOpenChange(false)}><X className="h-5 w-5" /></button>
+        </div>
+        <div className="space-y-4 text-center">
+          {!generatedUrl ? (
+            <>
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe the icon style..."
+                className="w-full rounded-lg border border-border bg-background p-3 text-sm focus:border-primary focus:outline-none h-24 text-left"
+              />
+              {error && <p className="text-xs text-red-500">{error}</p>}
+              <button
+                onClick={handleGenerate}
+                disabled={loading || !prompt.trim()}
+                className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                Generate Icon
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="mx-auto h-32 w-32 rounded-xl border border-border overflow-hidden bg-black/10">
+                <img src={generatedUrl} alt="Generated Icon" className="h-full w-full object-cover" />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setGeneratedUrl(null)}
+                  className="flex-1 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={() => { onIconGenerated(generatedUrl); onOpenChange(false); }}
+                  className="flex-1 rounded-lg bg-primary py-2 text-sm font-medium text-white"
+                >
+                  Use Icon
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminBadgesPage() {
   const { pb } = useAuth();
   const { data: allBadges = [], isLoading, refetch } = useAllBadges();
@@ -47,6 +220,9 @@ export default function AdminBadgesPage() {
   const [form, setForm] = useState<BadgeFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [showIconModal, setShowIconModal] = useState(false);
+  const [iconPrompt, setIconPrompt] = useState('');
 
   const handleSeedBadges = async () => {
     setSeeding(true);
@@ -140,6 +316,15 @@ export default function AdminBadgesPage() {
     }
   };
 
+  const handleAIGenerated = (data: any) => {
+    setForm({
+      ...EMPTY_FORM,
+      ...data,
+    });
+    setIconPrompt(data.icon_prompt || '');
+    setShowForm(true);
+  };
+
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <div className="flex items-center justify-between">
@@ -148,6 +333,13 @@ export default function AdminBadgesPage() {
           <h1 className="text-xl font-bold text-foreground">Manage Badges</h1>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAIModal(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-sm font-medium text-purple-400 hover:bg-purple-500/20"
+          >
+            <Sparkles className="h-4 w-4" />
+            AI Generate
+          </button>
           <button
             onClick={openCreate}
             className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/80"
@@ -188,13 +380,22 @@ export default function AdminBadgesPage() {
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
               required
             />
-            <input
-              type="text"
-              placeholder="Icon (e.g. award, palette)"
-              value={form.icon}
-              onChange={(e) => setForm({ ...form, icon: e.target.value })}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
-            />
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Icon (e.g. award, palette or URL)"
+                value={form.icon}
+                onChange={(e) => setForm({ ...form, icon: e.target.value })}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowIconModal(true)}
+                className="absolute right-2 top-1.5 text-purple-500 hover:text-purple-400"
+              >
+                <Sparkles className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           <textarea
             placeholder="Description"
@@ -316,6 +517,19 @@ export default function AdminBadgesPage() {
           ))}
         </div>
       )}
+
+      <AIGenerateBadgeDialog
+        open={showAIModal}
+        onOpenChange={setShowAIModal}
+        onGenerated={handleAIGenerated}
+      />
+
+      <AIGenerateIconDialog
+        open={showIconModal}
+        onOpenChange={setShowIconModal}
+        initialPrompt={iconPrompt}
+        onIconGenerated={(url) => setForm({ ...form, icon: url })}
+      />
     </div>
   );
 }

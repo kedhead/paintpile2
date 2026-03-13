@@ -4,6 +4,7 @@ import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tansta
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 import { logActivity } from './use-activities';
+import { useCheckBadges } from './use-badges';
 
 const PAGE_SIZE = 20;
 
@@ -80,6 +81,7 @@ export function useRecipe(recipeId: string | null) {
 export function useCreateRecipe() {
   const { pb, user } = useAuth();
   const queryClient = useQueryClient();
+  const { mutate: checkBadges } = useCheckBadges();
 
   return useMutation({
     mutationFn: async (data: RecipeData) => {
@@ -100,14 +102,16 @@ export function useCreateRecipe() {
           target_type: 'recipe',
           metadata: { target_name: result.name },
         });
+        checkBadges();
       }
     },
   });
 }
 
 export function useUpdateRecipe() {
-  const { pb } = useAuth();
+  const { pb, user } = useAuth();
   const queryClient = useQueryClient();
+  const { mutate: checkBadges } = useCheckBadges();
 
   return useMutation({
     mutationFn: async ({ recipeId, data }: { recipeId: string; data: Partial<RecipeData> }) => {
@@ -120,6 +124,7 @@ export function useUpdateRecipe() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.detail(variables.recipeId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.recipes.my() });
+      checkBadges();
     },
   });
 }
