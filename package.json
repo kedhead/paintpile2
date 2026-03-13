@@ -8,7 +8,7 @@
     "lint": "turbo lint",
     "clean": "turbo clean",
     "typecheck": "turbo typecheck",
-    "scrape": "tsx scripts/scrape.ts"
+    "scrape": "pnpm exec tsx scripts/scrape.ts"
   },
   "devDependencies": {
     "turbo": "^2.4.0"
