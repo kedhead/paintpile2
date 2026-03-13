@@ -5,10 +5,8 @@ import { Plus, Boxes } from 'lucide-react';
 import { usePileItems, usePileStats, useUpdatePileStatus, useDeletePileItem } from '../../../hooks/use-pile';
 import { PileStats } from '../../../components/pile/pile-stats';
 import { PileItemCard } from '../../../components/pile/pile-item-card';
-import { PileItemForm } from '../../../components/pile/pile-item-form';
 
 export default function PilePage() {
-  const [showForm, setShowForm] = useState(false);
   const pileItems = usePileItems();
   const pileStats = usePileStats();
   const updateStatus = useUpdatePileStatus();
@@ -33,13 +31,6 @@ export default function PilePage() {
           <Boxes className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold text-foreground">Pile of Shame</h1>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-        >
-          <Plus className="h-4 w-4" />
-          Add Item
-        </button>
       </div>
 
       <PileStats stats={pileStats.data} isLoading={pileStats.isLoading} />
@@ -85,7 +76,6 @@ export default function PilePage() {
         </>
       )}
 
-      {showForm && <PileItemForm onClose={() => setShowForm(false)} />}
     </div>
   );
 }
