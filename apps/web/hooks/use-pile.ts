@@ -14,7 +14,7 @@ export function usePileItems() {
     queryFn: async ({ pageParam = 1 }) => {
       return pb.collection('projects').getList(pageParam, PAGE_SIZE, {
         sort: '-created',
-        filter: `user="${user!.id}" && tags ~ "shame"`,
+        filter: `user="${user!.id}" && (status="not-started" || status="" || tags ~ "shame")`,
       });
     },
     getNextPageParam: (lastPage) =>
@@ -31,7 +31,7 @@ export function usePileStats() {
     queryKey: queryKeys.pile.stats(),
     queryFn: async () => {
       const items = await pb.collection('projects').getFullList({
-        filter: `user="${user!.id}" && tags ~ "shame"`,
+        filter: `user="${user!.id}" && (status="not-started" || status="" || tags ~ "shame")`,
         fields: 'id,status',
       });
 
