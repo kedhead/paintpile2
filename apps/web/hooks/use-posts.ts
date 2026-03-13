@@ -79,6 +79,20 @@ export function useCreatePost() {
   });
 }
 
+export function useUpdatePost() {
+  const { pb } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ postId, data }: { postId: string; data: { content?: string; tags?: string[] } }) => {
+      return pb.collection('posts').update(postId, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+    },
+  });
+}
+
 export function useDeletePost() {
   const { pb } = useAuth();
   const queryClient = useQueryClient();

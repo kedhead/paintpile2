@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
-import { Film, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Film, MoreHorizontal, Trash2, Pencil, Check, X, Loader2 } from 'lucide-react';
 import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../auth-provider';
 import { UserAvatar } from '../social/user-avatar';
 import { LikeButton } from '../social/like-button';
 import { CommentSection } from '../social/comment-section';
 import { PostMediaGrid } from './post-media-grid';
-import { useDeletePost, useAdminDeletePost } from '../../hooks/use-posts';
+import { useDeletePost, useAdminDeletePost, useUpdatePost } from '../../hooks/use-posts';
 import { relativeTime } from '../../lib/pb-helpers';
 
 interface PostCardProps {
@@ -25,11 +25,18 @@ export function PostCard({ post }: PostCardProps) {
   const isOwner = user?.id === post.user;
   const isAdmin = user?.role === 'admin';
   const canDelete = isOwner || isAdmin;
+  const canEdit = isOwner;
 
   const deletePost = useDeletePost();
   const adminDeletePost = useAdminDeletePost();
+  const updatePost = useUpdatePost();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editContent, setEditContent] = useState(post.content || '');
+  const [editTags, setEditTags] = useState(
+    Array.isArray(post.tags) ? post.tags.join(', ') : ''
+  );
 
   const handleDelete = async () => {
     try {
@@ -43,6 +50,28 @@ export function PostCard({ post }: PostCardProps) {
     }
     setConfirmDelete(false);
     setMenuOpen(false);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      const tags = editTags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
+      await updatePost.mutateAsync({
+        postId: post.id,
+        data: { content: editContent, tags },
+      });
+      setEditing(false);
+    } catch (err) {
+      console.error('Failed to update post:', err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditContent(post.content || '');
+    setEditTags(Array.isArray(post.tags) ? post.tags.join(', ') : '');
+    setEditing(false);
   };
 
   const isDeleting = deletePost.isPending || adminDeletePost.isPending;
@@ -66,7 +95,12 @@ export function PostCard({ post }: PostCardProps) {
             </Link>
           )}
           <div className="flex items-center gap-1.5">
-            <p className="text-xs text-muted-foreground">{relativeTime(post.created)}</p>
+            <p className="text-xs text-muted-foreground">
+              {relativeTime(post.created)}
+              {post.updated !== post.created && (
+                <span className="text-muted-foreground/60"> · edited</span>
+              )}
+            </p>
             {hasVideos && (
               <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
                 <Film className="h-3 w-3" />
@@ -76,7 +110,7 @@ export function PostCard({ post }: PostCardProps) {
         </div>
 
         {/* Overflow menu */}
-        {canDelete && (
+        {(canDelete || canEdit) && !editing && (
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -89,16 +123,30 @@ export function PostCard({ post }: PostCardProps) {
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
                 <div className="absolute right-0 z-50 mt-1 w-40 overflow-hidden rounded-lg border border-border bg-card shadow-xl">
-                  <button
-                    onClick={() => {
-                      setConfirmDelete(true);
-                      setMenuOpen(false);
-                    }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/10"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete Post
-                  </button>
+                  {canEdit && (
+                    <button
+                      onClick={() => {
+                        setEditing(true);
+                        setMenuOpen(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Edit Post
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={() => {
+                        setConfirmDelete(true);
+                        setMenuOpen(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/10"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete Post
+                    </button>
+                  )}
                 </div>
               </>
             )}
@@ -106,14 +154,62 @@ export function PostCard({ post }: PostCardProps) {
         )}
       </div>
 
-      {/* Content */}
-      <p className="mt-3 whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
+      {/* Content — editable or static */}
+      {editing ? (
+        <div className="mt-3 space-y-3">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">Caption</label>
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              rows={3}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              placeholder="Write a caption..."
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              Tags <span className="font-normal text-muted-foreground/60">(comma separated)</span>
+            </label>
+            <input
+              type="text"
+              value={editTags}
+              onChange={(e) => setEditTags(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="minipainting, warhammer, wip"
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={handleCancelEdit}
+              className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted"
+            >
+              <X className="h-3.5 w-3.5" />
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveEdit}
+              disabled={updatePost.isPending || !editContent.trim()}
+              className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            >
+              {updatePost.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Check className="h-3.5 w-3.5" />
+              )}
+              Save
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="mt-3 whitespace-pre-wrap text-sm text-foreground">{post.content}</p>
+      )}
 
       {/* Media (images + videos + text overlays) */}
       <PostMediaGrid post={post} />
 
       {/* Tags */}
-      {Array.isArray(post.tags) && post.tags.length > 0 && (
+      {!editing && Array.isArray(post.tags) && post.tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {post.tags.map((tag: string) => (
             <span
