@@ -1,13 +1,17 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
-import { ArrowLeft, Edit2, Trash2, Clock, ChefHat } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Clock } from 'lucide-react';
 import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../auth-provider';
-import { useDeleteRecipe } from '../../hooks/use-recipes';
+import { useDeleteRecipe, useUpdateRecipe } from '../../hooks/use-recipes';
+import type { RecipeStep, RecipeIngredient, RecipeStepAnnotation } from '../../hooks/use-recipes';
+import { useRecipeMedia } from '../../hooks/use-recipe-media';
 import { getFileUrl } from '../../lib/pb-helpers';
+import { StepDisplay } from './step-display';
 
 const DIFFICULTY_STYLES: Record<string, string> = {
   beginner: 'bg-green-900/20 text-green-400 border-green-500/30',
@@ -35,22 +39,42 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
   const router = useRouter();
   const { user } = useAuth();
   const deleteRecipe = useDeleteRecipe();
+  const updateRecipe = useUpdateRecipe();
   const isOwner = user?.id === recipe.user;
 
-  const ingredients = parseJSON<{ paint_name: string; paint_color: string; role: string; paint_brand?: string }[]>(
-    recipe.ingredients,
-    []
-  );
-  const steps = parseJSON<{ id?: string; title?: string; instruction: string; estimated_time: number; technique?: string; paint_indices?: number[]; tips?: string[]; video_url?: string }[]>(recipe.steps, []);
+  const { data: allMedia } = useRecipeMedia(recipe.id);
+
+  const ingredients = parseJSON<RecipeIngredient[]>(recipe.ingredients, []);
+  const steps = parseJSON<RecipeStep[]>(recipe.steps, []);
   const techniques = parseJSON<string[]>(recipe.techniques, []);
   const difficulty = recipe.difficulty || 'beginner';
   const totalTime = steps.reduce((sum, s) => sum + (s.estimated_time || 0), 0);
   const coverUrl = recipe.cover_image ? getFileUrl(recipe, recipe.cover_image, '800x600') : null;
 
+  // Group media by step_id
+  const mediaByStep = useMemo(() => {
+    const map: Record<string, RecordModel[]> = {};
+    (allMedia || []).forEach((m) => {
+      const sid = m.step_id;
+      if (!map[sid]) map[sid] = [];
+      map[sid].push(m);
+    });
+    return map;
+  }, [allMedia]);
+
   const handleDelete = async () => {
     if (!confirm('Delete this recipe? This cannot be undone.')) return;
     await deleteRecipe.mutateAsync(recipe.id);
     router.push('/recipes');
+  };
+
+  const handleStepAnnotationsChange = (stepIndex: number, annotations: RecipeStepAnnotation[]) => {
+    const updatedSteps = [...steps];
+    updatedSteps[stepIndex] = { ...updatedSteps[stepIndex], annotations };
+    updateRecipe.mutate({
+      recipeId: recipe.id,
+      data: { steps: updatedSteps },
+    });
   };
 
   return (
@@ -152,73 +176,21 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
         </div>
       )}
 
-      {/* Steps */}
+      {/* Steps — rich display */}
       {steps.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">Steps</h2>
-          <ol className="space-y-3">
+          <ol className="space-y-4">
             {steps.map((step, i) => (
-              <li key={i} className="rounded-lg border border-border bg-muted/50 p-3">
-                <div className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                    {i + 1}
-                  </span>
-                  <div className="flex-1 space-y-2">
-                    {step.title && (
-                      <h3 className="text-sm font-medium text-foreground">{step.title}</h3>
-                    )}
-                    <p className="text-sm text-foreground">{step.instruction}</p>
-
-                    {/* Technique badge */}
-                    {step.technique && (
-                      <span className="inline-block rounded-full border border-primary bg-primary/20 px-2 py-0.5 text-xs font-medium capitalize text-primary">
-                        {step.technique}
-                      </span>
-                    )}
-
-                    {/* Paint swatches */}
-                    {step.paint_indices && step.paint_indices.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {step.paint_indices.map((idx) => {
-                          const ing = ingredients[idx];
-                          if (!ing) return null;
-                          return (
-                            <span
-                              key={idx}
-                              className="flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                            >
-                              <span
-                                className="h-2.5 w-2.5 rounded-full border border-border"
-                                style={{ backgroundColor: ing.paint_color }}
-                              />
-                              {ing.paint_name}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Tips */}
-                    {step.tips && step.tips.length > 0 && (
-                      <div className="rounded-md border border-yellow-500/20 bg-yellow-900/10 px-3 py-2">
-                        {step.tips.map((tip, ti) => (
-                          <p key={ti} className="text-xs text-yellow-300">
-                            {tip}
-                          </p>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Time */}
-                    {step.estimated_time > 0 && (
-                      <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        ~{step.estimated_time} min
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </li>
+              <StepDisplay
+                key={step.id || i}
+                step={step}
+                index={i}
+                ingredients={ingredients}
+                media={mediaByStep[step.id] || []}
+                isOwner={isOwner}
+                onAnnotationsChange={(anns) => handleStepAnnotationsChange(i, anns)}
+              />
             ))}
           </ol>
         </div>
