@@ -87,11 +87,16 @@ function Btn({ children, variant = 'default', size = 'default', className = '', 
   );
 }
 
+interface GalleryPhoto {
+  id: string;
+  collectionId: string;
+  image: string;
+}
+
 interface ProjectRecord {
   id: string;
   name: string;
-  photos: string[];
-  collectionId: string;
+  photos: GalleryPhoto[];
 }
 
 export function LightingRefTool() {
@@ -580,11 +585,36 @@ export function LightingRefTool() {
     setShowGalleryPicker(true);
     setIsLoadingGallery(true);
     try {
-      const projects = await pb.collection('projects').getFullList({
+      const photos = await pb.collection('photos').getFullList({
         filter: `user="${user!.id}"`,
+        expand: 'project',
         sort: '-created',
       });
-      setGalleryProjects(projects.filter((p: Record<string, unknown>) => p.photos && (p.photos as string[]).length > 0) as unknown as ProjectRecord[]);
+
+      const projectMap: Record<string, ProjectRecord> = {};
+
+      photos.forEach((photo: any) => {
+        const projectId = photo.project;
+        if (!projectId) return;
+
+        const projectName = photo.expand?.project?.name || 'Untitled Project';
+
+        if (!projectMap[projectId]) {
+          projectMap[projectId] = {
+            id: projectId,
+            name: projectName,
+            photos: [],
+          };
+        }
+
+        projectMap[projectId].photos.push({
+          id: photo.id,
+          collectionId: photo.collectionId,
+          image: photo.image,
+        });
+      });
+
+      setGalleryProjects(Object.values(projectMap));
     } catch (error) {
       console.error('[LightingRef] Failed to load projects:', error);
     } finally {
@@ -592,8 +622,8 @@ export function LightingRefTool() {
     }
   };
 
-  const handleSelectGalleryPhoto = (project: ProjectRecord, filename: string) => {
-    const url = pb.files.getURL({ id: project.id, collectionId: project.collectionId } as Record<string, unknown>, filename);
+  const handleSelectGalleryPhoto = (photo: GalleryPhoto) => {
+    const url = pb.files.getURL({ id: photo.id, collectionId: photo.collectionId } as Record<string, unknown>, photo.image);
     setShowGalleryPicker(false);
     handleSourceUrl(url);
   };
@@ -671,15 +701,15 @@ export function LightingRefTool() {
                     <div className="p-3">
                       <p className="font-medium text-foreground mb-2">{project.name}</p>
                       <div className="grid grid-cols-4 gap-2">
-                        {project.photos.map((filename: string) => (
+                        {project.photos.map((photo) => (
                           <button
-                            key={filename}
-                            onClick={() => handleSelectGalleryPhoto(project, filename)}
+                            key={photo.id}
+                            onClick={() => handleSelectGalleryPhoto(photo)}
                             className="aspect-square rounded overflow-hidden border border-border hover:border-primary hover:ring-2 hover:ring-primary/30 transition-all"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={pb.files.getURL({ id: project.id, collectionId: project.collectionId } as Record<string, unknown>, filename, { thumb: '100x100' })}
+                              src={pb.files.getURL({ id: photo.id, collectionId: photo.collectionId } as Record<string, unknown>, photo.image, { thumb: '100x100' })}
                               alt=""
                               className="w-full h-full object-cover"
                             />
