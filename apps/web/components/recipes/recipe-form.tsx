@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Plus, Trash2, Upload, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Upload, Loader2, BookOpen } from 'lucide-react';
 import type { RecordModel } from 'pocketbase';
 import type { RecipeData, RecipeIngredient, RecipeStep } from '../../hooks/use-recipes';
 import { useCreateRecipe, useUpdateRecipe } from '../../hooks/use-recipes';
@@ -10,6 +10,7 @@ import { useRecipeMedia } from '../../hooks/use-recipe-media';
 import { useAuth } from '../auth-provider';
 import { getFileUrl } from '../../lib/pb-helpers';
 import { StepEditor } from './step-editor';
+import { PaintSelectorModal } from '../paints/paint-selector-modal';
 
 const CATEGORIES = [
   'skin-tone',
@@ -115,6 +116,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   const [ingredients, setIngredients] = useState<RecipeIngredient[]>(
     parseJSON<RecipeIngredient[]>(recipe?.ingredients, [])
   );
+  const [showPaintPicker, setShowPaintPicker] = useState(false);
 
   // Steps — migrate old format (no id/title) to new format
   const [steps, setSteps] = useState<RecipeStep[]>(() => {
@@ -140,6 +142,17 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
 
   const addIngredient = () => {
     setIngredients([...ingredients, { paint_name: '', paint_color: '#888888', role: 'base' }]);
+  };
+
+  const addIngredientsFromLibrary = (paints: RecordModel[]) => {
+    const newIngredients: RecipeIngredient[] = paints.map((p) => ({
+      paint_name: p.name,
+      paint_color: p.hex_color || p.color || '#888888',
+      role: 'base' as const,
+      paint_id: p.id,
+      paint_brand: p.brand,
+    }));
+    setIngredients([...ingredients, ...newIngredients]);
   };
 
   const removeIngredient = (index: number) => {
@@ -356,13 +369,22 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
             <fieldset className="space-y-3 rounded-lg border border-border bg-card p-4">
               <div className="flex items-center justify-between">
                 <legend className="px-2 text-sm font-medium text-foreground">Ingredients</legend>
-                <button
-                  type="button"
-                  onClick={addIngredient}
-                  className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  <Plus className="h-3 w-3" /> Add
-                </button>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowPaintPicker(true)}
+                    className="flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-xs text-primary hover:bg-primary/20"
+                  >
+                    <BookOpen className="h-3 w-3" /> Library
+                  </button>
+                  <button
+                    type="button"
+                    onClick={addIngredient}
+                    className="flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    <Plus className="h-3 w-3" /> Custom
+                  </button>
+                </div>
               </div>
 
               {ingredients.map((ing, i) => (
@@ -377,6 +399,9 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                     className="mt-1 h-7 w-7 shrink-0 cursor-pointer rounded border border-border"
                   />
                   <div className="flex-1 space-y-1.5">
+                    {ing.paint_brand && (
+                      <p className="text-[10px] text-muted-foreground">{ing.paint_brand}</p>
+                    )}
                     <input
                       type="text"
                       value={ing.paint_name}
@@ -503,6 +528,14 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           </button>
         </div>
       </form>
+
+      <PaintSelectorModal
+        open={showPaintPicker}
+        onClose={() => setShowPaintPicker(false)}
+        onSelect={() => {}}
+        onSelectRecords={addIngredientsFromLibrary}
+        excludeIds={ingredients.filter((i) => i.paint_id).map((i) => i.paint_id!)}
+      />
     </div>
   );
 }

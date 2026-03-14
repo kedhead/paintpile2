@@ -37,7 +37,7 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
   const deleteRecipe = useDeleteRecipe();
   const isOwner = user?.id === recipe.user;
 
-  const ingredients = parseJSON<{ paint_name: string; paint_color: string; role: string }[]>(
+  const ingredients = parseJSON<{ paint_name: string; paint_color: string; role: string; paint_brand?: string }[]>(
     recipe.ingredients,
     []
   );
@@ -137,7 +137,12 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
                   className="h-5 w-5 shrink-0 rounded-full border border-border"
                   style={{ backgroundColor: ing.paint_color }}
                 />
-                <span className="flex-1 text-sm text-foreground">{ing.paint_name}</span>
+                <div className="flex-1">
+                  <span className="text-sm text-foreground">{ing.paint_name}</span>
+                  {ing.paint_brand && (
+                    <span className="ml-1.5 text-xs text-muted-foreground">({ing.paint_brand})</span>
+                  )}
+                </div>
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground capitalize">
                   {ing.role}
                 </span>

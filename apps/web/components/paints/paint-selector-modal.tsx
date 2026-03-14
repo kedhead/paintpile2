@@ -9,10 +9,11 @@ interface PaintSelectorModalProps {
   open: boolean;
   onClose: () => void;
   onSelect: (paintIds: string[]) => void;
+  onSelectRecords?: (paints: RecordModel[]) => void;
   excludeIds?: string[];
 }
 
-export function PaintSelectorModal({ open, onClose, onSelect, excludeIds = [] }: PaintSelectorModalProps) {
+export function PaintSelectorModal({ open, onClose, onSelect, onSelectRecords, excludeIds = [] }: PaintSelectorModalProps) {
   const [search, setSearch] = useState('');
   const [brand, setBrand] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -46,7 +47,12 @@ export function PaintSelectorModal({ open, onClose, onSelect, excludeIds = [] }:
   };
 
   const handleConfirm = () => {
-    onSelect(Array.from(selected));
+    const selectedIds = Array.from(selected);
+    onSelect(selectedIds);
+    if (onSelectRecords) {
+      const records = allPaints.filter((p) => selected.has(p.id));
+      onSelectRecords(records);
+    }
     onClose();
   };
 

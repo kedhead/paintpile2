@@ -12,6 +12,8 @@ export interface RecipeIngredient {
   paint_name: string;
   paint_color: string;
   role: 'base' | 'highlight' | 'shadow' | 'midtone' | 'glaze' | 'wash' | 'layer' | 'accent';
+  paint_id?: string;
+  paint_brand?: string;
 }
 
 export interface RecipeStepAnnotation {
