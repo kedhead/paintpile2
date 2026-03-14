@@ -2,14 +2,19 @@
 
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
-import { Heart, MessageCircle, UserPlus } from 'lucide-react';
+import { Heart, MessageCircle, UserPlus, Award, ImagePlus, Newspaper, Bell } from 'lucide-react';
 import { relativeTime } from '../../lib/pb-helpers';
 import { useMarkNotificationRead } from '../../hooks/use-notifications';
 
-const icons: Record<string, typeof Heart> = {
-  like: Heart,
-  comment: MessageCircle,
-  follow: UserPlus,
+const iconConfig: Record<string, { icon: typeof Heart; color: string }> = {
+  like: { icon: Heart, color: 'text-red-400' },
+  comment: { icon: MessageCircle, color: 'text-blue-400' },
+  comment_reply: { icon: MessageCircle, color: 'text-blue-400' },
+  follow: { icon: UserPlus, color: 'text-green-400' },
+  badge_earned: { icon: Award, color: 'text-yellow-400' },
+  new_post: { icon: ImagePlus, color: 'text-purple-400' },
+  news: { icon: Newspaper, color: 'text-amber-400' },
+  mention: { icon: MessageCircle, color: 'text-cyan-400' },
 };
 
 interface NotificationItemProps {
@@ -18,7 +23,8 @@ interface NotificationItemProps {
 
 export function NotificationItem({ notification }: NotificationItemProps) {
   const markRead = useMarkNotificationRead();
-  const Icon = icons[notification.type] || MessageCircle;
+  const config = iconConfig[notification.type] || { icon: Bell, color: 'text-muted-foreground' };
+  const Icon = config.icon;
   const isUnread = !notification.read;
 
   const handleClick = () => {
@@ -33,7 +39,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         isUnread ? 'bg-primary/10' : 'hover:bg-background'
       }`}
     >
-      <div className={`mt-0.5 rounded-full p-1.5 ${isUnread ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
+      <div className={`mt-0.5 rounded-full p-1.5 ${isUnread ? 'bg-primary/20' : 'bg-muted'} ${config.color}`}>
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">

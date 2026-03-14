@@ -3,6 +3,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
+import { notifyAllUsersOfNews } from '../lib/notify-helpers';
 
 const PAGE_SIZE = 20;
 
@@ -33,10 +34,22 @@ export function useCreateNews() {
       content: string;
       type: 'update' | 'feature' | 'announcement' | 'maintenance';
     }) => {
-      return pb.collection('news').create({
+      const record = await pb.collection('news').create({
         ...data,
         author: user!.id,
       });
+
+      // Notify all users about the new news post
+      notifyAllUsersOfNews(
+        pb,
+        record.id,
+        data.title,
+        data.type,
+        user!.id,
+        user!.username || user!.name || 'PaintPile',
+      );
+
+      return record;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.news.all });

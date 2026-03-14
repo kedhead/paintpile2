@@ -5,6 +5,8 @@ export type NotificationType =
   | 'comment_reply'
   | 'mention'
   | 'badge_earned'
+  | 'new_post'
+  | 'news'
   | 'message'
   | 'system';
 

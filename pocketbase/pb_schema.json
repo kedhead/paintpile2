@@ -196,7 +196,7 @@
     "type": "base",
     "schema": [
       { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
-      { "name": "type", "type": "select", "required": true, "options": { "values": ["follow", "like", "comment", "comment_reply", "mention", "badge_earned", "message", "system"] } },
+      { "name": "type", "type": "select", "required": true, "options": { "values": ["follow", "like", "comment", "comment_reply", "mention", "badge_earned", "new_post", "news", "message", "system"] } },
       { "name": "actor", "type": "relation", "required": true, "options": { "collectionId": "users", "cascadeDelete": true, "maxSelect": 1 } },
       { "name": "target_id", "type": "text", "required": true },
       { "name": "target_type", "type": "text", "required": true },

@@ -5,12 +5,13 @@ import { useEffect, useState } from 'react';
 import { useAllBadges, useUserBadges, useCheckBadges } from '../../../hooks/use-badges';
 import { useAuth } from '../../../components/auth-provider';
 import { BadgeCard } from '../../../components/badges/badge-card';
+import { BadgeToast } from '../../../components/badges/badge-toast';
 
 export default function BadgesPage() {
   const { user } = useAuth();
   const { data: allBadges = [], isLoading } = useAllBadges();
   const { data: userBadges = [] } = useUserBadges(user?.id || '');
-  const { mutate: checkBadges, isPending: isSyncing } = useCheckBadges();
+  const { mutate: checkBadges, isPending: isSyncing, newBadges, dismissBadges } = useCheckBadges();
 
   const [hasSynced, setHasSynced] = useState(false);
 
@@ -81,6 +82,8 @@ export default function BadgesPage() {
           </div>
         </div>
       ))}
+
+      <BadgeToast badges={newBadges} onDismiss={dismissBadges} />
     </div>
   );
 }

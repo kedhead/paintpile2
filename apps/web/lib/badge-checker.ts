@@ -1,7 +1,15 @@
 import type PocketBase from 'pocketbase';
 import { BADGE_DEFINITIONS } from './badge-definitions';
 
-export async function checkAndAwardBadges(pb: PocketBase, userId: string) {
+export interface NewlyEarnedBadge {
+  badgeId: string;
+  badgeName: string;
+  badgeIcon: string;
+}
+
+export async function checkAndAwardBadges(pb: PocketBase, userId: string): Promise<NewlyEarnedBadge[]> {
+  const newlyEarned: NewlyEarnedBadge[] = [];
+
   try {
     // Get all badge definitions from DB
     const allBadges = await pb.collection('badges').getFullList();
@@ -29,11 +37,37 @@ export async function checkAndAwardBadges(pb: PocketBase, userId: string) {
           badge: badge.id,
           earned_at: new Date().toISOString(),
         });
+
+        newlyEarned.push({
+          badgeId: badge.id,
+          badgeName: badge.name,
+          badgeIcon: badge.icon || '',
+        });
+
+        // Create notification for badge earned
+        try {
+          await pb.collection('notifications').create({
+            user: userId,
+            type: 'badge_earned',
+            actor_id: userId,
+            actor_name: 'PaintPile',
+            target_id: badge.id,
+            target_type: 'badge',
+            message: `You earned the "${badge.name}" badge! ${badge.icon || '🏆'}`,
+            action_url: '/badges',
+            read: false,
+          });
+        } catch {
+          // Don't let notification failure block badge awarding
+          console.error('Failed to create badge notification');
+        }
       }
     }
   } catch (error) {
     console.error('Badge check failed:', error);
   }
+
+  return newlyEarned;
 }
 
 async function gatherUserStats(pb: PocketBase, userId: string): Promise<Record<string, number>> {

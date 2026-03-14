@@ -5,6 +5,7 @@ import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 import { logActivity } from './use-activities';
 import { useCheckBadges } from './use-badges';
+import { notifyFollowersOfNewPost } from '../lib/notify-helpers';
 
 const PAGE_SIZE = 20;
 
@@ -94,6 +95,15 @@ export function useCreateProject() {
           metadata: { target_name: data.name },
         });
         checkBadges();
+        // Notify followers about the new project
+        notifyFollowersOfNewPost(
+          pb,
+          user.id,
+          user.username || user.name || 'Someone',
+          data.id,
+          data.name || 'Untitled Project',
+          `/projects/${data.id}`,
+        );
       }
     },
   });

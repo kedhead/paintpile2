@@ -17,6 +17,31 @@ const tierGradients: Record<string, string> = {
   legendary: 'from-orange-600/40 to-red-500/20 border-orange-500/50',
 };
 
+function isEmoji(str: string): boolean {
+  // Check if the string starts with an emoji (non-ASCII, not a URL, not a plain word)
+  const emojiRegex = /^[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u;
+  return emojiRegex.test(str);
+}
+
+function BadgeIcon({ icon, name, color, earned }: { icon?: string; name: string; color?: string; earned: boolean }) {
+  if (!icon) {
+    return <Award className="h-5 w-5" style={{ color: earned ? color : 'var(--muted-foreground)' }} />;
+  }
+
+  // AI-generated or uploaded image URL
+  if (icon.startsWith('http') || icon.startsWith('/')) {
+    return <img src={icon} alt={name} className="h-full w-full object-cover" />;
+  }
+
+  // Emoji icon
+  if (isEmoji(icon)) {
+    return <span className="text-2xl leading-none">{icon}</span>;
+  }
+
+  // Fallback for old Lucide icon names still in DB
+  return <Award className="h-5 w-5" style={{ color: earned ? color : 'var(--muted-foreground)' }} />;
+}
+
 export function BadgeCard({ badge, earned = false, earnedAt }: BadgeCardProps) {
   const gradient = tierGradients[badge.tier] || tierGradients.bronze;
 
@@ -30,11 +55,7 @@ export function BadgeCard({ badge, earned = false, earnedAt }: BadgeCardProps) {
         <Lock className="absolute right-2 top-2 h-3 w-3 text-muted-foreground" />
       )}
       <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-black/20 overflow-hidden">
-        {badge.icon?.startsWith('http') ? (
-          <img src={badge.icon} alt={badge.name} className="h-full w-full object-cover" />
-        ) : (
-          <Award className="h-5 w-5" style={{ color: earned ? badge.color : 'var(--muted-foreground)' }} />
-        )}
+        <BadgeIcon icon={badge.icon} name={badge.name} color={badge.color} earned={earned} />
       </div>
       <h4 className="mt-2 text-xs font-bold text-foreground">{badge.name}</h4>
       <p className="mt-0.5 text-[10px] text-muted-foreground">{badge.description}</p>

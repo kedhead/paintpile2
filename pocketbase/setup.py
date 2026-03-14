@@ -162,7 +162,7 @@ create_col("comments", [
 # notifications
 create_col("notifications", [
     relation("user", USERS),
-    select("type", ["follow", "like", "comment", "comment_reply", "mention", "badge_earned", "message", "system"]),
+    select("type", ["follow", "like", "comment", "comment_reply", "mention", "badge_earned", "new_post", "news", "message", "system"]),
     relation("actor", USERS),
     text("target_id", required=True),
     text("target_type", required=True),
