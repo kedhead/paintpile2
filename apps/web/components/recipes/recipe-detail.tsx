@@ -12,6 +12,7 @@ import type { RecipeStep, RecipeIngredient, RecipeStepAnnotation } from '../../h
 import { useRecipeMedia } from '../../hooks/use-recipe-media';
 import { getFileUrl } from '../../lib/pb-helpers';
 import { StepDisplay } from './step-display';
+import { RecipeShareButtons } from './recipe-share-buttons';
 
 const DIFFICULTY_STYLES: Record<string, string> = {
   beginner: 'bg-green-900/20 text-green-400 border-green-500/30',
@@ -141,6 +142,9 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
           </span>
         )}
       </div>
+
+      {/* Share buttons */}
+      {recipe.is_public && <RecipeShareButtons recipe={recipe} />}
 
       {/* Description */}
       {recipe.description && (
