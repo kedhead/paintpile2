@@ -14,9 +14,26 @@ export interface RecipeIngredient {
   role: 'base' | 'highlight' | 'shadow' | 'midtone' | 'glaze' | 'wash' | 'layer' | 'accent';
 }
 
+export interface RecipeStepAnnotation {
+  media_id: string;
+  id: string;
+  x: number;
+  y: number;
+  label: string;
+  notes?: string;
+}
+
 export interface RecipeStep {
+  id: string;
+  title: string;
   instruction: string;
   estimated_time: number;
+  technique?: string;
+  paint_indices?: number[];
+  tips?: string[];
+  video_url?: string;
+  media_ids?: string[];
+  annotations?: RecipeStepAnnotation[];
 }
 
 export interface RecipeData {

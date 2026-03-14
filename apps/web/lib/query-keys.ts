@@ -116,6 +116,10 @@ export const queryKeys = {
     all: ['projectRecipes'] as const,
     byProject: (projectId: string) => [...queryKeys.projectRecipes.all, 'project', projectId] as const,
   },
+  recipeMedia: {
+    all: ['recipeMedia'] as const,
+    byRecipe: (recipeId: string) => [...queryKeys.recipeMedia.all, 'recipe', recipeId] as const,
+  },
   savedRecipes: {
     all: ['savedRecipes'] as const,
     my: () => [...queryKeys.savedRecipes.all, 'my'] as const,

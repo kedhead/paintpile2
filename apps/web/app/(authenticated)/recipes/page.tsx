@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { ChefHat, Plus } from 'lucide-react';
 import { useMyRecipes, usePublicRecipes } from '../../../hooks/use-recipes';
 import { RecipeList } from '../../../components/recipes/recipe-list';
-import { RecipeForm } from '../../../components/recipes/recipe-form';
 
 export default function RecipesPage() {
   const [tab, setTab] = useState<'my' | 'browse'>('my');
-  const [showCreate, setShowCreate] = useState(false);
   const myRecipes = useMyRecipes();
   const publicRecipes = usePublicRecipes();
 
@@ -19,13 +18,13 @@ export default function RecipesPage() {
           <ChefHat className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold text-foreground">Recipes</h1>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
+        <Link
+          href="/recipes/new"
           className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/80"
         >
           <Plus className="h-4 w-4" />
           New Recipe
-        </button>
+        </Link>
       </div>
 
       {/* Tabs */}
@@ -59,8 +58,6 @@ export default function RecipesPage() {
           emptyMessage="No public recipes to browse yet."
         />
       )}
-
-      {showCreate && <RecipeForm onClose={() => setShowCreate(false)} />}
     </div>
   );
 }

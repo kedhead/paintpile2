@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
 import { ChefHat, Layers, Clock } from 'lucide-react';
+import { getFileUrl } from '../../lib/pb-helpers';
 
 const DIFFICULTY_STYLES: Record<string, string> = {
-  beginner: 'bg-green-900/300/20 text-green-400 border-green-500/30',
-  intermediate: 'bg-yellow-900/300/20 text-yellow-400 border-yellow-500/30',
-  advanced: 'bg-red-900/300/20 text-red-400 border-red-500/30',
+  beginner: 'bg-green-900/20 text-green-400 border-green-500/30',
+  intermediate: 'bg-yellow-900/20 text-yellow-400 border-yellow-500/30',
+  advanced: 'bg-red-900/20 text-red-400 border-red-500/30',
 };
 
 interface RecipeCardProps {
@@ -17,15 +18,28 @@ interface RecipeCardProps {
 export function RecipeCard({ recipe }: RecipeCardProps) {
   const ingredients = parseJSON(recipe.ingredients, []);
   const steps = parseJSON(recipe.steps, []);
+  const techniques = parseJSON<string[]>(recipe.techniques, []);
   const difficulty = recipe.difficulty || 'beginner';
   const totalTime = steps.reduce(
     (sum: number, s: { estimated_time?: number }) => sum + (s.estimated_time || 0),
     0
   );
+  const coverUrl = recipe.cover_image
+    ? getFileUrl(recipe, recipe.cover_image, '400x300')
+    : null;
 
   return (
     <Link href={`/recipes/${recipe.id}`}>
       <article className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
+        {/* Cover image */}
+        {coverUrl && (
+          <img
+            src={coverUrl}
+            alt={recipe.name}
+            className="h-32 w-full object-cover"
+          />
+        )}
+
         <div className="p-4">
           {/* Header with difficulty badge */}
           <div className="flex items-start justify-between gap-2">
@@ -47,6 +61,25 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
             <span className="mt-2 inline-block rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground capitalize">
               {recipe.category.replace(/-/g, ' ')}
             </span>
+          )}
+
+          {/* Technique tags */}
+          {techniques.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {techniques.slice(0, 3).map((tech) => (
+                <span
+                  key={tech}
+                  className="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium capitalize text-primary"
+                >
+                  {tech}
+                </span>
+              ))}
+              {techniques.length > 3 && (
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                  +{techniques.length - 3}
+                </span>
+              )}
+            </div>
           )}
 
           {/* Description preview */}

@@ -1,18 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
 import { ArrowLeft, Edit2, Trash2, Clock, ChefHat } from 'lucide-react';
 import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../auth-provider';
 import { useDeleteRecipe } from '../../hooks/use-recipes';
-import { RecipeForm } from './recipe-form';
+import { getFileUrl } from '../../lib/pb-helpers';
 
 const DIFFICULTY_STYLES: Record<string, string> = {
-  beginner: 'bg-green-900/300/20 text-green-400 border-green-500/30',
-  intermediate: 'bg-yellow-900/300/20 text-yellow-400 border-yellow-500/30',
-  advanced: 'bg-red-900/300/20 text-red-400 border-red-500/30',
+  beginner: 'bg-green-900/20 text-green-400 border-green-500/30',
+  intermediate: 'bg-yellow-900/20 text-yellow-400 border-yellow-500/30',
+  advanced: 'bg-red-900/20 text-red-400 border-red-500/30',
 };
 
 function parseJSON<T>(value: unknown, fallback: T): T {
@@ -36,16 +36,16 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
   const { user } = useAuth();
   const deleteRecipe = useDeleteRecipe();
   const isOwner = user?.id === recipe.user;
-  const [showEdit, setShowEdit] = useState(false);
 
   const ingredients = parseJSON<{ paint_name: string; paint_color: string; role: string }[]>(
     recipe.ingredients,
     []
   );
-  const steps = parseJSON<{ instruction: string; estimated_time: number }[]>(recipe.steps, []);
+  const steps = parseJSON<{ id?: string; title?: string; instruction: string; estimated_time: number; technique?: string; paint_indices?: number[]; tips?: string[]; video_url?: string }[]>(recipe.steps, []);
   const techniques = parseJSON<string[]>(recipe.techniques, []);
   const difficulty = recipe.difficulty || 'beginner';
   const totalTime = steps.reduce((sum, s) => sum + (s.estimated_time || 0), 0);
+  const coverUrl = recipe.cover_image ? getFileUrl(recipe, recipe.cover_image, '800x600') : null;
 
   const handleDelete = async () => {
     if (!confirm('Delete this recipe? This cannot be undone.')) return;
@@ -55,6 +55,15 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
 
   return (
     <div className="space-y-6">
+      {/* Cover image */}
+      {coverUrl && (
+        <img
+          src={coverUrl}
+          alt={recipe.name}
+          className="h-48 w-full rounded-lg object-cover sm:h-64"
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <button
@@ -73,15 +82,15 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
         </div>
         {isOwner && (
           <div className="flex gap-1">
-            <button
-              onClick={() => setShowEdit(true)}
+            <Link
+              href={`/recipes/${recipe.id}/edit`}
               className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <Edit2 className="h-4 w-4" />
-            </button>
+            </Link>
             <button
               onClick={handleDelete}
-              className="rounded-lg p-2 text-muted-foreground hover:bg-red-900/300/10 hover:text-red-400"
+              className="rounded-lg p-2 text-muted-foreground hover:bg-red-900/10 hover:text-red-400"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -144,18 +153,65 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
           <h2 className="text-sm font-semibold text-foreground">Steps</h2>
           <ol className="space-y-3">
             {steps.map((step, i) => (
-              <li key={i} className="flex gap-3 rounded-lg border border-border bg-muted/50 p-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                  {i + 1}
-                </span>
-                <div className="flex-1">
-                  <p className="text-sm text-foreground">{step.instruction}</p>
-                  {step.estimated_time > 0 && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      ~{step.estimated_time} min
-                    </p>
-                  )}
+              <li key={i} className="rounded-lg border border-border bg-muted/50 p-3">
+                <div className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                    {i + 1}
+                  </span>
+                  <div className="flex-1 space-y-2">
+                    {step.title && (
+                      <h3 className="text-sm font-medium text-foreground">{step.title}</h3>
+                    )}
+                    <p className="text-sm text-foreground">{step.instruction}</p>
+
+                    {/* Technique badge */}
+                    {step.technique && (
+                      <span className="inline-block rounded-full border border-primary bg-primary/20 px-2 py-0.5 text-xs font-medium capitalize text-primary">
+                        {step.technique}
+                      </span>
+                    )}
+
+                    {/* Paint swatches */}
+                    {step.paint_indices && step.paint_indices.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {step.paint_indices.map((idx) => {
+                          const ing = ingredients[idx];
+                          if (!ing) return null;
+                          return (
+                            <span
+                              key={idx}
+                              className="flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                            >
+                              <span
+                                className="h-2.5 w-2.5 rounded-full border border-border"
+                                style={{ backgroundColor: ing.paint_color }}
+                              />
+                              {ing.paint_name}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Tips */}
+                    {step.tips && step.tips.length > 0 && (
+                      <div className="rounded-md border border-yellow-500/20 bg-yellow-900/10 px-3 py-2">
+                        {step.tips.map((tip, ti) => (
+                          <p key={ti} className="text-xs text-yellow-300">
+                            {tip}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Time */}
+                    {step.estimated_time > 0 && (
+                      <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        ~{step.estimated_time} min
+                      </p>
+                    )}
+                  </div>
                 </div>
               </li>
             ))}
@@ -179,8 +235,6 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
           </div>
         </div>
       )}
-
-      {showEdit && <RecipeForm onClose={() => setShowEdit(false)} recipe={recipe} />}
     </div>
   );
 }
