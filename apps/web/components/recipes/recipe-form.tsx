@@ -108,6 +108,8 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   // Cover image
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const existingCover = recipe?.cover_image
     ? getFileUrl(recipe, recipe.cover_image, '400x300')
     : null;
@@ -201,63 +203,66 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
     setCoverPreview(URL.createObjectURL(file));
   };
 
+  const buildFormData = (data: RecipeData, includeUser: boolean): FormData => {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    if (data.description) formData.append('description', data.description);
+    if (data.category) formData.append('category', data.category);
+    if (data.difficulty) formData.append('difficulty', data.difficulty);
+    formData.append('ingredients', JSON.stringify(data.ingredients || []));
+    formData.append('steps', JSON.stringify(data.steps || []));
+    formData.append('techniques', JSON.stringify(data.techniques || []));
+    formData.append('is_public', String(data.is_public));
+    if (coverFile) formData.append('cover_image', coverFile);
+    if (includeUser) formData.append('user', pb.authStore.record!.id);
+    return formData;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const data: RecipeData = {
-      name: name.trim(),
-      description: description.trim() || undefined,
-      category: category || undefined,
-      difficulty: difficulty as RecipeData['difficulty'],
-      ingredients,
-      steps,
-      techniques: selectedTechniques,
-      is_public: isPublic,
-    };
+    setFormError(null);
+    setSaving(true);
 
-    if (isEditing) {
-      // Update recipe — use FormData if cover image changed
-      if (coverFile) {
-        const formData = new FormData();
-        formData.append('name', data.name);
-        if (data.description) formData.append('description', data.description);
-        if (data.category) formData.append('category', data.category);
-        if (data.difficulty) formData.append('difficulty', data.difficulty);
-        formData.append('ingredients', JSON.stringify(data.ingredients || []));
-        formData.append('steps', JSON.stringify(data.steps || []));
-        formData.append('techniques', JSON.stringify(data.techniques || []));
-        formData.append('is_public', String(data.is_public));
-        formData.append('cover_image', coverFile);
-        await pb.collection('recipes').update(recipe!.id, formData);
+    try {
+      const data: RecipeData = {
+        name: name.trim(),
+        description: description.trim() || undefined,
+        category: category || undefined,
+        difficulty: difficulty as RecipeData['difficulty'],
+        ingredients,
+        steps,
+        techniques: selectedTechniques,
+        is_public: isPublic,
+      };
+
+      if (isEditing) {
+        if (coverFile) {
+          await pb.collection('recipes').update(recipe!.id, buildFormData(data, false));
+        } else {
+          await updateRecipe.mutateAsync({ recipeId: recipe!.id, data });
+        }
+        router.push(`/recipes/${recipe!.id}`);
       } else {
-        await updateRecipe.mutateAsync({ recipeId: recipe!.id, data });
+        if (coverFile) {
+          const result = await pb.collection('recipes').create(buildFormData(data, true));
+          router.push(`/recipes/${result.id}`);
+        } else {
+          const result = await createRecipe.mutateAsync(data);
+          router.push(`/recipes/${result.id}`);
+        }
       }
-      router.push(`/recipes/${recipe!.id}`);
-    } else {
-      // Create recipe — use FormData if cover image provided
-      if (coverFile) {
-        const formData = new FormData();
-        formData.append('name', data.name);
-        if (data.description) formData.append('description', data.description);
-        if (data.category) formData.append('category', data.category);
-        if (data.difficulty) formData.append('difficulty', data.difficulty);
-        formData.append('ingredients', JSON.stringify(data.ingredients || []));
-        formData.append('steps', JSON.stringify(data.steps || []));
-        formData.append('techniques', JSON.stringify(data.techniques || []));
-        formData.append('is_public', String(data.is_public));
-        formData.append('cover_image', coverFile);
-        formData.append('user', pb.authStore.record!.id);
-        const result = await pb.collection('recipes').create(formData);
-        router.push(`/recipes/${result.id}`);
-      } else {
-        const result = await createRecipe.mutateAsync(data);
-        router.push(`/recipes/${result.id}`);
-      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save recipe';
+      console.error('Recipe save error:', err);
+      setFormError(message);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const isPending = createRecipe.isPending || updateRecipe.isPending;
+  const isPending = saving || createRecipe.isPending || updateRecipe.isPending;
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -500,6 +505,13 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
             ))}
           </div>
         </div>
+
+        {/* Error display */}
+        {formError && (
+          <div className="mt-4 rounded-lg border border-red-500/30 bg-red-900/20 p-3 text-sm text-red-400">
+            {formError}
+          </div>
+        )}
 
         {/* Actions — full width */}
         <div className="mt-6 flex justify-end gap-2 border-t border-border pt-4">
