@@ -13,6 +13,7 @@ import { useRecipeMedia } from '../../hooks/use-recipe-media';
 import { getFileUrl } from '../../lib/pb-helpers';
 import { StepDisplay } from './step-display';
 import { RecipeShareButtons } from './recipe-share-buttons';
+import { RecipeVideoGenerator } from './recipe-video-generator';
 
 const DIFFICULTY_STYLES: Record<string, string> = {
   beginner: 'bg-green-900/20 text-green-400 border-green-500/30',
@@ -145,6 +146,9 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
 
       {/* Share buttons */}
       {recipe.is_public && <RecipeShareButtons recipe={recipe} />}
+
+      {/* Video generator (owner only) */}
+      {isOwner && steps.length > 0 && <RecipeVideoGenerator recipe={recipe} />}
 
       {/* Description */}
       {recipe.description && (

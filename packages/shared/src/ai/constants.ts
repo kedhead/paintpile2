@@ -5,7 +5,9 @@ export type AIOperation =
   | 'aiCleanup'
   | 'recolor'
   | 'recipeGeneration'
-  | 'techniqueAdvisor';
+  | 'techniqueAdvisor'
+  | 'recipeVideoScript'
+  | 'recipeVideoAI';
 
 export interface UsageStats {
   totalCreditsUsed: number;
@@ -19,6 +21,8 @@ export interface UsageStats {
     recolor: number;
     recipeGeneration: number;
     techniqueAdvisor: number;
+    recipeVideoScript: number;
+    recipeVideoAI: number;
   };
   quotaLimit: number;
   remainingCredits: number;
@@ -38,6 +42,8 @@ export const OPERATION_COSTS = {
   recolor: 20,
   recipeGeneration: 25,
   techniqueAdvisor: 8,
+  recipeVideoScript: 15,
+  recipeVideoAI: 50,
 } as const;
 
 export function creditsToDollars(credits: number): string {

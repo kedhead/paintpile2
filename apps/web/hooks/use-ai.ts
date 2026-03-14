@@ -82,3 +82,10 @@ export function useRecolor() {
     { success: boolean; data: { imageUrl: string; creditsUsed: number } }
   >('/api/ai/recolor');
 }
+
+export function useRecipeVideoScript() {
+  return useAIMutation<
+    { recipe: Record<string, unknown> },
+    { success: boolean; data: { script: { step_index: number; narration: string; duration_seconds: number; text_overlay: string }[]; creditsUsed: number } }
+  >('/api/ai/recipe-video-script');
+}
