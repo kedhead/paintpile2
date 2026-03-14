@@ -7,7 +7,8 @@ export function middleware(request: NextRequest) {
   const isAuthRoute = request.nextUrl.pathname.startsWith('/auth');
   const isApiRoute = request.nextUrl.pathname.startsWith('/api');
   const isShareRoute = request.nextUrl.pathname.startsWith('/share');
-  const isPublicRoute = request.nextUrl.pathname === '/' || isShareRoute;
+  const isManifestRoute = request.nextUrl.pathname === '/manifest.webmanifest';
+  const isPublicRoute = request.nextUrl.pathname === '/' || isShareRoute || isManifestRoute;
 
   // Redirect unauthenticated users away from protected routes
   if (!isAuthenticated && !isAuthRoute && !isApiRoute && !isPublicRoute) {
