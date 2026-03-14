@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { Palette, Loader2, Send } from 'lucide-react';
+import { useAuth } from '../auth-provider';
 
 export function PaintMixer() {
+  const { pb } = useAuth();
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -19,7 +21,7 @@ export function PaintMixer() {
       const res = await fetch('/api/ai/paint-mixer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: query.trim() }),
+        body: JSON.stringify({ query: query.trim(), pbToken: pb.authStore.token }),
       });
       if (!res.ok) throw new Error('Failed to get mixing recipe');
       const data = await res.json();
