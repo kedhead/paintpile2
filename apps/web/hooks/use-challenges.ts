@@ -45,6 +45,22 @@ export function useChallengeEntries(challengeId: string | null) {
   });
 }
 
+/** Returns set of entry IDs the current user has voted for in this challenge */
+export function useMyVotes(challengeId: string | null) {
+  const { pb, user } = useAuth();
+
+  return useQuery({
+    queryKey: queryKeys.challenges.votes(challengeId || '', user?.id || ''),
+    queryFn: async () => {
+      const votes = await pb.collection('challenge_votes').getFullList({
+        filter: `challenge="${challengeId}" && user="${user!.id}"`,
+      });
+      return new Set(votes.map((v) => v.entry));
+    },
+    enabled: !!challengeId && !!user,
+  });
+}
+
 export function useSubmitEntry() {
   const { pb, user } = useAuth();
   const queryClient = useQueryClient();
@@ -61,7 +77,7 @@ export function useSubmitEntry() {
       photoUrl?: string;
       projectTitle: string;
     }) => {
-      return pb.collection('challenge_entries').create({
+      const entry = await pb.collection('challenge_entries').create({
         challenge: challengeId,
         user: user!.id,
         project: projectId,
@@ -69,20 +85,41 @@ export function useSubmitEntry() {
         project_title: projectTitle,
         votes: 0,
       });
+
+      // Increment participant_count on the challenge
+      try {
+        const challenge = await pb.collection('challenges').getOne(challengeId);
+        await pb.collection('challenges').update(challengeId, {
+          participant_count: (challenge.participant_count || 0) + 1,
+        });
+      } catch {
+        // non-critical
+      }
+
+      return entry;
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.challenges.entries(variables.challengeId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.challenges.detail(variables.challengeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.challenges.list() });
     },
   });
 }
 
 export function useVoteEntry() {
-  const { pb } = useAuth();
+  const { pb, user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ entryId, challengeId }: { entryId: string; challengeId: string }) => {
+      // Create a vote record (unique index prevents duplicates)
+      await pb.collection('challenge_votes').create({
+        user: user!.id,
+        entry: entryId,
+        challenge: challengeId,
+      });
+
+      // Increment vote count on the entry
       const entry = await pb.collection('challenge_entries').getOne(entryId);
       return pb.collection('challenge_entries').update(entryId, {
         votes: (entry.votes || 0) + 1,
@@ -90,6 +127,34 @@ export function useVoteEntry() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.challenges.entries(variables.challengeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.challenges.votes(variables.challengeId, user?.id || '') });
+    },
+  });
+}
+
+export function useUnvoteEntry() {
+  const { pb, user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ entryId, challengeId }: { entryId: string; challengeId: string }) => {
+      // Find and delete the vote record
+      const votes = await pb.collection('challenge_votes').getFullList({
+        filter: `user="${user!.id}" && entry="${entryId}"`,
+      });
+      if (votes.length > 0) {
+        await pb.collection('challenge_votes').delete(votes[0].id);
+      }
+
+      // Decrement vote count on the entry
+      const entry = await pb.collection('challenge_entries').getOne(entryId);
+      return pb.collection('challenge_entries').update(entryId, {
+        votes: Math.max(0, (entry.votes || 0) - 1),
+      });
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.challenges.entries(variables.challengeId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.challenges.votes(variables.challengeId, user?.id || '') });
     },
   });
 }

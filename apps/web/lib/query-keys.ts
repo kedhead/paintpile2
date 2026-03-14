@@ -135,5 +135,6 @@ export const queryKeys = {
     list: () => [...queryKeys.challenges.all, 'list'] as const,
     detail: (challengeId: string) => [...queryKeys.challenges.all, 'detail', challengeId] as const,
     entries: (challengeId: string) => [...queryKeys.challenges.all, 'entries', challengeId] as const,
+    votes: (challengeId: string, userId: string) => [...queryKeys.challenges.all, 'votes', challengeId, userId] as const,
   },
 };
