@@ -23,7 +23,9 @@ export function useChallenge(challengeId: string | null) {
   return useQuery({
     queryKey: queryKeys.challenges.detail(challengeId || ''),
     queryFn: async () => {
-      return pb.collection('challenges').getOne(challengeId!);
+      return pb.collection('challenges').getOne(challengeId!, {
+        expand: 'winner,winner.user,winner_badge',
+      });
     },
     enabled: !!challengeId,
   });
