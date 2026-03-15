@@ -1,0 +1,165 @@
+{
+  "name": "PaintPile Video Commercial Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "weeks", "weekInterval": 1, "triggerAtDay": [1], "triggerAtHour": 10 }]
+        }
+      },
+      "id": "vc-schedule",
+      "name": "Weekly Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8090/api/collections/projects/records",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "filter", "value": "visibility='public' && cover_photo!=''" },
+            { "name": "sort", "value": "-created" },
+            { "name": "perPage", "value": "5" },
+            { "name": "expand", "value": "user" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "vc-fetch-projects",
+      "name": "Fetch Recent Projects",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter and format projects for the video commercial\nconst data = $input.first().json;\nconst items = data.items || [];\n\nif (items.length === 0) {\n  throw new Error('No public projects with photos found');\n}\n\nconst projects = items.map(item => ({\n  id: item.id,\n  collectionId: item.collectionId,\n  name: item.name,\n  author_name: item.expand?.user?.name || item.expand?.user?.username || 'PaintPile Artist',\n  cover_photo: item.cover_photo || null,\n  photos: item.photos || [],\n  description: item.description || ''\n}));\n\nreturn [{ json: { projects } }];"
+      },
+      "id": "vc-format-projects",
+      "name": "Format Projects",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-haiku-4-5-20251001\",\n  \"max_tokens\": 1024,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"You are a social media manager for PaintPile, a miniature painting community app. Generate a video commercial script as a JSON array for a short promotional video showcasing these projects:\\n\\n{{ JSON.stringify($json.projects.map(p => ({ name: p.name, author: p.author_name, description: p.description }))) }}\\n\\nReturn ONLY a JSON array with this structure (no markdown, no explanation):\\n[\\n  { \\\"type\\\": \\\"intro\\\", \\\"text_overlay\\\": \\\"PaintPile\\\", \\\"duration\\\": 4 },\\n  { \\\"type\\\": \\\"project\\\", \\\"project_index\\\": 0, \\\"text_overlay\\\": \\\"Short catchy caption\\\", \\\"duration\\\": 6 },\\n  ... (one per project, max 5) ...\\n  { \\\"type\\\": \\\"cta\\\", \\\"text_overlay\\\": \\\"Join PaintPile today!\\\", \\\"duration\\\": 4 }\\n]\\n\\nKeep text_overlay under 40 chars. Duration 4-8 seconds per slide.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "vc-generate-script",
+      "name": "Generate Script (Claude)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the Claude response and extract the script JSON\nconst response = $input.first().json;\nconst text = response.content?.[0]?.text || '';\n\n// Extract JSON array from the response\nlet script;\ntry {\n  script = JSON.parse(text);\n} catch {\n  // Try to find JSON array in the text\n  const match = text.match(/\\[\\s*\\{[\\s\\S]*\\}\\s*\\]/);\n  if (match) {\n    script = JSON.parse(match[0]);\n  } else {\n    throw new Error('Could not parse script from Claude response: ' + text.substring(0, 200));\n  }\n}\n\n// Get projects from the previous Format Projects node\nconst projects = $('Format Projects').first().json.projects;\n\nreturn [{ json: { projects, script } }];"
+      },
+      "id": "vc-parse-script",
+      "name": "Parse Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://thepaintpile.com/api/video/commercial",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ projects: $json.projects, script: $json.script, format: '9:16', secret: $env.VIDEO_API_SECRET }) }}",
+        "options": {
+          "response": { "response": { "responseFormat": "file" } },
+          "timeout": 120000
+        }
+      },
+      "id": "vc-generate-reel",
+      "name": "Generate Reel (9:16)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://thepaintpile.com/api/video/commercial",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ projects: $json.projects, script: $json.script, format: '1:1', secret: $env.VIDEO_API_SECRET }) }}",
+        "options": {
+          "response": { "response": { "responseFormat": "file" } },
+          "timeout": 120000
+        }
+      },
+      "id": "vc-generate-square",
+      "name": "Generate Square (1:1)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Upload the generated reel video to a temporary public URL via PocketBase\n// For now, log success and pass through for Instagram Reels posting\nconst reelData = $('Generate Reel (9:16)').first();\nconst squareData = $('Generate Square (1:1)').first();\nconst scriptData = $('Parse Script').first().json;\n\n// Build caption from script\nconst projectNames = scriptData.projects.map(p => p.name).join(', ');\nconst caption = `🎨 Check out these amazing miniatures on PaintPile!\\n\\nFeaturing: ${projectNames}\\n\\nJoin our community at thepaintpile.com\\n\\n#paintpile #minipainting #warhammer #tabletop #miniatures #painting #hobby`;\n\nreturn [{\n  json: {\n    caption,\n    projects: scriptData.projects,\n    reelGenerated: !!reelData,\n    squareGenerated: !!squareData\n  }\n}];"
+      },
+      "id": "vc-prepare-post",
+      "name": "Prepare IG Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1400, 300],
+      "_note": "Instagram Reels posting requires hosting the video at a public URL. Future: upload to PocketBase or S3, then use the URL for IG Reels API. For now this node prepares the caption and metadata."
+    }
+  ],
+  "connections": {
+    "Weekly Schedule": {
+      "main": [[{ "node": "Fetch Recent Projects", "type": "main", "index": 0 }]]
+    },
+    "Fetch Recent Projects": {
+      "main": [[{ "node": "Format Projects", "type": "main", "index": 0 }]]
+    },
+    "Format Projects": {
+      "main": [[{ "node": "Generate Script (Claude)", "type": "main", "index": 0 }]]
+    },
+    "Generate Script (Claude)": {
+      "main": [[{ "node": "Parse Script", "type": "main", "index": 0 }]]
+    },
+    "Parse Script": {
+      "main": [
+        [
+          { "node": "Generate Reel (9:16)", "type": "main", "index": 0 },
+          { "node": "Generate Square (1:1)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Generate Reel (9:16)": {
+      "main": [[{ "node": "Prepare IG Post", "type": "main", "index": 0 }]]
+    },
+    "Generate Square (1:1)": {
+      "main": [[{ "node": "Prepare IG Post", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "env_vars_required": {
+    "ANTHROPIC_API_KEY": "Anthropic API key for Claude Haiku",
+    "VIDEO_API_SECRET": "Secret for the /api/video/commercial endpoint",
+    "META_ACCESS_TOKEN": "Long-lived Meta/Instagram access token (for future Reels posting)",
+    "IG_USER_ID": "Instagram Business Account ID (for future Reels posting)"
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "_readme": "Add these nodes to the existing 'PaintPile Social Media Promoter' workflow (HHnQh29fpGwuhUjw). Connect 'Format Post' output → 'Resolve Photo URL' input. These run in parallel with the Twitter/Bluesky branches.",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Resolve the best photo URL for Instagram posting\n// Instagram requires HTTPS URLs\nconst project = $input.first().json;\nconst pbBase = 'https://thepaintpile.com/api/files';\n\nlet photoUrl = null;\n\nif (project.cover_photo) {\n  photoUrl = `${pbBase}/${project.collectionId}/${project.id}/${project.cover_photo}`;\n} else if (project.photos && project.photos.length > 0) {\n  // Use the HTTPS proxy route for PocketBase files\n  photoUrl = `${pbBase}/${project.collectionId}/${project.id}/${project.photos[0]}`;\n}\n\nreturn [{\n  json: {\n    ...project,\n    photoUrl,\n    caption: project.formatted_caption || project.caption || `${project.name} by ${project.author_name || 'a PaintPile artist'} 🎨\\n\\n#paintpile #minipainting #tabletop #warhammer #miniatures`\n  }\n}];"
+      },
+      "id": "ig-resolve-photo",
+      "name": "Resolve Photo URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "has-photo",
+              "leftValue": "={{ $json.photoUrl }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "ig-has-photo",
+      "name": "Has Photo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1300, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.instagram.com/v21.0/{{ $env.IG_USER_ID }}/media",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "image_url", "value": "={{ $json.photoUrl }}" },
+            { "name": "caption", "value": "={{ $json.caption }}" },
+            { "name": "access_token", "value": "={{ $env.META_ACCESS_TOKEN }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ig-create-container",
+      "name": "Create IG Media Container",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1500, 500]
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "id": "ig-wait",
+      "name": "Wait for Processing",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1700, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.instagram.com/v21.0/{{ $env.IG_USER_ID }}/media_publish",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "creation_id", "value": "={{ $json.id }}" },
+            { "name": "access_token", "value": "={{ $env.META_ACCESS_TOKEN }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ig-publish",
+      "name": "Publish IG Media",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1900, 500]
+    }
+  ],
+  "connections": {
+    "Resolve Photo URL": {
+      "main": [[{ "node": "Has Photo?", "type": "main", "index": 0 }]]
+    },
+    "Has Photo?": {
+      "main": [
+        [{ "node": "Create IG Media Container", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Create IG Media Container": {
+      "main": [[{ "node": "Wait for Processing", "type": "main", "index": 0 }]]
+    },
+    "Wait for Processing": {
+      "main": [[{ "node": "Publish IG Media", "type": "main", "index": 0 }]]
+    }
+  },
+  "env_vars_required": {
+    "META_ACCESS_TOKEN": "Long-lived Meta/Instagram access token",
+    "IG_USER_ID": "Instagram Business Account ID (numeric)"
+  }
+}
