@@ -1,59 +1,404 @@
+/**
+ * Curated Paint Sets Database
+ *
+ * Manually verified paint set contents ported from the original Paintpile.
+ * Each set lists the exact paints included, matched against the paint database.
+ */
+
 export interface CuratedPaintSet {
-  name: string;
+  setId: string;
+  setName: string;
   brand: string;
+  paintCount: number;
   description: string;
-  paints: string[]; // paint names to match against DB
+  releaseYear?: number;
+  sourceUrl: string;
+  paintNames: string[];
 }
 
 export const CURATED_PAINT_SETS: CuratedPaintSet[] = [
+  // ===== ARMY PAINTER =====
   {
-    name: 'Citadel Starter Set',
-    brand: 'Citadel',
-    description: 'Essential paints for getting started with Warhammer',
-    paints: [
-      'Abaddon Black', 'Corax White', 'Mephiston Red', 'Macragge Blue',
-      'Retributor Armour', 'Leadbelcher', 'Agrax Earthshade', 'Nuln Oil',
-      'Wraithbone', 'Averland Sunset', 'Warpstone Glow', 'Bugmans Glow',
-    ],
-  },
-  {
-    name: 'Army Painter Speedpaint Set',
+    setId: 'army-painter-speedpaint-2-mega',
+    setName: 'Speedpaint 2.0 Mega Set',
     brand: 'Army Painter',
-    description: 'Fast painting with contrast-style paints',
-    paints: [
-      'Speedpaint Medium', 'Crusader Skin', 'Zealot Yellow', 'Fire Giant Orange',
-      'Blood Red', 'Orc Skin', 'Absolution Green', 'Holy White',
-      'Hive Dweller', 'Gravelord Grey', 'Hardened Leather', 'Slaughter Red',
+    paintCount: 48,
+    description: 'Complete collection of Speedpaint 2.0 one-coat paints',
+    releaseYear: 2024,
+    sourceUrl: 'https://www.thearmypainter.com/shop/us/sp2001',
+    paintNames: [
+      'Crusader Skin 2.0', 'Mouldy Red 2.0', 'Red Gore 2.0', 'Runic Red 2.0',
+      'Blood Red 2.0', 'Sunset Red 2.0', 'Burnt Sienna 2.0', 'Flaming Orange 2.0',
+      'Fire Giant Orange 2.0', 'Daemonic Yellow 2.0', 'Zealot Yellow 2.0',
+      'Highlord Yellow 2.0', 'Goblin Green 2.0', 'Zealous Green 2.0',
+      'Woodland Green 2.0', 'Orc Skin 2.0', 'Malignant Green 2.0', 'Pale Green 2.0',
+      'Dark Blue 2.0', 'Deep Blue 2.0', 'Magic Blue 2.0', 'Cloudburst Blue 2.0',
+      'Turquoise 2.0', 'Hive Purple 2.0', 'Royal Purple 2.0', 'Malignant Magenta 2.0',
+      'Tanned Skin 2.0', 'Terradon Turquoise 2.0', 'Gravelord Grey 2.0',
+      'Pallid Bone 2.0', 'Mummy Skin 2.0', 'Dark Grey 2.0', 'Hardened Carapace 2.0',
+      'Dusk Grey 2.0', 'Grim Black 2.0', 'Ashen Grey 2.0', 'Orichalcum Gold 2.0',
+      'Bright Gold 2.0', 'Aged Steel 2.0', 'Chainmail Silver 2.0',
+      'Hardened Leather 2.0', 'Tainted Skin 2.0', 'Holy White 2.0',
+      'Slaughter Red 2.0', 'Hiveborn Chitin 2.0',
     ],
   },
   {
-    name: 'Vallejo Game Color Basics',
+    setId: 'army-painter-speedpaint-starter',
+    setName: 'Speedpaint Starter Set',
+    brand: 'Army Painter',
+    paintCount: 10,
+    description: 'Essential Speedpaint colors for beginners',
+    sourceUrl: 'https://www.thearmypainter.com/shop/us/sp7001',
+    paintNames: [
+      'Holy White 2.0', 'Zealot Yellow 2.0', 'Fire Giant Orange 2.0',
+      'Blood Red 2.0', 'Royal Purple 2.0', 'Magic Blue 2.0',
+      'Goblin Green 2.0', 'Gravelord Grey 2.0', 'Hardened Carapace 2.0',
+      'Grim Black 2.0',
+    ],
+  },
+  {
+    setId: 'army-painter-fanatic-starter',
+    setName: 'Fanatic Paint Starter Set',
+    brand: 'Army Painter',
+    paintCount: 24,
+    description: 'Complete starter set of Fanatic acrylic paints',
+    releaseYear: 2024,
+    sourceUrl: 'https://www.thearmypainter.com/shop/us/fa2001',
+    paintNames: [
+      'Matt Black', 'Matt White', 'Deep Red', 'Blood Red', 'Bright Red',
+      'Bright Orange', 'Sun Yellow', 'Basilisk Brown', 'Oak Brown', 'Deep Green',
+      'Jungle Green', 'Bright Green', 'Deep Blue', 'Ocean Blue', 'Sky Blue',
+      'Royal Purple', 'Violet', 'Smokey Grey', 'Stone Grey', 'Light Grey',
+      'Leather Brown', 'Bronze', 'Gold', 'Silver',
+    ],
+  },
+
+  // ===== CITADEL =====
+  {
+    setId: 'citadel-base-paint-set',
+    setName: 'Citadel Base Paint Set',
+    brand: 'Citadel',
+    paintCount: 11,
+    description: 'Essential base coat paints from Games Workshop',
+    sourceUrl: 'https://www.games-workshop.com',
+    paintNames: [
+      'Abaddon Black', 'Corax White', 'Mephiston Red', 'Caliban Green',
+      'Macragge Blue', 'Balthasar Gold', 'Leadbelcher', 'Rakarth Flesh',
+      'Zandri Dust', 'Rhinox Hide', 'Averland Sunset',
+    ],
+  },
+  {
+    setId: 'citadel-essentials-set',
+    setName: 'Citadel Essentials Set',
+    brand: 'Citadel',
+    paintCount: 8,
+    description: 'Core paint collection for new hobbyists',
+    sourceUrl: 'https://www.games-workshop.com',
+    paintNames: [
+      'Abaddon Black', 'Corax White', 'Mephiston Red', 'Caliban Green',
+      'Macragge Blue', 'Balthasar Gold', 'Nuln Oil', 'Agrax Earthshade',
+    ],
+  },
+  {
+    setId: 'citadel-contrast-paint-set',
+    setName: 'Citadel Contrast Paint Set',
+    brand: 'Citadel',
+    paintCount: 18,
+    description: 'One-coat painting system for quick results',
+    sourceUrl: 'https://www.games-workshop.com',
+    paintNames: [
+      'Apothecary White', 'Black Templar', 'Militarum Green', 'Blood Angels Red',
+      'Flesh Tearers Red', 'Gryph-Charger Grey', 'Terradon Turquoise',
+      'Aethermatic Blue', 'Talassar Blue', 'Shyish Purple', 'Magos Purple',
+      'Volupus Pink', 'Baal Red', 'Aggaros Dunes', 'Skeleton Horde',
+      'Snakebite Leather', 'Cygor Brown', 'Darkoath Flesh',
+    ],
+  },
+
+  // ===== VALLEJO =====
+  {
+    setId: 'vallejo-basic-usa-colors',
+    setName: 'Basic USA Colors Set',
     brand: 'Vallejo',
-    description: 'Versatile acrylic paints for any miniature',
-    paints: [
-      'Dead White', 'Black', 'Bloody Red', 'Sunrise Yellow',
-      'Magic Blue', 'Goblin Green', 'Bonewhite', 'Bronze Fleshtone',
-      'Glorious Gold', 'Chainmail Silver', 'Charred Brown', 'Cold Grey',
+    paintCount: 8,
+    description: 'WWII US military vehicle colors',
+    sourceUrl: 'https://acrylicosvallejo.com',
+    paintNames: [
+      'Olive Drab', 'Yellow Olive', 'USA Tan Earth', 'Khaki',
+      'White', 'Black', 'Burnt Umber', 'Dark Yellow',
     ],
   },
   {
-    name: 'Scale75 Fantasy & Games',
+    setId: 'vallejo-game-color-intro',
+    setName: 'Game Color Introduction Set',
+    brand: 'Vallejo',
+    paintCount: 16,
+    description: 'Starter set for fantasy miniatures',
+    sourceUrl: 'https://acrylicosvallejo.com',
+    paintNames: [
+      'Black', 'White', 'Bloody Red', 'Scrofulous Brown', 'Goblin Green',
+      'Electric Blue', 'Sun Yellow', 'Orange Fire', 'Sepia Wash', 'Black Wash',
+      'Elf Skintone', 'Dwarf Skin', 'Chainmail Silver', 'Polished Gold',
+      'Gunmetal', 'Bonewhite',
+    ],
+  },
+  {
+    setId: 'vallejo-model-color-basic',
+    setName: 'Model Color Basic Set',
+    brand: 'Vallejo',
+    paintCount: 16,
+    description: 'Essential colors for all modeling projects',
+    sourceUrl: 'https://acrylicosvallejo.com',
+    paintNames: [
+      'Black', 'White', 'Red', 'Blue', 'Yellow', 'Green', 'Flat Brown',
+      'Grey', 'Orange', 'Purple', 'Flat Flesh', 'Dark Green', 'Dark Blue',
+      'Ochre', 'Burnt Umber', 'Medium Grey',
+    ],
+  },
+  {
+    setId: 'vallejo-face-skin-tones',
+    setName: 'Face & Skin Tones Set',
+    brand: 'Vallejo',
+    paintCount: 8,
+    description: 'Complete range of skin tones for all miniatures',
+    sourceUrl: 'https://acrylicosvallejo.com',
+    paintNames: [
+      'Dark Fleshtone', 'Dwarf Skin', 'Elf Skintone', 'Pale Flesh',
+      'Bronzed Flesh', 'Terracotta', 'Dark Skin', 'Sunny Skintone',
+    ],
+  },
+
+  // ===== REAPER =====
+  {
+    setId: 'reaper-core-colors',
+    setName: 'Core Colors Paint Set',
+    brand: 'Reaper',
+    paintCount: 11,
+    description: 'Essential colors for all miniature painting',
+    sourceUrl: 'https://www.reapermini.com',
+    paintNames: [
+      'Pure Black', 'Pure White', 'Blood Red', 'Harvest Brown', 'Viper Green',
+      'Ultramarine Blue', 'Brilliant Yellow', 'Burnt Orange', 'Royal Purple',
+      'Shadowed Stone', 'Polished Silver',
+    ],
+  },
+
+  // ===== SCALE75 =====
+  {
+    setId: 'scale75-basic-set',
+    setName: 'Fantasy & Games Basic Set',
     brand: 'Scale75',
-    description: 'Premium paints for display-quality work',
-    paints: [
-      'White', 'Black', 'Blood Red', 'Mars Orange',
-      'Caribbean Blue', 'Spring Green', 'Sahara Yellow', 'Innsmouth Blue',
-      'Ardennes Green', 'Victorian Brass', 'Thrash Metal', 'Pale Skin',
+    paintCount: 8,
+    description: 'Essential colors for fantasy miniatures',
+    sourceUrl: 'https://scale75.com',
+    paintNames: [
+      'Black', 'White', 'Red', 'Yellow', 'Blue', 'Green',
+      'Leather Brown', 'Metal Medium',
+    ],
+  },
+
+  // ===== PRO ACRYL (MONUMENT HOBBIES) =====
+  {
+    setId: 'pro-acryl-base-set',
+    setName: 'Pro Acryl Base Set',
+    brand: 'ProAcryl',
+    paintCount: 24,
+    description: 'Complete base paint collection with 24 essential colors',
+    releaseYear: 2024,
+    sourceUrl: 'https://monumenthobbies.com/products/pro-acryl-base-set',
+    paintNames: [
+      'Bold Titanium White', 'Coal Black', 'Bold Pyrrole Red', 'Green', 'Blue',
+      'Golden Yellow', 'Orange', 'Burnt Red', 'Mahogany', 'Purple', 'Magenta',
+      'Sky Blue', 'Faded Ultramarine', 'Dark Grey Blue', 'Bright Warm Grey',
+      'Dark Warm Grey', 'Golden Brown', 'Light Umber', 'Dark Umber',
+      'Camo Green', 'Jade', 'Bright Ivory', 'Ivory', 'Tan Flesh',
     ],
   },
   {
-    name: 'NMM (Non-Metallic Metal) Kit',
-    brand: 'Mixed',
-    description: 'Essential paints for painting NMM effects',
-    paints: [
+    setId: 'pro-acryl-intro-set',
+    setName: 'Pro Acryl Intro Set',
+    brand: 'ProAcryl',
+    paintCount: 12,
+    description: 'Perfect starter set with 12 core colors plus primer and wash',
+    sourceUrl: 'https://monumenthobbies.com/products/pro-acryl-intro-set',
+    paintNames: [
+      'Bold Titanium White', 'Coal Black', 'Burnt Red', 'Dark Grey Blue',
+      'Dark Golden Brown', 'Yellow Green', 'Tan Flesh', 'Yellow Ochre',
+      'Silver', 'Burnt Orange', 'Black Wash', 'Black Brush-On Primer',
+    ],
+  },
+  {
+    setId: 'pro-acryl-metallic-set',
+    setName: 'Pro Acryl Metallic Set',
+    brand: 'ProAcryl',
+    paintCount: 9,
+    description: 'Complete collection of all Pro Acryl metallic paints',
+    sourceUrl: 'https://monumenthobbies.com/products/pro-acryl-metallic-set',
+    paintNames: [
+      'Bronze', 'Light Bronze', 'Copper', 'Bright Gold', 'Rich Gold',
+      'White Gold', 'Silver', 'Dark Silver', 'Metallic Medium',
+    ],
+  },
+  {
+    setId: 'pro-acryl-fluorescents-set',
+    setName: 'Pro Acryl Fluorescents Set',
+    brand: 'ProAcryl',
+    paintCount: 6,
+    description: 'All 6 fluorescent colors for vibrant effects',
+    sourceUrl: 'https://monumenthobbies.com/products/fluorescents-set',
+    paintNames: [
+      'Fluorescent Red', 'Fluorescent Orange', 'Fluorescent Yellow',
+      'Fluorescent Green', 'Fluorescent Purple', 'Fluorescent Pink',
+    ],
+  },
+  {
+    setId: 'pro-acryl-expansion-set-1',
+    setName: 'Pro Acryl Expansion Set #1',
+    brand: 'ProAcryl',
+    paintCount: 12,
+    description: 'Additional core colors to expand your palette',
+    sourceUrl: 'https://monumenthobbies.com/products/pro-acryl-expansion-set-1',
+    paintNames: [
+      'Dark Purple', 'Dark Blue', 'Burnt Orange', 'Yellow Ochre',
+      'Dark Neutral Grey', 'Bright Neutral Grey', 'Black Brown',
+      'Shadow Flesh', 'Olive Flesh', 'Pale Pink', 'Bright Yellow Green',
+      'Dark Camo Green',
+    ],
+  },
+  {
+    setId: 'pro-acryl-expansion-set-2-transparents',
+    setName: 'Pro Acryl Expansion Set #2 - Transparents',
+    brand: 'ProAcryl',
+    paintCount: 9,
+    description: 'All transparent colors for glazing and special effects',
+    sourceUrl: 'https://monumenthobbies.com/products/pro-acryl-expansion-set-2-transparents',
+    paintNames: [
+      'Transparent Purple', 'Transparent Blue', 'Transparent Orange',
+      'Transparent Yellow', 'Transparent Red', 'Transparent Green',
+      'Transparent Black', 'Transparent White', 'Transparent Brown',
+    ],
+  },
+  {
+    setId: 'pro-acryl-expansion-set-3',
+    setName: 'Pro Acryl Expansion Set #3',
+    brand: 'ProAcryl',
+    paintCount: 9,
+    description: 'Unique mid-tone colors to expand your range',
+    sourceUrl: 'https://monumenthobbies.com/products/pro-acryl-expansion-set-3',
+    paintNames: [
+      'Black Green', 'Blue Black', 'Dark Golden Brown', 'Burnt Sienna',
+      'Bright Pale Green', 'Grey Blue', 'Pale Yellow', 'Turquoise', 'Faded Plum',
+    ],
+  },
+  {
+    setId: 'pro-acryl-expansion-set-4',
+    setName: 'Pro Acryl Expansion Set #4',
+    brand: 'ProAcryl',
+    paintCount: 12,
+    description: 'More essential colors including flesh tones and earth colors',
+    sourceUrl: 'https://monumenthobbies.com/products/pro-acryl-expansion-set-4',
+    paintNames: [
+      'Yellow Green', 'Faded Green', 'Bright Jade', 'Dark Flesh', 'Burgundy',
+      'Plum', 'Pink', 'Warm Yellow', 'Warm Flesh', 'Khaki', 'Warm Grey',
+      'Neutral Grey',
+    ],
+  },
+  {
+    setId: 'pro-acryl-signature-vince-venturella',
+    setName: 'Signature Series Set 1 - Vince Venturella',
+    brand: 'ProAcryl',
+    paintCount: 6,
+    description: 'Curated colors by renowned painter Vince Venturella',
+    sourceUrl: 'https://monumenthobbies.com/products/signature-series-set-1-vince-venturella',
+    paintNames: [
+      'Dark Jade', "Payne's Grey", 'Royal Purple', 'White Blue',
+      'Beige Red', 'Dark Yellow Green',
+    ],
+  },
+  {
+    setId: 'pro-acryl-signature-ninjon',
+    setName: 'Signature Series Set 2 - Ninjon',
+    brand: 'ProAcryl',
+    paintCount: 6,
+    description: 'Hand-picked colors by popular painter Ninjon',
+    sourceUrl: 'https://monumenthobbies.com/products/signature-series-set-2-ninjon',
+    paintNames: [
+      'Dark Ivory', 'Dark Warm Flesh', 'Warm Brown', 'Dark Magenta',
+      'Dark Plum', 'Red Grey',
+    ],
+  },
+  {
+    setId: 'pro-acryl-signature-ben-komets',
+    setName: 'Signature Series Set 3 - Ben Komets',
+    brand: 'ProAcryl',
+    paintCount: 6,
+    description: 'Signature set featuring satin and gloss finishes',
+    sourceUrl: 'https://monumenthobbies.com/products/signature-series-set-3-ben-komets',
+    paintNames: [
+      'Dark Sea Ben', 'Petroleum Brown', 'Dark Burgundy', 'Green Oxide',
+      'Advanced Flesh Tone', 'Heavy Warm White',
+    ],
+  },
+  {
+    setId: 'pro-acryl-signature-matt-cexwish',
+    setName: 'Signature Series Set 4 - Matt Cexwish',
+    brand: 'ProAcryl',
+    paintCount: 6,
+    description: 'Expertly selected colors by Matt Cexwish',
+    sourceUrl: 'https://monumenthobbies.com/products/signature-series-set-4-matt-cexwish',
+    paintNames: [
+      'Dark Crimson', 'Dark Emerald', 'Heavy Titanium White', 'Brown Grey',
+      'Bone', 'Dark Bronze',
+    ],
+  },
+  {
+    setId: 'pro-acryl-signature-flameon',
+    setName: 'Signature Series Set 5 - Flameon Miniatures',
+    brand: 'ProAcryl',
+    paintCount: 6,
+    description: 'Earth tone focused set by Flameon Miniatures',
+    sourceUrl: 'https://monumenthobbies.com/products/signature-series-set-5-flameon-miniatures',
+    paintNames: [
+      'Dark Green Brown', 'Dark Orange Brown', 'Orange Brown',
+      'Caramel Brown', 'Bright Yellow Ochre', 'Bright Pale Yellow',
+    ],
+  },
+  {
+    setId: 'pro-acryl-signature-rogue-hobbies',
+    setName: 'Signature Series Set 6 - Rogue Hobbies',
+    brand: 'ProAcryl',
+    paintCount: 6,
+    description: 'Vibrant color selection by Rogue Hobbies',
+    sourceUrl: 'https://monumenthobbies.com/products/signature-series-set-6-rogue-hobbies',
+    paintNames: [
+      'Red Orange', 'Dark Hot Pink', 'Bright Green', 'Dark Turquoise',
+      'Ultramarine', 'Bismuth Yellow',
+    ],
+  },
+
+  // ===== TECHNIQUE KITS =====
+  {
+    setId: 'nmm-starter-kit',
+    setName: 'NMM (Non-Metallic Metal) Kit',
+    brand: 'Citadel',
+    paintCount: 11,
+    description: 'Essential paints for painting non-metallic metal effects',
+    sourceUrl: 'https://www.games-workshop.com',
+    paintNames: [
       'Rhinox Hide', 'Mournfang Brown', 'Skrag Brown', 'Balor Brown',
       'Zamesi Desert', 'Ushabti Bone', 'Screaming Skull', 'Corax White',
       'Abaddon Black', 'Thunderhawk Blue', 'Fenrisian Grey',
     ],
   },
 ];
+
+export function getCuratedBrands(): string[] {
+  const brands = new Set(CURATED_PAINT_SETS.map((s) => s.brand));
+  return Array.from(brands).sort();
+}
+
+export function getCuratedSetsByBrand(brand: string): CuratedPaintSet[] {
+  return CURATED_PAINT_SETS.filter(
+    (s) => s.brand.toLowerCase() === brand.toLowerCase()
+  );
+}

@@ -17,7 +17,7 @@ export function PaintSetSelectionDialog({ onClose, onBulkAdd }: PaintSetSelectio
     if (!selectedSet) return;
     setAdding(true);
     try {
-      await onBulkAdd(selectedSet.paints);
+      await onBulkAdd(selectedSet.paintNames);
       onClose();
     } catch (error) {
       console.error('Bulk add failed:', error);
@@ -39,21 +39,21 @@ export function PaintSetSelectionDialog({ onClose, onBulkAdd }: PaintSetSelectio
         <div className="max-h-96 overflow-y-auto p-4 space-y-2">
           {CURATED_PAINT_SETS.map((set) => (
             <button
-              key={set.name}
+              key={set.setName}
               onClick={() => setSelectedSet(set)}
               className={`w-full rounded-lg border p-3 text-left transition-colors ${
-                selectedSet?.name === set.name
+                selectedSet?.setName === set.setName
                   ? 'border-primary bg-primary/5'
                   : 'border-border hover:bg-muted'
               }`}
             >
               <div className="flex items-center gap-2">
                 <Package className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-foreground">{set.name}</span>
-                {selectedSet?.name === set.name && <Check className="ml-auto h-4 w-4 text-primary" />}
+                <span className="text-sm font-medium text-foreground">{set.setName}</span>
+                {selectedSet?.setName === set.setName && <Check className="ml-auto h-4 w-4 text-primary" />}
               </div>
               <p className="mt-1 text-xs text-muted-foreground">{set.description}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{set.paints.length} paints &middot; {set.brand}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{set.paintNames.length} paints &middot; {set.brand}</p>
             </button>
           ))}
         </div>
@@ -68,7 +68,7 @@ export function PaintSetSelectionDialog({ onClose, onBulkAdd }: PaintSetSelectio
             className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/80 disabled:opacity-50"
           >
             {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
-            Add {selectedSet?.paints.length || 0} Paints
+            Add {selectedSet?.paintNames.length || 0} Paints
           </button>
         </div>
       </div>
