@@ -51,7 +51,7 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
   const techniques = parseJSON<string[]>(recipe.techniques, []);
   const difficulty = recipe.difficulty || 'beginner';
   const totalTime = steps.reduce((sum, s) => sum + (s.estimated_time || 0), 0);
-  const coverUrl = recipe.cover_image ? getFileUrl(recipe, recipe.cover_image, '800x600') : null;
+  const coverUrl = recipe.cover_image ? getFileUrl(recipe, recipe.cover_image) : null;
 
   // Group media by step_id
   const mediaByStep = useMemo(() => {
@@ -86,7 +86,7 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
         <img
           src={coverUrl}
           alt={recipe.name}
-          className="h-48 w-full rounded-lg object-cover sm:h-64"
+          className="w-full max-h-96 rounded-lg object-contain"
         />
       )}
 

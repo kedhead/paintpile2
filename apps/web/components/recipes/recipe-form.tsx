@@ -355,7 +355,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
                 <img
                   src={coverPreview || existingCover!}
                   alt="Cover preview"
-                  className="h-40 w-full rounded-lg object-cover"
+                  className="w-full max-h-60 rounded-lg object-contain"
                 />
               )}
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-4 text-sm text-muted-foreground hover:border-muted-foreground">
