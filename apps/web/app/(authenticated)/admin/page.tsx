@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Users, Palette, Database, Download, Trash2, Shield, Award, Trophy, Newspaper, Globe } from 'lucide-react';
+import { Users, Palette, Database, Download, Trash2, Shield, Award, Trophy, Newspaper, Globe, Workflow, ExternalLink } from 'lucide-react';
 
 const adminTools = [
   {
@@ -66,6 +66,15 @@ const adminTools = [
   },
 ];
 
+const externalTools = [
+  {
+    title: 'n8n Workflows',
+    description: 'Manage automated social media promotion and other workflows',
+    icon: Workflow,
+    href: 'http://65.75.201.180:5678',
+  },
+];
+
 export default function AdminDashboard() {
   return (
     <div className="space-y-6">
@@ -85,6 +94,21 @@ export default function AdminDashboard() {
                 <p className="text-sm text-muted-foreground mt-1">{tool.description}</p>
               </div>
             </Link>
+          );
+        })}
+        {externalTools.map((tool) => {
+          const Icon = tool.icon;
+          return (
+            <a key={tool.href} href={tool.href} target="_blank" rel="noopener noreferrer">
+              <div className="bg-card border border-border rounded-lg p-6 hover:border-primary transition-colors cursor-pointer h-full">
+                <div className="flex items-center justify-between mb-3">
+                  <Icon className="w-8 h-8 text-primary" />
+                  <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <h2 className="text-lg font-semibold text-foreground">{tool.title}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{tool.description}</p>
+              </div>
+            </a>
           );
         })}
       </div>
