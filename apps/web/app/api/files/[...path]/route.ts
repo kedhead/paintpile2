@@ -28,7 +28,8 @@ export async function GET(
       return new NextResponse(null, { status: res.status });
     }
 
-    let buffer = Buffer.from(await res.arrayBuffer());
+    const arrayBuf = await res.arrayBuffer();
+    let buffer: Buffer = Buffer.from(new Uint8Array(arrayBuf));
     let contentType = res.headers.get('content-type') || 'application/octet-stream';
 
     // Resize if w or h query params are provided
@@ -47,7 +48,7 @@ export async function GET(
       contentType = 'image/jpeg';
     }
 
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {
         'Content-Type': contentType,
