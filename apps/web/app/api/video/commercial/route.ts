@@ -299,8 +299,7 @@ async function generateNarration(text: string, outputPath: string): Promise<void
   }
 
   const data = await res.json();
-  // 1min.ai returns { aiRecord: { ..., fileUrl: "https://..." } }
-  const fileUrl = data?.aiRecord?.fileUrl;
+  const fileUrl = data?.aiRecord?.temporaryUrl;
   if (!fileUrl) {
     throw new Error('1min.ai TTS returned no audio URL');
   }
