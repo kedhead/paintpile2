@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
-import { spawn } from 'child_process';
+import { spawn, execFile } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
+import puppeteer from 'puppeteer-core';
+
+export const maxDuration = 120;
 
 interface SlideScript {
-  type: 'intro' | 'project' | 'cta';
+  type: 'intro' | 'project' | 'cta' | 'screenshot';
   project_index?: number;
   text_overlay: string;
+  narration?: string;
   duration: number;
+  url?: string;
+  ken_burns?: 'zoom_in' | 'zoom_out' | 'pan_left' | 'pan_right';
 }
 
 interface ProjectData {
@@ -26,6 +32,8 @@ interface CommercialRequest {
   script: SlideScript[];
   format: '9:16' | '1:1' | '16:9';
   secret: string;
+  music?: string | false;
+  voiceover?: boolean;
 }
 
 const FORMAT_DIMENSIONS: Record<string, { width: number; height: number }> = {
@@ -36,6 +44,25 @@ const FORMAT_DIMENSIONS: Record<string, { width: number; height: number }> = {
 
 const BRAND_BG = '#14111e';
 const BRAND_PURPLE = '#a78bfa';
+const PIPER_PATH = process.env.PIPER_PATH || '/opt/piper/piper/piper';
+const PIPER_VOICE = process.env.PIPER_VOICE || '/opt/piper/voices/en_US-lessac-medium.onnx';
+const CHROMIUM_PATH = process.env.CHROMIUM_PATH || '/usr/bin/chromium-browser';
+
+// Ken Burns variants cycle through for variety
+const KB_VARIANTS: Array<(d: number, w: number, h: number) => string> = [
+  // Zoom in centered
+  (d, w, h) =>
+    `zoompan=z='min(zoom+0.0012,1.25)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${d * 30}:s=${w}x${h}:fps=30`,
+  // Zoom out
+  (d, w, h) =>
+    `zoompan=z='if(eq(on\\,0)\\,1.25\\,max(zoom-0.0012\\,1.0))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${d * 30}:s=${w}x${h}:fps=30`,
+  // Pan left to right
+  (d, w, h) =>
+    `zoompan=z='1.15':x='if(eq(on\\,0)\\,0\\,min(x+1.5\\,(iw-iw/zoom)))':y='ih/2-(ih/zoom/2)':d=${d * 30}:s=${w}x${h}:fps=30`,
+  // Pan right to left
+  (d, w, h) =>
+    `zoompan=z='1.15':x='if(eq(on\\,0)\\,(iw-iw/zoom)\\,max(x-1.5\\,0))':y='ih/2-(ih/zoom/2)':d=${d * 30}:s=${w}x${h}:fps=30`,
+];
 
 function escapeXml(str: string): string {
   return str
@@ -63,6 +90,19 @@ function wrapText(text: string, maxCharsPerLine: number): string[] {
   return lines;
 }
 
+function runCmd(cmd: string, args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(cmd, args);
+    let stderr = '';
+    proc.stderr?.on('data', (d) => { stderr += d.toString(); });
+    proc.on('close', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`${cmd} exited ${code}: ${stderr.slice(-500)}`));
+    });
+    proc.on('error', reject);
+  });
+}
+
 async function fetchImage(url: string): Promise<Buffer> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch image: ${url}`);
@@ -74,107 +114,82 @@ function getPbFileUrl(project: ProjectData, filename: string): string {
   return `${pbUrl}/api/files/${project.collectionId}/${project.id}/${filename}`;
 }
 
+// Generate oversized slide (130%) for Ken Burns headroom
 async function generateIntroSlide(
-  width: number,
-  height: number,
-  textOverlay: string
+  width: number, height: number, textOverlay: string
 ): Promise<Buffer> {
+  const w = Math.round(width * 1.3);
+  const h = Math.round(height * 1.3);
   const logoPath = path.join(process.cwd(), 'public', 'logofull.png');
   const bgPath = path.join(process.cwd(), 'public', 'background.png');
 
-  // Load and resize background to fill
-  let bg = sharp(bgPath).resize(width, height, { fit: 'cover' });
-  let bgBuffer = await bg.png().toBuffer();
-
-  // Load logo — scale to ~40% of width
-  const logoWidth = Math.round(width * 0.4);
+  const bgBuffer = await sharp(bgPath).resize(w, h, { fit: 'cover' }).png().toBuffer();
+  const logoWidth = Math.round(w * 0.4);
   const logoBuffer = await sharp(logoPath)
     .resize(logoWidth, undefined, { fit: 'inside', withoutEnlargement: true })
-    .png()
-    .toBuffer();
+    .png().toBuffer();
   const logoMeta = await sharp(logoBuffer).metadata();
   const logoH = logoMeta.height || 200;
+  const logoX = Math.round((w - logoWidth) / 2);
+  const logoY = Math.round(h * 0.25 - logoH / 2);
 
-  // Position logo centered, upper third
-  const logoX = Math.round((width - logoWidth) / 2);
-  const logoY = Math.round(height * 0.25 - logoH / 2);
-
-  // Tagline SVG
   const lines = wrapText(textOverlay, 30);
-  const fontSize = Math.round(width * 0.04);
+  const fontSize = Math.round(w * 0.04);
   const lineHeight = fontSize * 1.4;
   const svgLines = lines
-    .map(
-      (line, i) =>
-        `<text x="${width / 2}" y="${Math.round(height * 0.55 + i * lineHeight)}" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="${BRAND_PURPLE}" text-anchor="middle">${escapeXml(line)}</text>`
-    )
-    .join('');
-  const textSvg = Buffer.from(
-    `<svg width="${width}" height="${height}">${svgLines}</svg>`
-  );
+    .map((line, i) =>
+      `<text x="${w / 2}" y="${Math.round(h * 0.55 + i * lineHeight)}" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="${BRAND_PURPLE}" text-anchor="middle">${escapeXml(line)}</text>`
+    ).join('');
+  const textSvg = Buffer.from(`<svg width="${w}" height="${h}">${svgLines}</svg>`);
 
   return sharp(bgBuffer)
     .composite([
       { input: logoBuffer, left: logoX, top: Math.max(0, logoY) },
       { input: textSvg, left: 0, top: 0 },
     ])
-    .png()
-    .toBuffer();
+    .png().toBuffer();
 }
 
 async function generateProjectSlide(
-  width: number,
-  height: number,
-  project: ProjectData,
-  textOverlay: string
+  width: number, height: number, project: ProjectData, textOverlay: string
 ): Promise<Buffer> {
-  // Start with brand background
-  let base = sharp({
-    create: { width, height, channels: 4, background: BRAND_BG },
-  }).png();
-  let baseBuffer = await base.toBuffer();
+  const w = Math.round(width * 1.3);
+  const h = Math.round(height * 1.3);
 
-  // Try to get project photo
+  let baseBuffer = await sharp({
+    create: { width: w, height: h, channels: 4, background: BRAND_BG },
+  }).png().toBuffer();
+
   let photoBuffer: Buffer | null = null;
   const photoFile = project.cover_photo || (project.photos && project.photos[0]);
   if (photoFile) {
     try {
-      const url = getPbFileUrl(project, photoFile);
-      const raw = await fetchImage(url);
-      // Resize photo to fit ~80% of the canvas
-      const targetW = Math.round(width * 0.8);
-      const targetH = Math.round(height * 0.6);
+      const raw = await fetchImage(getPbFileUrl(project, photoFile));
       photoBuffer = await sharp(raw)
-        .resize(targetW, targetH, { fit: 'inside', withoutEnlargement: true })
-        .png()
-        .toBuffer();
-    } catch {
-      // Continue without photo
-    }
+        .rotate()
+        .resize(Math.round(w * 0.8), Math.round(h * 0.6), { fit: 'inside', withoutEnlargement: true })
+        .png().toBuffer();
+    } catch { /* continue without photo */ }
   }
 
   const composites: sharp.OverlayOptions[] = [];
-
   if (photoBuffer) {
     const meta = await sharp(photoBuffer).metadata();
-    const pw = meta.width || 0;
-    const ph = meta.height || 0;
     composites.push({
       input: photoBuffer,
-      left: Math.round((width - pw) / 2),
-      top: Math.round(height * 0.08),
+      left: Math.round((w - (meta.width || 0)) / 2),
+      top: Math.round(h * 0.08),
     });
   }
 
-  // Caption bar at bottom
-  const barHeight = Math.round(height * 0.22);
-  const barY = height - barHeight;
+  const barHeight = Math.round(h * 0.22);
+  const barY = h - barHeight;
   const barSvg = Buffer.from(
-    `<svg width="${width}" height="${height}">
-      <rect x="0" y="${barY}" width="${width}" height="${barHeight}" fill="rgba(20,17,30,0.9)"/>
-      <text x="${width / 2}" y="${barY + Math.round(barHeight * 0.35)}" font-family="sans-serif" font-size="${Math.round(width * 0.04)}" font-weight="bold" fill="${BRAND_PURPLE}" text-anchor="middle">${escapeXml(textOverlay)}</text>
-      <text x="${width / 2}" y="${barY + Math.round(barHeight * 0.6)}" font-family="sans-serif" font-size="${Math.round(width * 0.03)}" fill="#e2e8f0" text-anchor="middle">${escapeXml(project.name)}</text>
-      ${project.author_name ? `<text x="${width / 2}" y="${barY + Math.round(barHeight * 0.8)}" font-family="sans-serif" font-size="${Math.round(width * 0.025)}" fill="#94a3b8" text-anchor="middle">by ${escapeXml(project.author_name)}</text>` : ''}
+    `<svg width="${w}" height="${h}">
+      <rect x="0" y="${barY}" width="${w}" height="${barHeight}" fill="rgba(20,17,30,0.9)"/>
+      <text x="${w / 2}" y="${barY + Math.round(barHeight * 0.35)}" font-family="sans-serif" font-size="${Math.round(w * 0.04)}" font-weight="bold" fill="${BRAND_PURPLE}" text-anchor="middle">${escapeXml(textOverlay)}</text>
+      <text x="${w / 2}" y="${barY + Math.round(barHeight * 0.6)}" font-family="sans-serif" font-size="${Math.round(w * 0.03)}" fill="#e2e8f0" text-anchor="middle">${escapeXml(project.name)}</text>
+      ${project.author_name ? `<text x="${w / 2}" y="${barY + Math.round(barHeight * 0.8)}" font-family="sans-serif" font-size="${Math.round(w * 0.025)}" fill="#94a3b8" text-anchor="middle">by ${escapeXml(project.author_name)}</text>` : ''}
     </svg>`
   );
   composites.push({ input: barSvg, left: 0, top: 0 });
@@ -183,115 +198,261 @@ async function generateProjectSlide(
 }
 
 async function generateCtaSlide(
-  width: number,
-  height: number,
-  textOverlay: string
+  width: number, height: number, textOverlay: string
 ): Promise<Buffer> {
+  const w = Math.round(width * 1.3);
+  const h = Math.round(height * 1.3);
   const bgPath = path.join(process.cwd(), 'public', 'background.png');
-  const bgBuffer = await sharp(bgPath)
-    .resize(width, height, { fit: 'cover' })
-    .png()
-    .toBuffer();
+  const bgBuffer = await sharp(bgPath).resize(w, h, { fit: 'cover' }).png().toBuffer();
 
-  const fontSize = Math.round(width * 0.05);
-  const subSize = Math.round(width * 0.035);
-
+  const fontSize = Math.round(w * 0.05);
+  const subSize = Math.round(w * 0.035);
   const svgOverlay = Buffer.from(
-    `<svg width="${width}" height="${height}">
-      <rect x="0" y="0" width="${width}" height="${height}" fill="rgba(20,17,30,0.6)"/>
-      <text x="${width / 2}" y="${Math.round(height * 0.4)}" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="#ffffff" text-anchor="middle">${escapeXml(textOverlay)}</text>
-      <text x="${width / 2}" y="${Math.round(height * 0.52)}" font-family="sans-serif" font-size="${subSize}" fill="${BRAND_PURPLE}" text-anchor="middle">thepaintpile.com</text>
+    `<svg width="${w}" height="${h}">
+      <rect x="0" y="0" width="${w}" height="${h}" fill="rgba(20,17,30,0.6)"/>
+      <text x="${w / 2}" y="${Math.round(h * 0.4)}" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="#ffffff" text-anchor="middle">${escapeXml(textOverlay)}</text>
+      <text x="${w / 2}" y="${Math.round(h * 0.52)}" font-family="sans-serif" font-size="${subSize}" fill="${BRAND_PURPLE}" text-anchor="middle">thepaintpile.com</text>
     </svg>`
   );
 
   return sharp(bgBuffer)
     .composite([{ input: svgOverlay, left: 0, top: 0 }])
-    .png()
-    .toBuffer();
+    .png().toBuffer();
 }
 
-function assembleVideo(
-  slidePaths: string[],
-  durations: number[],
-  outputPath: string,
-  width: number,
-  height: number
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    // Build ffmpeg command with xfade transitions between slides
-    const transitionDuration = 0.5;
+async function generateScreenshotSlide(
+  width: number, height: number, url: string, textOverlay: string
+): Promise<Buffer> {
+  const w = Math.round(width * 1.3);
+  const h = Math.round(height * 1.3);
 
-    if (slidePaths.length === 0) {
-      return reject(new Error('No slides to assemble'));
-    }
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      executablePath: CHROMIUM_PATH,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+      headless: true,
+    });
+    const page = await browser.newPage();
+    await page.setViewport({ width: w, height: h });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 });
+    // Wait a bit for any animations
+    await new Promise(r => setTimeout(r, 1000));
+    const screenshot = await page.screenshot({ type: 'png' });
+    await browser.close();
+    browser = undefined;
 
-    if (slidePaths.length === 1) {
-      // Single slide — just convert image to video
-      const args = [
-        '-loop', '1',
-        '-i', slidePaths[0],
-        '-t', String(durations[0]),
-        '-c:v', 'libx264',
-        '-pix_fmt', 'yuv420p',
-        '-r', '30',
-        '-vf', `scale=${width}:${height}`,
-        '-y', outputPath,
-      ];
-      const proc = spawn('ffmpeg', args);
-      proc.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg exited ${code}`))));
-      proc.on('error', reject);
-      return;
-    }
+    let screenshotBuffer: Buffer = Buffer.from(new Uint8Array(screenshot));
 
-    // Multiple slides with xfade transitions
-    const args: string[] = [];
-
-    // Add all inputs as image loops
-    for (let i = 0; i < slidePaths.length; i++) {
-      args.push('-loop', '1', '-t', String(durations[i] + transitionDuration), '-i', slidePaths[i]);
-    }
-
-    // Build xfade filter chain
-    let filterParts: string[] = [];
-    let lastLabel = '[0:v]';
-
-    for (let i = 1; i < slidePaths.length; i++) {
-      const offset = durations.slice(0, i).reduce((a, b) => a + b, 0) - transitionDuration * i;
-      const outLabel = i === slidePaths.length - 1 ? '[outv]' : `[v${i}]`;
-      filterParts.push(
-        `${lastLabel}[${i}:v]xfade=transition=fade:duration=${transitionDuration}:offset=${Math.max(0, offset)}${outLabel}`
+    // Add text overlay bar at bottom
+    if (textOverlay) {
+      const barHeight = Math.round(h * 0.12);
+      const barY = h - barHeight;
+      const overlaySvg = Buffer.from(
+        `<svg width="${w}" height="${h}">
+          <rect x="0" y="${barY}" width="${w}" height="${barHeight}" fill="rgba(20,17,30,0.85)"/>
+          <text x="${w / 2}" y="${barY + Math.round(barHeight * 0.6)}" font-family="sans-serif" font-size="${Math.round(w * 0.03)}" font-weight="bold" fill="${BRAND_PURPLE}" text-anchor="middle">${escapeXml(textOverlay)}</text>
+        </svg>`
       );
-      lastLabel = outLabel;
+      screenshotBuffer = await sharp(screenshotBuffer)
+        .composite([{ input: overlaySvg, left: 0, top: 0 }])
+        .png().toBuffer();
     }
 
-    const filterComplex = filterParts.join(';');
-
-    args.push(
-      '-filter_complex', filterComplex,
-      '-map', '[outv]',
-      '-c:v', 'libx264',
-      '-pix_fmt', 'yuv420p',
-      '-r', '30',
-      '-y', outputPath,
+    return screenshotBuffer;
+  } catch (err) {
+    if (browser) await browser.close().catch(() => {});
+    // Fallback to CTA-style slide
+    return generateCtaSlide(
+      Math.round(width), Math.round(height), textOverlay || 'PaintPile'
     );
+  }
+}
 
-    const proc = spawn('ffmpeg', args);
+// Generate TTS narration for a slide using Piper
+async function generateNarration(text: string, outputPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(PIPER_PATH, [
+      '--model', PIPER_VOICE,
+      '--output_file', outputPath,
+    ]);
+    proc.stdin?.write(text);
+    proc.stdin?.end();
     let stderr = '';
     proc.stderr?.on('data', (d) => { stderr += d.toString(); });
     proc.on('close', (code) => {
       if (code === 0) resolve();
-      else reject(new Error(`ffmpeg exited ${code}: ${stderr.slice(-500)}`));
+      else reject(new Error(`Piper TTS failed: ${stderr.slice(-300)}`));
     });
     proc.on('error', reject);
   });
 }
 
+// Render a single slide with Ken Burns effect into a .mp4 clip
+async function renderKenBurnsClip(
+  slidePath: string, clipPath: string,
+  duration: number, width: number, height: number,
+  kbIndex: number
+): Promise<void> {
+  const kbFilter = KB_VARIANTS[kbIndex % KB_VARIANTS.length](duration, width, height);
+  const args = [
+    '-i', slidePath,
+    '-vf', kbFilter,
+    '-c:v', 'libx264',
+    '-pix_fmt', 'yuv420p',
+    '-t', String(duration),
+    '-y', clipPath,
+  ];
+  await runCmd('ffmpeg', args);
+}
+
+// Concatenate clips with xfade transitions
+async function concatenateClips(
+  clipPaths: string[], durations: number[], outputPath: string
+): Promise<void> {
+  if (clipPaths.length === 0) throw new Error('No clips');
+  if (clipPaths.length === 1) {
+    await fs.copyFile(clipPaths[0], outputPath);
+    return;
+  }
+
+  const transitionDuration = 0.5;
+  const args: string[] = [];
+  for (const clip of clipPaths) {
+    args.push('-i', clip);
+  }
+
+  const filterParts: string[] = [];
+  let lastLabel = '[0:v]';
+  for (let i = 1; i < clipPaths.length; i++) {
+    const offset = durations.slice(0, i).reduce((a, b) => a + b, 0) - transitionDuration * i;
+    const outLabel = i === clipPaths.length - 1 ? '[outv]' : `[v${i}]`;
+    filterParts.push(
+      `${lastLabel}[${i}:v]xfade=transition=fade:duration=${transitionDuration}:offset=${Math.max(0, offset)}${outLabel}`
+    );
+    lastLabel = outLabel;
+  }
+
+  args.push(
+    '-filter_complex', filterParts.join(';'),
+    '-map', '[outv]',
+    '-c:v', 'libx264',
+    '-pix_fmt', 'yuv420p',
+    '-y', outputPath,
+  );
+  await runCmd('ffmpeg', args);
+}
+
+// Build combined narration audio track with silence padding per slide
+async function buildNarrationTrack(
+  slides: SlideScript[], durations: number[], tmpDir: string
+): Promise<string | null> {
+  const narrationParts: string[] = [];
+  let hasAny = false;
+
+  for (let i = 0; i < slides.length; i++) {
+    const text = slides[i].narration;
+    const partPath = path.join(tmpDir, `narr_${i}.wav`);
+    const paddedPath = path.join(tmpDir, `narr_padded_${i}.wav`);
+
+    if (text && text.trim()) {
+      await generateNarration(text, partPath);
+      // Pad/trim to match slide duration
+      await runCmd('ffmpeg', [
+        '-i', partPath,
+        '-af', `apad=whole_dur=${durations[i]}`,
+        '-t', String(durations[i]),
+        '-y', paddedPath,
+      ]);
+      narrationParts.push(paddedPath);
+      hasAny = true;
+    } else {
+      // Generate silence for this slide's duration
+      await runCmd('ffmpeg', [
+        '-f', 'lavfi', '-i', `anullsrc=r=22050:cl=mono`,
+        '-t', String(durations[i]),
+        '-y', paddedPath,
+      ]);
+      narrationParts.push(paddedPath);
+    }
+  }
+
+  if (!hasAny) return null;
+
+  // Concatenate all narration parts
+  const listFile = path.join(tmpDir, 'narr_list.txt');
+  await fs.writeFile(listFile, narrationParts.map(p => `file '${p}'`).join('\n'));
+  const combinedPath = path.join(tmpDir, 'narration.wav');
+  await runCmd('ffmpeg', [
+    '-f', 'concat', '-safe', '0', '-i', listFile,
+    '-y', combinedPath,
+  ]);
+  return combinedPath;
+}
+
+// Mix video + narration + background music
+async function mixAudio(
+  videoPath: string, narrationPath: string | null, musicTrack: string | false | undefined,
+  outputPath: string
+): Promise<void> {
+  const musicPath = musicTrack && musicTrack !== 'none'
+    ? path.join(process.cwd(), 'public', 'music', `${musicTrack}.mp3`)
+    : path.join(process.cwd(), 'public', 'music', 'ambient-default.mp3');
+
+  const hasMusic = musicTrack !== false;
+  let musicExists = false;
+  if (hasMusic) {
+    try { await fs.access(musicPath); musicExists = true; } catch { /* no music file */ }
+  }
+
+  if (!narrationPath && !musicExists) {
+    await fs.copyFile(videoPath, outputPath);
+    return;
+  }
+
+  const args: string[] = ['-i', videoPath];
+  const filterParts: string[] = [];
+  let audioInputs = 0;
+
+  if (narrationPath) {
+    args.push('-i', narrationPath);
+    audioInputs++;
+    filterParts.push(`[${audioInputs}:a]volume=1.0[vo]`);
+  }
+
+  if (musicExists) {
+    args.push('-stream_loop', '-1', '-i', musicPath);
+    audioInputs++;
+    const musicVol = narrationPath ? '0.1' : '0.25';
+    filterParts.push(`[${audioInputs}:a]volume=${musicVol}[bgm]`);
+  }
+
+  // Mix audio streams
+  if (narrationPath && musicExists) {
+    filterParts.push('[vo][bgm]amix=inputs=2:duration=first[aout]');
+  } else if (narrationPath) {
+    filterParts.push('[vo]acopy[aout]');
+  } else if (musicExists) {
+    filterParts.push('[bgm]acopy[aout]');
+  }
+
+  args.push(
+    '-filter_complex', filterParts.join(';'),
+    '-map', '0:v',
+    '-map', '[aout]',
+    '-c:v', 'copy',
+    '-c:a', 'aac',
+    '-shortest',
+    '-y', outputPath,
+  );
+  await runCmd('ffmpeg', args);
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body: CommercialRequest = await req.json();
-    const { projects, script, format, secret } = body;
+    const { projects, script, format, secret, music, voiceover } = body;
 
-    // Validate secret
     const expectedSecret = process.env.VIDEO_API_SECRET;
     if (!expectedSecret || secret !== expectedSecret) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -313,7 +474,7 @@ export async function POST(req: NextRequest) {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'paintpile-video-'));
 
     try {
-      // Generate slide images
+      // Phase 1: Generate slide images (oversized for Ken Burns)
       const slidePaths: string[] = [];
       const durations: number[] = [];
 
@@ -334,9 +495,12 @@ export async function POST(req: NextRequest) {
             }
             break;
           }
-          case 'cta':
-            slideBuffer = await generateCtaSlide(width, height, slide.text_overlay);
+          case 'screenshot':
+            slideBuffer = await generateScreenshotSlide(
+              width, height, slide.url || 'https://thepaintpile.com', slide.text_overlay
+            );
             break;
+          case 'cta':
           default:
             slideBuffer = await generateCtaSlide(width, height, slide.text_overlay);
         }
@@ -347,14 +511,35 @@ export async function POST(req: NextRequest) {
         durations.push(slide.duration || 5);
       }
 
-      // Assemble into MP4
-      const outputPath = path.join(tmpDir, 'commercial.mp4');
-      await assembleVideo(slidePaths, durations, outputPath, width, height);
+      // Phase 2: Render Ken Burns clips
+      const clipPaths: string[] = [];
+      for (let i = 0; i < slidePaths.length; i++) {
+        const clipPath = path.join(tmpDir, `clip_${String(i).padStart(3, '0')}.mp4`);
+        const kbType = script[i].ken_burns;
+        const kbIndex = kbType
+          ? ['zoom_in', 'zoom_out', 'pan_left', 'pan_right'].indexOf(kbType)
+          : i; // Auto-cycle through variants
+        await renderKenBurnsClip(slidePaths[i], clipPath, durations[i], width, height, kbIndex >= 0 ? kbIndex : i);
+        clipPaths.push(clipPath);
+      }
 
-      // Read the output video
+      // Phase 3: Concatenate clips with transitions
+      const silentVideoPath = path.join(tmpDir, 'video_silent.mp4');
+      await concatenateClips(clipPaths, durations, silentVideoPath);
+
+      // Phase 4: Generate narration (if voiceover enabled and narration text provided)
+      let narrationPath: string | null = null;
+      if (voiceover) {
+        narrationPath = await buildNarrationTrack(script, durations, tmpDir);
+      }
+
+      // Phase 5: Mix audio (narration + background music)
+      const outputPath = path.join(tmpDir, 'commercial.mp4');
+      await mixAudio(silentVideoPath, narrationPath, music, outputPath);
+
       const videoBuffer = await fs.readFile(outputPath);
 
-      return new NextResponse(videoBuffer, {
+      return new NextResponse(videoBuffer as unknown as BodyInit, {
         status: 200,
         headers: {
           'Content-Type': 'video/mp4',
@@ -363,7 +548,6 @@ export async function POST(req: NextRequest) {
         },
       });
     } finally {
-      // Cleanup temp files
       await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
     }
   } catch (error) {
