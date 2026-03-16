@@ -39,6 +39,7 @@ export async function GET(
 
     if ((w || h) && contentType.startsWith('image/')) {
       buffer = await sharp(buffer)
+        .rotate()
         .resize(w ? parseInt(w, 10) : undefined, h ? parseInt(h, 10) : undefined, {
           fit: 'inside',
           withoutEnlargement: true,
