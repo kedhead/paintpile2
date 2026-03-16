@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
-import { spawn, execFile } from 'child_process';
+import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
@@ -44,8 +44,7 @@ const FORMAT_DIMENSIONS: Record<string, { width: number; height: number }> = {
 
 const BRAND_BG = '#14111e';
 const BRAND_PURPLE = '#a78bfa';
-const PIPER_PATH = process.env.PIPER_PATH || '/opt/piper/piper/piper';
-const PIPER_VOICE = process.env.PIPER_VOICE || '/opt/piper/voices/en_US-lessac-medium.onnx';
+const ONEMIN_API_KEY = process.env.ONEMIN_API_KEY || '';
 const CHROMIUM_PATH = process.env.CHROMIUM_PATH || '/usr/bin/chromium-browser';
 
 // Ken Burns variants cycle through for variety
@@ -269,23 +268,61 @@ async function generateScreenshotSlide(
   }
 }
 
-// Generate TTS narration for a slide using Piper
+// Generate TTS narration using 1min.ai (OpenAI TTS)
 async function generateNarration(text: string, outputPath: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(PIPER_PATH, [
-      '--model', PIPER_VOICE,
-      '--output_file', outputPath,
-    ]);
-    proc.stdin?.write(text);
-    proc.stdin?.end();
-    let stderr = '';
-    proc.stderr?.on('data', (d) => { stderr += d.toString(); });
-    proc.on('close', (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(`Piper TTS failed: ${stderr.slice(-300)}`));
-    });
-    proc.on('error', reject);
+  if (!ONEMIN_API_KEY) {
+    throw new Error('ONEMIN_API_KEY not configured');
+  }
+
+  const res = await fetch('https://api.1min.ai/api/features', {
+    method: 'POST',
+    headers: {
+      'API-KEY': ONEMIN_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      type: 'TEXT_TO_SPEECH',
+      model: 'tts-1',
+      conversationId: 'TEXT_TO_SPEECH',
+      promptObject: {
+        text,
+        voice: 'nova',
+        response_format: 'mp3',
+        speed: 1,
+      },
+    }),
   });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(`1min.ai TTS failed (${res.status}): ${errText.slice(0, 300)}`);
+  }
+
+  const data = await res.json();
+  // 1min.ai returns { aiRecord: { ..., fileUrl: "https://..." } }
+  const fileUrl = data?.aiRecord?.fileUrl;
+  if (!fileUrl) {
+    throw new Error('1min.ai TTS returned no audio URL');
+  }
+
+  // Download the audio file
+  const audioRes = await fetch(fileUrl);
+  if (!audioRes.ok) {
+    throw new Error(`Failed to download TTS audio: ${audioRes.status}`);
+  }
+  const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+  await fs.writeFile(outputPath, audioBuffer);
+
+  // Convert mp3 to wav for consistent ffmpeg handling
+  if (outputPath.endsWith('.wav')) {
+    await fs.rename(outputPath, outputPath + '.mp3');
+    await runCmd('ffmpeg', [
+      '-i', outputPath + '.mp3',
+      '-ar', '22050', '-ac', '1',
+      '-y', outputPath,
+    ]);
+    await fs.unlink(outputPath + '.mp3').catch(() => {});
+  }
 }
 
 // Render a single slide with Ken Burns effect into a .mp4 clip
@@ -390,19 +427,74 @@ async function buildNarrationTrack(
   return combinedPath;
 }
 
+// Generate background music using 1min.ai Lyria
+async function generateBackgroundMusic(outputPath: string): Promise<void> {
+  if (!ONEMIN_API_KEY) {
+    throw new Error('ONEMIN_API_KEY not configured for music generation');
+  }
+
+  const res = await fetch('https://api.1min.ai/api/features', {
+    method: 'POST',
+    headers: {
+      'API-KEY': ONEMIN_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      type: 'MUSIC_GENERATOR',
+      model: 'lyria-002',
+      conversationId: 'MUSIC_GENERATOR',
+      promptObject: {
+        prompt: 'ambient calm electronic background music, uplifting and modern, soft synth pads, gentle melody, cinematic promotional feel',
+        negative_prompt: 'vocals singing lyrics heavy metal screaming distortion',
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(`1min.ai music generation failed (${res.status}): ${errText.slice(0, 300)}`);
+  }
+
+  const data = await res.json();
+  const fileUrl = data?.temporaryUrl;
+  if (!fileUrl) {
+    throw new Error('1min.ai music generation returned no audio URL');
+  }
+
+  const audioRes = await fetch(fileUrl);
+  if (!audioRes.ok) {
+    throw new Error(`Failed to download generated music: ${audioRes.status}`);
+  }
+  const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+  await fs.writeFile(outputPath, audioBuffer);
+}
+
 // Mix video + narration + background music
 async function mixAudio(
   videoPath: string, narrationPath: string | null, musicTrack: string | false | undefined,
   outputPath: string
 ): Promise<void> {
-  const musicPath = musicTrack && musicTrack !== 'none'
-    ? path.join(process.cwd(), 'public', 'music', `${musicTrack}.mp3`)
-    : path.join(process.cwd(), 'public', 'music', 'ambient-default.mp3');
-
-  const hasMusic = musicTrack !== false;
+  let musicPath: string | null = null;
   let musicExists = false;
+  const hasMusic = musicTrack !== false;
+
   if (hasMusic) {
-    try { await fs.access(musicPath); musicExists = true; } catch { /* no music file */ }
+    const namedPath = musicTrack && musicTrack !== 'none'
+      ? path.join(process.cwd(), 'public', 'music', `${musicTrack}.mp3`)
+      : path.join(process.cwd(), 'public', 'music', 'ambient-default.mp3');
+    try {
+      await fs.access(namedPath);
+      musicPath = namedPath;
+      musicExists = true;
+    } catch {
+      // No music file found — generate via AI
+      if (ONEMIN_API_KEY) {
+        const tmpMusic = outputPath.replace('.mp4', '_aigen.wav');
+        await generateBackgroundMusic(tmpMusic);
+        musicPath = tmpMusic;
+        musicExists = true;
+      }
+    }
   }
 
   if (!narrationPath && !musicExists) {
@@ -420,7 +512,7 @@ async function mixAudio(
     filterParts.push(`[${audioInputs}:a]volume=1.0[vo]`);
   }
 
-  if (musicExists) {
+  if (musicExists && musicPath) {
     args.push('-stream_loop', '-1', '-i', musicPath);
     audioInputs++;
     const musicVol = narrationPath ? '0.1' : '0.25';
