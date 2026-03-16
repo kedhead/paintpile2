@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import sharp from 'sharp';
 
 /**
  * Proxy PocketBase file URLs through HTTPS.
  * Usage: /api/files/{collectionId}/{recordId}/{filename}
- * This allows Instagram (which requires HTTPS image URLs) to access PocketBase files.
+ * Optional query params:
+ *   ?w=400&h=400  — resize to fit within dimensions
+ *   ?q=80         — JPEG quality (default 80)
  */
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await params;
@@ -25,8 +28,24 @@ export async function GET(
       return new NextResponse(null, { status: res.status });
     }
 
-    const contentType = res.headers.get('content-type') || 'application/octet-stream';
-    const buffer = Buffer.from(await res.arrayBuffer());
+    let buffer = Buffer.from(await res.arrayBuffer());
+    let contentType = res.headers.get('content-type') || 'application/octet-stream';
+
+    // Resize if w or h query params are provided
+    const w = req.nextUrl.searchParams.get('w');
+    const h = req.nextUrl.searchParams.get('h');
+    const q = parseInt(req.nextUrl.searchParams.get('q') || '80', 10);
+
+    if ((w || h) && contentType.startsWith('image/')) {
+      buffer = await sharp(buffer)
+        .resize(w ? parseInt(w, 10) : undefined, h ? parseInt(h, 10) : undefined, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .jpeg({ quality: q })
+        .toBuffer();
+      contentType = 'image/jpeg';
+    }
 
     return new NextResponse(buffer, {
       status: 200,
