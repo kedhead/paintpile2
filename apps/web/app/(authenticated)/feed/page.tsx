@@ -19,7 +19,7 @@ export default function FeedPage() {
 
   const { data: followingIds = [] } = useFollowingIds(user?.id || '');
   const discover = useDiscoverFeed();
-  const following = useFollowingFeed(followingIds);
+  const following = useFollowingFeed(user ? followingIds : []);
   const { data: liveStreams = [] } = useLiveStreams();
 
   const feed = activeTab === 'discover' ? discover : following;
@@ -49,9 +49,11 @@ export default function FeedPage() {
         <div className="flex-1">
           <CreatePostForm />
         </div>
-        <div className="pt-1">
-          <GoLiveButton />
-        </div>
+        {user && (
+          <div className="pt-1">
+            <GoLiveButton />
+          </div>
+        )}
       </div>
 
       {/* Live Streams */}
@@ -63,9 +65,11 @@ export default function FeedPage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-border bg-card">
-        <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
+      {user && (
+        <div className="rounded-lg border border-border bg-card">
+          <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
+      )}
 
       <div className="space-y-4">
         {feed.isLoading ? (

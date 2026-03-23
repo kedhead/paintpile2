@@ -1,8 +1,13 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Palette, Camera, Brain, Users, Award, ChefHat,
   MessageSquare, BarChart3, Share2, Zap, Shield, Sparkles,
 } from 'lucide-react';
+import { useAuth } from '../components/auth-provider';
 
 const features = [
   {
@@ -92,6 +97,17 @@ const features = [
 ];
 
 export default function HomePage() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      router.replace('/feed');
+    }
+  }, [user, router]);
+
+  if (user) return null;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}

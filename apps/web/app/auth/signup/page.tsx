@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupSchema, type SignupInput } from '@paintpile/shared';
 import { getClient } from '../../../lib/pocketbase';
+import { logActivity } from '../../../hooks/use-activities';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -39,6 +40,15 @@ export default function SignupPage() {
       // Auto-login after signup
       await pb.collection('users').authWithPassword(data.email, data.password);
       document.cookie = `pb_auth=${pb.authStore.token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+
+      // Log "user joined" activity
+      await logActivity(pb, pb.authStore.record!.id, {
+        type: 'user_joined',
+        target_id: pb.authStore.record!.id,
+        target_type: 'user',
+        metadata: { display_name: data.displayName },
+      });
+
       router.push('/feed');
       router.refresh();
     } catch (err: unknown) {

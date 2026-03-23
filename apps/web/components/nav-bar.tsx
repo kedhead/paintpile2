@@ -8,7 +8,7 @@ import {
   Home, User, Palette, LogOut, Users, Shield,
   ChefHat, Boxes, Sun, MoreHorizontal, Settings,
   Activity, BookOpen, Newspaper, Globe, BarChart3,
-  Trophy, Award, Crosshair,
+  Trophy, Award, Crosshair, LogIn, UserPlus,
 } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
 import { ThemeToggle } from './theme-toggle';
@@ -50,15 +50,13 @@ export function NavBar() {
   const { user, signOut } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
 
-  if (!user) return null;
-
   const allMoreItems = [...moreNavItems, ...toolsItems, ...bottomItems];
   const isMoreActive = allMoreItems.some(({ href }) => pathname.startsWith(href));
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <Link href="/feed" className="flex items-center gap-2">
+        <Link href={user ? '/feed' : '/'} className="flex items-center gap-2">
           <img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" />
         </Link>
 
@@ -142,40 +140,65 @@ export function NavBar() {
                     );
                   })}
 
-                  <div className="my-1 border-t border-border" />
-                  {bottomItems.map(({ href, label, icon: Icon }) => {
-                    const isActive = pathname.startsWith(href);
-                    return (
-                      <Link
-                        key={href}
-                        href={href}
-                        onClick={() => setMoreOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                          isActive
-                            ? 'bg-primary/10 text-primary'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {label}
-                      </Link>
-                    );
-                  })}
+                  {user && (
+                    <>
+                      <div className="my-1 border-t border-border" />
+                      {bottomItems.map(({ href, label, icon: Icon }) => {
+                        const isActive = pathname.startsWith(href);
+                        return (
+                          <Link
+                            key={href}
+                            href={href}
+                            onClick={() => setMoreOpen(false)}
+                            className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+                              isActive
+                                ? 'bg-primary/10 text-primary'
+                                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+                            {label}
+                          </Link>
+                        );
+                      })}
+                    </>
+                  )}
                 </div>
               </>
             )}
           </div>
 
           <ThemeToggle />
-          <NotificationBell />
 
-          <button
-            onClick={signOut}
-            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </button>
+          {user ? (
+            <>
+              <NotificationBell />
+              <button
+                onClick={signOut}
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <LogIn className="h-4 w-4" />
+                <span className="hidden sm:inline">Login</span>
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/80"
+              >
+                <UserPlus className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign Up</span>
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>

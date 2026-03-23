@@ -10,7 +10,8 @@ import { useCreatePost } from '../../hooks/use-posts';
 import { MediaUpload, type MediaFile } from './media-upload';
 import { TextOverlayEditor } from './text-overlay-editor';
 import { UserAvatar } from '../social/user-avatar';
-import { Loader2, Send } from 'lucide-react';
+import { LoginPrompt } from '../auth/login-prompt';
+import { Loader2, Send, PenSquare } from 'lucide-react';
 
 export function CreatePostForm() {
   const { user } = useAuth();
@@ -73,7 +74,23 @@ export function CreatePostForm() {
     [overlayEditorIndex]
   );
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <LoginPrompt action="share your work">
+        {(open) => (
+          <button
+            onClick={open}
+            className="w-full rounded-lg border border-border bg-card p-4 text-left text-sm text-muted-foreground hover:border-primary/40 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <PenSquare className="h-5 w-5" />
+              <span>Sign in to share what you&apos;re painting...</span>
+            </div>
+          </button>
+        )}
+      </LoginPrompt>
+    );
+  }
 
   // Find the image file for the overlay editor
   const imageFiles = mediaFiles.filter((f) => f.type === 'image');

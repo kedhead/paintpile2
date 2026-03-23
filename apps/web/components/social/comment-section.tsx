@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageCircle } from 'lucide-react';
+import Link from 'next/link';
+import { MessageCircle, LogIn } from 'lucide-react';
 import { useComments, useCreateComment } from '../../hooks/use-comments';
 import { CommentForm } from './comment-form';
 import { CommentItem } from './comment-item';
@@ -41,9 +42,19 @@ export function CommentSection({ targetId, targetType, commentCount }: CommentSe
             <CommentItem key={comment.id} comment={comment} />
           ))}
 
-          {user && (
+          {user ? (
             <div className="pt-1">
               <CommentForm onSubmit={handleCreate} isPending={createComment.isPending} />
+            </div>
+          ) : (
+            <div className="pt-2 text-center">
+              <Link
+                href="/auth/login"
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                Sign in to comment
+              </Link>
             </div>
           )}
         </div>

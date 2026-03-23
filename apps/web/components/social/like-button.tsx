@@ -3,6 +3,7 @@
 import { Heart } from 'lucide-react';
 import { useHasLiked, useToggleLike } from '../../hooks/use-likes';
 import { useAuth } from '../auth-provider';
+import { LoginPrompt } from '../auth/login-prompt';
 
 interface LikeButtonProps {
   targetId: string;
@@ -16,9 +17,24 @@ export function LikeButton({ targetId, targetType, initialCount }: LikeButtonPro
   const toggleLike = useToggleLike();
 
   const handleClick = () => {
-    if (!user) return;
     toggleLike.mutate({ targetId, targetType, liked });
   };
+
+  if (!user) {
+    return (
+      <LoginPrompt action="like this">
+        {(open) => (
+          <button
+            onClick={open}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-red-400"
+          >
+            <Heart className="h-4 w-4" />
+            <span>{initialCount}</span>
+          </button>
+        )}
+      </LoginPrompt>
+    );
+  }
 
   return (
     <button
