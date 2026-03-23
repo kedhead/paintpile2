@@ -22,6 +22,7 @@ export default function ManageUsersPage() {
   const [email, setEmail] = useState('');
   const [searching, setSearching] = useState(false);
   const [foundUser, setFoundUser] = useState<UserResult | null>(null);
+  const [userList, setUserList] = useState<UserResult[]>([]);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
 
@@ -29,6 +30,7 @@ export default function ManageUsersPage() {
     setSearching(true);
     setError('');
     setFoundUser(null);
+    setUserList([]);
     try {
       const res = await fetch('/api/admin/search-user', {
         method: 'POST',
@@ -37,7 +39,11 @@ export default function ManageUsersPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setFoundUser(data.user);
+        if (data.users) {
+          setUserList(data.users);
+        } else {
+          setFoundUser(data.user);
+        }
       } else {
         setError(data.error || 'User not found');
       }
@@ -72,6 +78,11 @@ export default function ManageUsersPage() {
     setUpdating(false);
   }
 
+  function selectUser(user: UserResult) {
+    setFoundUser(user);
+    setUserList([]);
+  }
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-3">
@@ -83,8 +94,8 @@ export default function ManageUsersPage() {
 
       <div className="flex gap-2">
         <input
-          type="email"
-          placeholder="Search by email..."
+          type="text"
+          placeholder="Search by email, name, username, or * for all..."
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && searchUser()}
@@ -106,8 +117,52 @@ export default function ManageUsersPage() {
         </div>
       )}
 
+      {/* User list from wildcard search */}
+      {userList.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">{userList.length} users found</p>
+          <div className="border border-border rounded-lg divide-y divide-border">
+            {userList.map((u) => (
+              <button
+                key={u.id}
+                onClick={() => selectUser(u)}
+                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {u.name || u.username || 'No name'}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                </div>
+                <div className="flex items-center gap-2 text-xs shrink-0 ml-3">
+                  <span className="text-muted-foreground">
+                    {new Date(u.created).toLocaleDateString()}
+                  </span>
+                  {u.role === 'admin' && (
+                    <span className="rounded-full bg-primary/20 px-2 py-0.5 text-primary font-medium">
+                      admin
+                    </span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {foundUser && (
         <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">User Details</h2>
+            {userList.length === 0 && (
+              <button
+                onClick={() => { setFoundUser(null); setEmail('*'); searchUser(); }}
+                className="text-xs text-primary hover:underline"
+              >
+                Back to list
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
               <span className="text-muted-foreground">Name:</span>

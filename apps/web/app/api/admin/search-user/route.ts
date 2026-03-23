@@ -11,7 +11,30 @@ export async function POST(req: NextRequest) {
 
     const { pb } = await validateAdminAuth(pbToken);
 
-    const user = await pb.collection('users').getFirstListItem(`email="${email}"`);
+    // Support wildcard "*" to list all users, or search by email/name/username
+    if (email === '*') {
+      const result = await pb.collection('users').getList(1, 100, {
+        sort: '-created',
+      });
+      return NextResponse.json({
+        success: true,
+        users: result.items.map((u) => ({
+          id: u.id,
+          email: u.email,
+          name: u.name,
+          username: u.username,
+          role: u.role,
+          ai_enabled: u.ai_enabled,
+          subscription: u.subscription,
+          created: u.created,
+          updated: u.updated,
+        })),
+      });
+    }
+
+    const user = await pb.collection('users').getFirstListItem(
+      `email="${email}" || name~"${email}" || username~"${email}"`
+    );
 
     return NextResponse.json({
       success: true,
