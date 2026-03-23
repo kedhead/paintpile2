@@ -152,7 +152,7 @@ export function ShareScoreButton({ projectId, projectName, critique, imageUrl }:
           <CritiqueShowcaseCard
             cardId={cardId}
             projectName={projectName}
-            critique={critique as Parameters<typeof CritiqueShowcaseCard>[0]['critique']}
+            critique={critique as unknown as Parameters<typeof CritiqueShowcaseCard>[0]['critique']}
             imageUrl={imageUrl}
           />
         </div>
