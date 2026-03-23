@@ -52,16 +52,45 @@ export function useCreatePalettePost() {
       formData.append('layout', data.layout);
       formData.append('caption', data.caption);
       formData.append('is_public', String(data.is_public));
+      formData.append('mode', data.mode);
+      if (data.attribution) formData.append('attribution', data.attribution);
       if (data.project) formData.append('project', data.project);
 
       if (data.imageBlob) {
         formData.append('image', new File([data.imageBlob], 'palette-post.png', { type: 'image/png' }));
       }
 
-      if (data.mediaFiles) {
-        for (const file of data.mediaFiles) {
-          formData.append('media', file);
-        }
+      // Build ordered media file list and steps JSON with mediaIndex references.
+      // Order: cover file first (index 0), then each step's file in order.
+      // Steps without a file get mediaIndex: null.
+      const orderedMediaFiles: File[] = [];
+
+      let coverMediaIndex: number | null = null;
+      if (data.coverImageFile) {
+        coverMediaIndex = orderedMediaFiles.length;
+        orderedMediaFiles.push(data.coverImageFile);
+      }
+
+      const stepsJson = {
+        coverMediaIndex,
+        items: data.steps.map((step) => {
+          let mediaIndex: number | null = null;
+          if (step.imageFile) {
+            mediaIndex = orderedMediaFiles.length;
+            orderedMediaFiles.push(step.imageFile);
+          }
+          return {
+            description: step.description,
+            paints: step.paints,
+            mediaIndex,
+          };
+        }),
+      };
+
+      formData.append('steps', JSON.stringify(stepsJson));
+
+      for (const file of orderedMediaFiles) {
+        formData.append('media', file);
       }
 
       return pb.collection('palette_posts').create(formData);

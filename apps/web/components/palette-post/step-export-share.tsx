@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Save, Check, Copy, Loader2, Images } from 'lucide-react';
+import { Download, Save, Check, Copy, Loader2, Images, Sparkles, Link2 } from 'lucide-react';
 import { CarouselPreview, buildCards } from './carousel-preview';
 import { TutorialCard } from './tutorial-card';
 import { generateCaption } from '../../lib/caption-generator';
 import { useCreatePalettePost } from '../../hooks/use-palette-posts';
+import { useAuth } from '../auth-provider';
 import type { PalettePostData } from '../../lib/palette-post-types';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://thepaintpile.com';
@@ -22,7 +23,10 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
   const [saved, setSaved] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [generatingCaption, setGeneratingCaption] = useState(false);
   const createPost = useCreatePalettePost();
+  const { pb } = useAuth();
 
   const cards = buildCards(data);
 
@@ -117,6 +121,52 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const shareUrl = savedId ? `${SITE_URL}/share/palette-post/${savedId}` : null;
+
+  const handleCopyLink = async () => {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = shareUrl;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleGenerateCaption = async () => {
+    setGeneratingCaption(true);
+    try {
+      const res = await fetch('/api/ai/palette-post-caption', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: data.title,
+          paints: data.paints,
+          steps: data.steps.map((s) => ({ description: s.description })),
+          pbToken: pb.authStore.token,
+        }),
+      });
+      const json = await res.json();
+      if (json.success && json.data?.caption) {
+        onChange({ caption: json.data.caption });
+      } else {
+        alert(json.error || 'Caption generation failed');
+      }
+    } catch {
+      alert('Caption generation failed');
+    } finally {
+      setGeneratingCaption(false);
+    }
+  };
+
+  const hasVideo = cards.some((c) => c.imageFile?.type.startsWith('video/'));
+
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       {/* Carousel preview */}
@@ -133,15 +183,29 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
       <div className="space-y-5 lg:w-80">
         {/* Caption */}
         <div>
-          <div className="mb-1.5 flex items-center justify-between">
+          <div className="mb-1.5 flex items-center justify-between gap-2">
             <label className="text-xs font-semibold text-foreground">Caption</label>
-            <button
-              onClick={handleCopyCaption}
-              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
-            >
-              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleGenerateCaption}
+                disabled={generatingCaption}
+                className="flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 disabled:opacity-50"
+              >
+                {generatingCaption ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
+                {generatingCaption ? 'Generating…' : 'AI Caption'}
+              </button>
+              <button
+                onClick={handleCopyCaption}
+                className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
+              >
+                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
           </div>
           <textarea
             value={data.caption}
@@ -172,22 +236,45 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
         </div>
 
         {saved && savedId && (
-          <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3">
+          <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 space-y-2">
             <p className="text-sm font-medium text-green-400">Saved to gallery!</p>
-            {data.is_public && (
-              <p className="mt-1 break-all text-xs text-green-400/70">
-                {SITE_URL}/share/palette-post/{savedId}
-              </p>
+            {data.is_public && shareUrl && (
+              <>
+                <p className="break-all text-xs text-green-400/70">{shareUrl}</p>
+                <button
+                  onClick={handleCopyLink}
+                  className="flex items-center gap-1.5 rounded-md bg-green-500/20 px-3 py-1.5 text-xs font-medium text-green-400 hover:bg-green-500/30 w-full justify-center"
+                >
+                  {copiedLink ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+                  {copiedLink ? 'Link copied!' : 'Copy share link'}
+                </button>
+              </>
             )}
           </div>
         )}
 
         {/* Action buttons */}
         <div className="flex flex-col gap-2">
+          {/* Save first — always the primary action */}
+          <button
+            onClick={handleSaveToGallery}
+            disabled={saving || saved}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/80 disabled:opacity-50"
+          >
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : saved ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {saved ? 'Saved to Gallery' : 'Save to Gallery'}
+          </button>
+
           <button
             onClick={handleDownloadAll}
             disabled={downloading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/80 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
           >
             {downloading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -199,23 +286,8 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
             {downloading
               ? 'Downloading…'
               : cards.length > 1
-              ? `Download ${cards.length} Cards`
+              ? `Download ${cards.length} PNGs${hasVideo ? ' (videos as thumbnails)' : ''}`
               : 'Download PNG'}
-          </button>
-
-          <button
-            onClick={handleSaveToGallery}
-            disabled={saving || saved}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
-          >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : saved ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            {saved ? 'Saved to Gallery' : 'Save to Gallery'}
           </button>
         </div>
       </div>

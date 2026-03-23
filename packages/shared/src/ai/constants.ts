@@ -7,7 +7,8 @@ export type AIOperation =
   | 'recipeGeneration'
   | 'techniqueAdvisor'
   | 'recipeVideoScript'
-  | 'recipeVideoAI';
+  | 'recipeVideoAI'
+  | 'palettePostCaption';
 
 export interface UsageStats {
   totalCreditsUsed: number;
@@ -23,6 +24,7 @@ export interface UsageStats {
     techniqueAdvisor: number;
     recipeVideoScript: number;
     recipeVideoAI: number;
+    palettePostCaption: number;
   };
   quotaLimit: number;
   remainingCredits: number;
@@ -44,6 +46,7 @@ export const OPERATION_COSTS = {
   techniqueAdvisor: 8,
   recipeVideoScript: 15,
   recipeVideoAI: 50,
+  palettePostCaption: 5,
 } as const;
 
 export function creditsToDollars(credits: number): string {
