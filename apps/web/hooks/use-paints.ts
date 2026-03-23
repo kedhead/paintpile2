@@ -102,6 +102,22 @@ export function useCreateCustomPaint() {
   });
 }
 
+export function useAllPaintsForMatching() {
+  const { pb } = useAuth();
+
+  return useQuery({
+    queryKey: [...queryKeys.paints.all, 'matching'],
+    queryFn: async () => {
+      return pb.collection('paints').getFullList({
+        fields: 'id,name,brand,hex_color',
+        sort: 'brand,name',
+        batch: 500,
+      });
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 export function usePaintBrands() {
   const { pb } = useAuth();
 

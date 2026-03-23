@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Upload, Crosshair, Loader2 } from 'lucide-react';
 import { findTopMatches, type PaintMatch } from '../../lib/color-math';
-import { usePaintDatabase } from '../../hooks/use-paints';
+import { useAllPaintsForMatching } from '../../hooks/use-paints';
 import { useMyInventory } from '../../hooks/use-paints';
 
 export function ColorMatcher() {
@@ -12,10 +12,10 @@ export function ColorMatcher() {
   const [matches, setMatches] = useState<PaintMatch[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const { data: paintsResult } = usePaintDatabase();
+  const { data: paintsResult } = useAllPaintsForMatching();
   const { data: inventory } = useMyInventory();
 
-  const paints = (paintsResult?.pages.flatMap((p) => p.items) || []) as unknown as { id: string; name: string; brand: string; hex_color: string }[];
+  const paints = (paintsResult || []) as unknown as { id: string; name: string; brand: string; hex_color: string }[];
   const ownedIds = new Set((inventory || []).map((i) => i.paint as string));
 
   const handleImageLoad = useCallback(() => {
