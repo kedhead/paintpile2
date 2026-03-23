@@ -159,6 +159,7 @@ export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarPro
             projectId={projectId}
             projectName={projectName}
             critique={results.critique}
+            imageUrl={imageUrl}
           />
         </div>
       )}
