@@ -19,6 +19,14 @@ export function useAIQuota() {
   });
 }
 
+export function isQuotaError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('Insufficient credits');
+}
+
+export function hasUpgradeHint(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('Upgrade to Pro');
+}
+
 function useAIMutation<TInput, TResult>(endpoint: string) {
   const { pb } = useAuth();
   const queryClient = useQueryClient();

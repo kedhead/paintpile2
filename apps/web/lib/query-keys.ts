@@ -130,6 +130,10 @@ export const queryKeys = {
     list: () => [...queryKeys.badges.all, 'list'] as const,
     user: (userId: string) => [...queryKeys.badges.all, 'user', userId] as const,
   },
+  ads: {
+    all: ['ads'] as const,
+    byPlacement: (placement: string) => [...queryKeys.ads.all, placement] as const,
+  },
   challenges: {
     all: ['challenges'] as const,
     list: () => [...queryKeys.challenges.all, 'list'] as const,

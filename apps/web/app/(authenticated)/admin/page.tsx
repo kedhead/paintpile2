@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Users, Palette, Database, Download, Trash2, Shield, Award, Trophy, Newspaper, Globe, Workflow, ExternalLink } from 'lucide-react';
+import { Users, Palette, Database, Download, Trash2, Shield, Award, Trophy, Newspaper, Globe, Workflow, ExternalLink, Megaphone } from 'lucide-react';
 
 const adminTools = [
   {
@@ -39,6 +39,12 @@ const adminTools = [
     description: 'Create and manage hobby challenges',
     icon: Trophy,
     href: '/admin/challenges',
+  },
+  {
+    title: 'Manage Ads',
+    description: 'Create and manage feed ads and sponsored content',
+    icon: Megaphone,
+    href: '/admin/ads',
   },
   {
     title: 'Manage News',

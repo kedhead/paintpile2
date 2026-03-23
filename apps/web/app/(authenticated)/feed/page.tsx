@@ -8,6 +8,8 @@ import { useFollowingIds } from '../../../hooks/use-follows';
 import { useLiveStreams } from '../../../hooks/use-live-streams';
 import { CreatePostForm } from '../../../components/feed/create-post-form';
 import { PostCard } from '../../../components/feed/post-card';
+import { AdCard } from '../../../components/feed/ad-card';
+import { useActiveAds } from '../../../hooks/use-ads';
 import { FeedTabs } from '../../../components/feed/feed-tabs';
 import { GoLiveButton } from '../../../components/feed/go-live-button';
 import { LiveStreamCard } from '../../../components/feed/live-stream-card';
@@ -21,6 +23,8 @@ export default function FeedPage() {
   const discover = useDiscoverFeed();
   const following = useFollowingFeed(user ? followingIds : []);
   const { data: liveStreams = [] } = useLiveStreams();
+  const { data: feedAds = [] } = useActiveAds('feed');
+  const isPro = user?.subscription === 'pro';
 
   const feed = activeTab === 'discover' ? discover : following;
   const posts = feed.data?.pages.flatMap((p) => p.items) || [];
@@ -85,7 +89,16 @@ export default function FeedPage() {
             </p>
           </div>
         ) : (
-          posts.map((post) => <PostCard key={post.id} post={post} />)
+          posts.map((post, index) => (
+            <div key={post.id}>
+              <PostCard post={post} />
+              {!isPro && (index + 1) % 5 === 0 && (
+                <div className="mt-4">
+                  <AdCard ad={feedAds[(Math.floor(index / 5)) % Math.max(feedAds.length, 1)] || undefined} />
+                </div>
+              )}
+            </div>
+          ))
         )}
 
         {/* Infinite scroll sentinel */}

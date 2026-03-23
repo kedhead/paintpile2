@@ -8,7 +8,8 @@ import {
   Home, User, Palette, LogOut, Users, Shield,
   ChefHat, Boxes, Sun, MoreHorizontal, Settings,
   Activity, BookOpen, Newspaper, Globe, BarChart3,
-  Trophy, Award, Crosshair, LogIn, UserPlus,
+  Trophy, Award, Crosshair, LogIn, UserPlus, Crown,
+  CreditCard,
 } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
 import { ThemeToggle } from './theme-toggle';
@@ -42,6 +43,7 @@ const toolsItems = [
 
 const bottomItems = [
   { href: '/profile', label: 'Profile', icon: User },
+  { href: '/settings/subscription', label: 'Subscription', icon: CreditCard },
   { href: '/admin', label: 'Admin', icon: Settings },
 ];
 
@@ -172,6 +174,12 @@ export function NavBar() {
 
           {user ? (
             <>
+              {user.subscription === 'pro' && (
+                <span className="flex items-center gap-1 rounded-full bg-yellow-500/20 px-2 py-0.5 text-xs font-semibold text-yellow-500">
+                  <Crown className="h-3 w-3" />
+                  PRO
+                </span>
+              )}
               <NotificationBell />
               <button
                 onClick={signOut}
