@@ -141,4 +141,9 @@ export const queryKeys = {
     entries: (challengeId: string) => [...queryKeys.challenges.all, 'entries', challengeId] as const,
     votes: (challengeId: string, userId: string) => [...queryKeys.challenges.all, 'votes', challengeId, userId] as const,
   },
+  palettePosts: {
+    all: ['palettePosts'] as const,
+    my: () => [...queryKeys.palettePosts.all, 'my'] as const,
+    detail: (id: string) => [...queryKeys.palettePosts.all, 'detail', id] as const,
+  },
 };

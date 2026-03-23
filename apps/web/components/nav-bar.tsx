@@ -9,7 +9,7 @@ import {
   ChefHat, Boxes, Sun, MoreHorizontal, Settings,
   Activity, BookOpen, Newspaper, Globe, BarChart3,
   Trophy, Award, Crosshair, LogIn, UserPlus, Crown,
-  CreditCard,
+  CreditCard, Image,
 } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
 import { ThemeToggle } from './theme-toggle';
@@ -36,6 +36,7 @@ const moreNavItems = [
 ];
 
 const toolsItems = [
+  { href: '/palette-post', label: 'Palette Post', icon: Image },
   { href: '/tools/lighting-ref', label: 'Lighting Ref', icon: Sun },
   { href: '/tools/color-matcher', label: 'Color Matcher', icon: Crosshair },
   { href: '/tools/paint-mixer', label: 'Paint Mixer', icon: Palette },
