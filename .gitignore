@@ -31,3 +31,4 @@ apps/mobile/.expo/
 
 # misc
 *.tsbuildinfo
+package-lock.json
