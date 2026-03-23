@@ -36,8 +36,9 @@ export function useCreateComment() {
       targetType: string;
       content: string;
     }) => {
+      if (!user) throw new Error('Not authenticated');
       return pb.collection('comments').create({
-        user: user!.id,
+        user: user.id,
         target_id: targetId,
         target_type: targetType,
         content,
@@ -53,7 +54,7 @@ export function useCreateComment() {
           await createNotification(pb, {
             user: post.user,
             type: 'comment',
-            actor_id: user!.id,
+            actor_id: user?.id || '',
             actor_name: getDisplayName(user!, 'Someone'),
             target_id: targetId,
             target_type: 'post',

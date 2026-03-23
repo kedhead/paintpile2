@@ -38,10 +38,11 @@ export function useToggleLike() {
       targetType: string;
       liked: boolean;
     }) => {
+      if (!user) throw new Error('Not authenticated');
       if (liked) {
         // Unlike: find and delete
         const existing = await pb.collection('likes').getList(1, 1, {
-          filter: `user="${user!.id}" && target_id="${targetId}"`,
+          filter: `user="${user.id}" && target_id="${targetId}"`,
         });
         if (existing.items[0]) {
           await pb.collection('likes').delete(existing.items[0].id);
@@ -49,7 +50,7 @@ export function useToggleLike() {
       } else {
         // Like: create
         await pb.collection('likes').create({
-          user: user!.id,
+          user: user.id,
           target_id: targetId,
           target_type: targetType,
         });
@@ -86,7 +87,7 @@ export function useToggleLike() {
           await createNotification(pb, {
             user: post.user,
             type: 'like',
-            actor_id: user!.id,
+            actor_id: user?.id || '',
             actor_name: getDisplayName(user!, 'Someone'),
             target_id: targetId,
             target_type: 'post',
@@ -97,7 +98,7 @@ export function useToggleLike() {
       }
     },
     onSettled: (_data, _err, { targetId, targetType, liked }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.likes.check(targetId, user!.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.likes.check(targetId, user?.id || '') });
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
       // Log activity for new likes
       if (!liked && user) {

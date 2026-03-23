@@ -35,41 +35,43 @@ export function useToggleFollow() {
       targetUserId: string;
       isFollowing: boolean;
     }) => {
+      if (!user) throw new Error('Not authenticated');
       if (isFollowing) {
         const existing = await pb.collection('follows').getList(1, 1, {
-          filter: `follower="${user!.id}" && following="${targetUserId}"`,
+          filter: `follower="${user.id}" && following="${targetUserId}"`,
         });
         if (existing.items[0]) {
           await pb.collection('follows').delete(existing.items[0].id);
         }
       } else {
         await pb.collection('follows').create({
-          follower: user!.id,
+          follower: user.id,
           following: targetUserId,
         });
       }
     },
     onSuccess: async (_data, { targetUserId, isFollowing }) => {
+      if (!user) return;
       if (!isFollowing) {
         await createNotification(pb, {
           user: targetUserId,
           type: 'follow',
-          actor_id: user!.id,
-          actor_name: getDisplayName(user!, 'Someone'),
-          target_id: user!.id,
+          actor_id: user.id,
+          actor_name: getDisplayName(user, 'Someone'),
+          target_id: user.id,
           target_type: 'user',
-          message: `${getDisplayName(user!, 'Someone')} started following you`,
-          action_url: `/profile/${user!.id}`,
+          message: `${getDisplayName(user, 'Someone')} started following you`,
+          action_url: `/profile/${user.id}`,
         });
       }
       queryClient.invalidateQueries({
-        queryKey: queryKeys.follows.check(user!.id, targetUserId),
+        queryKey: queryKeys.follows.check(user.id, targetUserId),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followingIds(user!.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followingIds(user.id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.follows.followers(targetUserId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.follows.following(user!.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.following(user.id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(targetUserId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(user!.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(user.id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.following() });
       // Log activity for new follows
       if (!isFollowing && user) {
