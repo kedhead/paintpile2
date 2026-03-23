@@ -2,11 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { Users } from 'lucide-react';
+import { useAuth } from '../../../components/auth-provider';
+import { LoginPrompt } from '../../../components/auth/login-prompt';
 import { usePublicGroups } from '../../../hooks/use-groups';
 import { useJoinGroup } from '../../../hooks/use-group-members';
 import type { RecordModel } from 'pocketbase';
 
 export default function GroupsPage() {
+  const { user } = useAuth();
   const router = useRouter();
   const { data: publicGroups, isLoading } = usePublicGroups();
   const joinGroup = useJoinGroup();
@@ -48,13 +51,26 @@ export default function GroupsPage() {
               {group.description && (
                 <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{group.description}</p>
               )}
-              <button
-                onClick={() => handleJoin(group.id)}
-                disabled={joinGroup.isPending}
-                className="w-full rounded-lg bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary/80 disabled:opacity-50"
-              >
-                Join
-              </button>
+              {user ? (
+                <button
+                  onClick={() => handleJoin(group.id)}
+                  disabled={joinGroup.isPending}
+                  className="w-full rounded-lg bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary/80 disabled:opacity-50"
+                >
+                  Join
+                </button>
+              ) : (
+                <LoginPrompt action="join this group">
+                  {(open) => (
+                    <button
+                      onClick={open}
+                      className="w-full rounded-lg bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary/80"
+                    >
+                      Join
+                    </button>
+                  )}
+                </LoginPrompt>
+              )}
             </div>
           ))}
         </div>

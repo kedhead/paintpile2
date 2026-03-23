@@ -26,9 +26,10 @@ export function useJoinGroup() {
 
   return useMutation({
     mutationFn: async (groupId: string) => {
+      if (!user) throw new Error('Not authenticated');
       // Check if already a member
       const existing = await pb.collection('group_members').getList(1, 1, {
-        filter: `group = "${groupId}" && user = "${user!.id}"`,
+        filter: `group = "${groupId}" && user = "${user.id}"`,
         requestKey: null,
       });
       if (existing.items.length > 0) {
@@ -37,7 +38,7 @@ export function useJoinGroup() {
 
       const membership = await pb.collection('group_members').create({
         group: groupId,
-        user: user!.id,
+        user: user.id,
         role: 'member',
       });
 
