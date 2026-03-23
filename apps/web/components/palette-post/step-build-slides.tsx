@@ -23,6 +23,39 @@ import type { RecordModel } from 'pocketbase';
 import { PaintSelectorModal } from '../paints/paint-selector-modal';
 import type { PalettePostData, PalettePostPaint, TutorialStep } from '../../lib/palette-post-types';
 
+const VIDEO_TYPES = 'image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/ogg';
+
+async function generateVideoThumbnail(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.muted = true;
+    video.playsInline = true;
+    const objectUrl = URL.createObjectURL(file);
+    video.src = objectUrl;
+
+    video.onloadeddata = () => {
+      video.currentTime = 0.5;
+    };
+
+    video.onseeked = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 1080;
+      canvas.height = video.videoHeight || 1080;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { reject(new Error('No canvas context')); return; }
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(objectUrl);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Video load failed'));
+    };
+  });
+}
+
 interface StepBuildSlidesProps {
   data: PalettePostData;
   onChange: (updates: Partial<PalettePostData>) => void;
@@ -46,6 +79,8 @@ function SortableStepCard({
   const [paintModalOpen, setPaintModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(step.imageUrl || null);
+  const [isVideo, setIsVideo] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -53,13 +88,30 @@ function SortableStepCard({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    onUpdate({ imageFile: file, imageUrl: undefined });
     e.target.value = '';
+
+    if (file.type.startsWith('video/')) {
+      setIsVideo(true);
+      const blobUrl = URL.createObjectURL(file);
+      setVideoUrl(blobUrl);
+      try {
+        const thumbnail = await generateVideoThumbnail(file);
+        setPreviewUrl(thumbnail);
+        onUpdate({ imageFile: file, imageUrl: thumbnail });
+      } catch {
+        setPreviewUrl(null);
+        onUpdate({ imageFile: file, imageUrl: undefined });
+      }
+    } else {
+      setIsVideo(false);
+      setVideoUrl(null);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      onUpdate({ imageFile: file, imageUrl: undefined });
+    }
   };
 
   const handlePaintsSelect = (records: RecordModel[]) => {
@@ -106,7 +158,7 @@ function SortableStepCard({
 
       {expanded && (
         <div className="p-3 space-y-3">
-          {/* Image upload */}
+          {/* Image / video upload */}
           <div className="flex gap-3">
             <div
               className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-border bg-muted cursor-pointer group"
@@ -114,7 +166,18 @@ function SortableStepCard({
             >
               {previewUrl ? (
                 <>
-                  <img src={previewUrl} alt="" className="h-full w-full object-cover" />
+                  {isVideo && videoUrl ? (
+                    <video
+                      src={videoUrl}
+                      muted
+                      autoPlay
+                      loop
+                      playsInline
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <img src={previewUrl} alt="" className="h-full w-full object-cover" />
+                  )}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                     <Upload className="h-4 w-4 text-white" />
                   </div>
@@ -122,13 +185,13 @@ function SortableStepCard({
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-1">
                   <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground">Add image</span>
+                  <span className="text-[10px] text-muted-foreground">Add image/video</span>
                 </div>
               )}
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept={VIDEO_TYPES}
                 onChange={handleImageChange}
                 className="hidden"
               />
@@ -193,19 +256,38 @@ function SortableStepCard({
 export function StepBuildSlides({ data, onChange }: StepBuildSlidesProps) {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(data.coverImageUrl || null);
+  const [coverIsVideo, setCoverIsVideo] = useState(false);
+  const [coverVideoUrl, setCoverVideoUrl] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const handleCoverImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setCoverPreview(url);
-    onChange({ coverImageFile: file, coverImageUrl: undefined });
     e.target.value = '';
+
+    if (file.type.startsWith('video/')) {
+      setCoverIsVideo(true);
+      const blobUrl = URL.createObjectURL(file);
+      setCoverVideoUrl(blobUrl);
+      try {
+        const thumbnail = await generateVideoThumbnail(file);
+        setCoverPreview(thumbnail);
+        onChange({ coverImageFile: file, coverImageUrl: thumbnail });
+      } catch {
+        setCoverPreview(null);
+        onChange({ coverImageFile: file, coverImageUrl: undefined });
+      }
+    } else {
+      setCoverIsVideo(false);
+      setCoverVideoUrl(null);
+      const url = URL.createObjectURL(file);
+      setCoverPreview(url);
+      onChange({ coverImageFile: file, coverImageUrl: undefined });
+    }
   };
 
   const addStep = useCallback(() => {
@@ -296,17 +378,34 @@ export function StepBuildSlides({ data, onChange }: StepBuildSlidesProps) {
         </div>
       </div>
 
-      {/* Cover image */}
+      {/* Cover image / video */}
       <div>
         <label className="mb-1.5 block text-xs font-semibold text-foreground">
-          {data.mode === 'tutorial' ? 'Cover Image' : 'Post Image'}
+          {data.mode === 'tutorial' ? 'Cover Image / Video' : 'Post Image / Video'}
         </label>
         <div
           className="group relative cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted/30 transition-colors hover:border-primary hover:bg-muted/60"
           onClick={() => coverInputRef.current?.click()}
           style={{ height: 160 }}
         >
-          {coverPreview ? (
+          {coverIsVideo && coverVideoUrl ? (
+            <>
+              <video
+                src={coverVideoUrl}
+                muted
+                autoPlay
+                loop
+                playsInline
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="flex flex-col items-center gap-1 text-white">
+                  <Upload className="h-6 w-6" />
+                  <span className="text-xs font-medium">Change video</span>
+                </div>
+              </div>
+            </>
+          ) : coverPreview ? (
             <>
               <img src={coverPreview} alt="" className="h-full w-full object-cover" />
               <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
@@ -319,14 +418,14 @@ export function StepBuildSlides({ data, onChange }: StepBuildSlidesProps) {
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-2">
               <Upload className="h-8 w-8 text-muted-foreground" />
-              <span className="text-sm font-medium text-muted-foreground">Click to upload image</span>
-              <span className="text-xs text-muted-foreground">JPG, PNG, WebP</span>
+              <span className="text-sm font-medium text-muted-foreground">Click to upload image or video</span>
+              <span className="text-xs text-muted-foreground">JPG, PNG, WebP, MP4, WebM</span>
             </div>
           )}
           <input
             ref={coverInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept={VIDEO_TYPES}
             onChange={handleCoverImage}
             className="hidden"
           />

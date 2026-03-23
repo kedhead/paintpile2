@@ -47,6 +47,8 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
         scale: 1,
         useCORS: true,
         logging: false,
+        width: EXPORT_SIZE,
+        height: EXPORT_SIZE,
       });
       return new Promise((resolve) => {
         canvas.toBlob((blob) => resolve(blob), 'image/png');
@@ -219,25 +221,29 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
       </div>
 
       {/* Off-screen export cards at 1080×1080 */}
-      <div className="fixed" style={{ left: -9999, top: -9999 }}>
-        {cards.map((card, i) => (
-          <TutorialCard
-            key={i}
-            cardId={`palette-export-card-${i}`}
-            type={card.type}
-            title={card.title}
-            stepNumber={card.stepNumber}
-            description={card.description}
-            imageFile={card.imageFile}
-            imageUrl={card.imageUrl}
-            paints={card.paints}
-            attribution={data.attribution || 'paintpile.com'}
-            currentCardIndex={i}
-            totalCards={cards.length}
-            cardBg={data.background_color || '#ffffff'}
-            size={EXPORT_SIZE}
-          />
-        ))}
+      <div style={{ position: 'fixed', left: -9999, top: -9999, overflow: 'visible' }}>
+        {cards.map((card, i) => {
+          // For video files, skip imageFile and use the thumbnail stored in imageUrl instead
+          const isVideo = card.imageFile?.type.startsWith('video/');
+          return (
+            <TutorialCard
+              key={i}
+              cardId={`palette-export-card-${i}`}
+              type={card.type}
+              title={card.title}
+              stepNumber={card.stepNumber}
+              description={card.description}
+              imageFile={isVideo ? undefined : card.imageFile}
+              imageUrl={card.imageUrl}
+              paints={card.paints}
+              attribution={data.attribution || 'paintpile.com'}
+              currentCardIndex={i}
+              totalCards={cards.length}
+              cardBg={data.background_color || '#ffffff'}
+              size={EXPORT_SIZE}
+            />
+          );
+        })}
       </div>
     </div>
   );

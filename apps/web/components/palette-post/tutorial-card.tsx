@@ -35,6 +35,7 @@ export function TutorialCard({
   cardId,
 }: TutorialCardProps) {
   const [imageSrc, setImageSrc] = useState<string | null>(imageUrl || null);
+  const isVideo = !!imageFile?.type.startsWith('video/');
 
   useEffect(() => {
     if (imageFile) {
@@ -47,7 +48,7 @@ export function TutorialCard({
   }, [imageFile, imageUrl]);
 
   const pad = size * 0.05;
-  const imageHeight = size * 0.55;
+  const imageHeight = size * 0.52;
   const imageRadius = size * 0.025;
   const labelSize = size * 0.022;
   const titleSize = type === 'cover' ? size * 0.095 : size * 0.034;
@@ -55,6 +56,8 @@ export function TutorialCard({
   const attrSize = size * 0.02;
   const dotDiameter = size * 0.014;
   const counterDiameter = size * 0.062;
+  const paintDot = size * 0.022;
+  const paintTextSize = size * 0.024;
 
   const isDark = cardBg === '#000000' || cardBg.startsWith('linear');
   const textPrimary = isDark ? '#ffffff' : '#111827';
@@ -63,6 +66,10 @@ export function TutorialCard({
   const dotActive = isDark ? '#ffffff' : '#111827';
   const counterBg = isDark ? '#ffffff' : '#111827';
   const counterText = isDark ? '#111827' : '#ffffff';
+  const paintsBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+
+  const visiblePaints = paints.slice(0, 6);
+  const extraPaints = paints.length > 6 ? paints.length - 6 : 0;
 
   return (
     <div
@@ -80,7 +87,7 @@ export function TutorialCard({
         flexShrink: 0,
       }}
     >
-      {/* Image / swatch area */}
+      {/* Image / video / swatch area */}
       <div
         style={{
           width: '100%',
@@ -91,7 +98,16 @@ export function TutorialCard({
           backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
         }}
       >
-        {imageSrc ? (
+        {isVideo && imageSrc ? (
+          <video
+            src={imageSrc}
+            muted
+            autoPlay
+            loop
+            playsInline
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        ) : imageSrc ? (
           <img
             src={imageSrc}
             alt=""
@@ -122,13 +138,69 @@ export function TutorialCard({
         )}
       </div>
 
+      {/* Paint names — shown when paints are provided */}
+      {paints.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: pad * 0.35,
+            marginTop: pad * 0.35,
+            padding: `${pad * 0.3}px ${pad * 0.4}px`,
+            backgroundColor: paintsBg,
+            borderRadius: imageRadius * 0.6,
+            flexShrink: 0,
+          }}
+        >
+          {visiblePaints.map((p) => (
+            <div
+              key={p.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: paintDot * 0.55,
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: paintDot,
+                  height: paintDot,
+                  borderRadius: '50%',
+                  backgroundColor: p.hex_color,
+                  flexShrink: 0,
+                  boxShadow: isDark ? '0 0 0 1px rgba(255,255,255,0.15)' : '0 0 0 1px rgba(0,0,0,0.1)',
+                }}
+              />
+              <span
+                style={{
+                  color: textPrimary,
+                  fontSize: paintTextSize,
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1,
+                }}
+              >
+                {p.name}
+              </span>
+            </div>
+          ))}
+          {extraPaints > 0 && (
+            <span style={{ color: textSecondary, fontSize: paintTextSize, fontWeight: 500 }}>
+              +{extraPaints}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Content */}
       <div
         style={{
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          paddingTop: pad * 0.55,
+          paddingTop: pad * 0.45,
           minHeight: 0,
         }}
       >
@@ -140,8 +212,9 @@ export function TutorialCard({
             letterSpacing: '0.13em',
             textTransform: 'uppercase',
             color: textSecondary,
-            marginBottom: pad * 0.25,
+            marginBottom: pad * 0.2,
             lineHeight: 1,
+            flexShrink: 0,
           }}
         >
           {type === 'cover' ? 'Tutorial:' : `Step ${String(stepNumber).padStart(2, '0')}:`}
@@ -183,7 +256,7 @@ export function TutorialCard({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: pad * 0.4,
+            marginTop: pad * 0.3,
             flexShrink: 0,
           }}
         >
