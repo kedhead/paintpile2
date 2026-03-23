@@ -145,7 +145,9 @@ export function NavBar() {
                   {user && (
                     <>
                       <div className="my-1 border-t border-border" />
-                      {bottomItems.map(({ href, label, icon: Icon }) => {
+                      {bottomItems
+                        .filter(({ href }) => href !== '/settings/subscription' || user?.role === 'admin')
+                        .map(({ href, label, icon: Icon }) => {
                         const isActive = pathname.startsWith(href);
                         return (
                           <Link
@@ -174,7 +176,7 @@ export function NavBar() {
 
           {user ? (
             <>
-              {user.subscription === 'pro' && (
+              {user.subscription === 'pro' && user.role === 'admin' && (
                 <span className="flex items-center gap-1 rounded-full bg-yellow-500/20 px-2 py-0.5 text-xs font-semibold text-yellow-500">
                   <Crown className="h-3 w-3" />
                   PRO
