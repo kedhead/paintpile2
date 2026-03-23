@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Save, Link2, Check, Copy, Loader2 } from 'lucide-react';
-import { CardPreview } from './card-preview';
+import { Download, Save, Check, Copy, Loader2, Images } from 'lucide-react';
+import { CarouselPreview, buildCards } from './carousel-preview';
+import { TutorialCard } from './tutorial-card';
 import { generateCaption } from '../../lib/caption-generator';
 import { useCreatePalettePost } from '../../hooks/use-palette-posts';
 import type { PalettePostData } from '../../lib/palette-post-types';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://thepaintpile.com';
+const EXPORT_SIZE = 1080;
 
 interface StepExportShareProps {
   data: PalettePostData;
@@ -20,53 +22,56 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
   const [saved, setSaved] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [showExportCard, setShowExportCard] = useState(false);
   const createPost = useCreatePalettePost();
+
+  const cards = buildCards(data);
 
   // Auto-generate caption on mount if empty
   useEffect(() => {
     if (!data.caption && data.paints.length > 0) {
       onChange({ caption: generateCaption(data.paints, data.title) });
+    } else if (!data.caption && data.title) {
+      onChange({ caption: `${data.title}\n\n#miniaturepainting #warhammer #paintpile` });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const captureCard = async (): Promise<Blob | null> => {
-    setShowExportCard(true);
-    await new Promise((r) => setTimeout(r, 300));
+  const captureCard = async (cardIndex: number): Promise<Blob | null> => {
+    const containerId = `palette-export-card-${cardIndex}`;
+    const element = document.getElementById(containerId);
+    if (!element) return null;
 
     try {
       const html2canvas = (await import('html2canvas')).default;
-      const element = document.getElementById('palette-post-export');
-      if (!element) return null;
-
       const canvas = await html2canvas(element, {
         backgroundColor: null,
         scale: 1,
         useCORS: true,
+        logging: false,
       });
-
       return new Promise((resolve) => {
         canvas.toBlob((blob) => resolve(blob), 'image/png');
       });
     } catch (err) {
       console.error('Failed to capture card:', err);
       return null;
-    } finally {
-      setShowExportCard(false);
     }
   };
 
-  const handleDownloadPNG = async () => {
+  const handleDownloadAll = async () => {
     setDownloading(true);
     try {
-      const blob = await captureCard();
-      if (!blob) return;
-
-      const link = document.createElement('a');
-      link.download = `palette-${data.title.replace(/\s+/g, '-').toLowerCase() || 'post'}.png`;
-      link.href = URL.createObjectURL(blob);
-      link.click();
-      URL.revokeObjectURL(link.href);
+      const slug = data.title.replace(/\s+/g, '-').toLowerCase() || 'palette';
+      for (let i = 0; i < cards.length; i++) {
+        const blob = await captureCard(i);
+        if (!blob) continue;
+        const link = document.createElement('a');
+        link.download = `${slug}-${i + 1}-of-${cards.length}.png`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        // Small delay between downloads
+        if (i < cards.length - 1) await new Promise((r) => setTimeout(r, 300));
+      }
     } finally {
       setDownloading(false);
     }
@@ -75,10 +80,9 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
   const handleSaveToGallery = async () => {
     setSaving(true);
     try {
-      const blob = await captureCard();
-      const mediaFiles = data.media
-        .filter((m) => m.file)
-        .map((m) => m.file!);
+      // Capture cover card (index 0) as the representative image
+      const blob = await captureCard(0);
+      const mediaFiles = data.media.filter((m) => m.file).map((m) => m.file!);
 
       const result = await createPost.mutateAsync({
         ...data,
@@ -99,27 +103,27 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
   const handleCopyCaption = async () => {
     try {
       await navigator.clipboard.writeText(data.caption);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback
-      const textarea = document.createElement('textarea');
-      textarea.value = data.caption;
-      document.body.appendChild(textarea);
-      textarea.select();
+      const ta = document.createElement('textarea');
+      ta.value = data.caption;
+      document.body.appendChild(ta);
+      ta.select();
       document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      document.body.removeChild(ta);
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
-      {/* Preview */}
+      {/* Carousel preview */}
       <div className="flex flex-1 items-start justify-center">
-        <div className="overflow-hidden rounded-xl border border-border shadow-lg">
-          <CardPreview data={data} size={480} />
+        <div className="w-full max-w-[460px]">
+          <p className="mb-3 text-center text-xs text-muted-foreground">
+            {cards.length} card{cards.length !== 1 ? 's' : ''} — each downloads as a separate PNG
+          </p>
+          <CarouselPreview data={data} size={370} />
         </div>
       </div>
 
@@ -140,16 +144,16 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
           <textarea
             value={data.caption}
             onChange={(e) => onChange({ caption: e.target.value })}
-            rows={6}
+            rows={5}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
           />
         </div>
 
-        {/* Sharing toggle */}
+        {/* Public toggle */}
         <div className="flex items-center justify-between rounded-lg border border-border p-3">
           <div>
             <p className="text-sm font-medium text-foreground">Public sharing</p>
-            <p className="text-xs text-muted-foreground">Allow anyone with the link to view</p>
+            <p className="text-xs text-muted-foreground">Anyone with the link can view</p>
           </div>
           <button
             onClick={() => onChange({ is_public: !data.is_public })}
@@ -167,7 +171,7 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
 
         {saved && savedId && (
           <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3">
-            <p className="text-sm font-medium text-green-400">Saved!</p>
+            <p className="text-sm font-medium text-green-400">Saved to gallery!</p>
             {data.is_public && (
               <p className="mt-1 break-all text-xs text-green-400/70">
                 {SITE_URL}/share/palette-post/{savedId}
@@ -179,16 +183,22 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
         {/* Action buttons */}
         <div className="flex flex-col gap-2">
           <button
-            onClick={handleDownloadPNG}
+            onClick={handleDownloadAll}
             disabled={downloading}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/80 disabled:opacity-50"
           >
             {downloading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
+            ) : cards.length > 1 ? (
+              <Images className="h-4 w-4" />
             ) : (
               <Download className="h-4 w-4" />
             )}
-            Download PNG
+            {downloading
+              ? 'Downloading…'
+              : cards.length > 1
+              ? `Download ${cards.length} Cards`
+              : 'Download PNG'}
           </button>
 
           <button
@@ -208,12 +218,27 @@ export function StepExportShare({ data, onChange }: StepExportShareProps) {
         </div>
       </div>
 
-      {/* Offscreen export card at 1080x1080 */}
-      {showExportCard && (
-        <div className="fixed -left-[9999px] -top-[9999px]">
-          <CardPreview data={data} cardId="palette-post-export" size={1080} />
-        </div>
-      )}
+      {/* Off-screen export cards at 1080×1080 */}
+      <div className="fixed" style={{ left: -9999, top: -9999 }}>
+        {cards.map((card, i) => (
+          <TutorialCard
+            key={i}
+            cardId={`palette-export-card-${i}`}
+            type={card.type}
+            title={card.title}
+            stepNumber={card.stepNumber}
+            description={card.description}
+            imageFile={card.imageFile}
+            imageUrl={card.imageUrl}
+            paints={card.paints}
+            attribution={data.attribution || 'paintpile.com'}
+            currentCardIndex={i}
+            totalCards={cards.length}
+            cardBg={data.background_color || '#ffffff'}
+            size={EXPORT_SIZE}
+          />
+        ))}
+      </div>
     </div>
   );
 }

@@ -2,22 +2,25 @@
 
 import { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { StepPaintSelection } from './step-paint-selection';
+import { StepBuildSlides } from './step-build-slides';
 import { StepCardCustomization } from './step-card-customization';
 import { StepExportShare } from './step-export-share';
 import type { PalettePostData } from '../../lib/palette-post-types';
 
-const STEPS = ['Select Paints', 'Customize Card', 'Export & Share'];
+const STEPS = ['Build Slides', 'Customize', 'Export'];
 
 const DEFAULT_DATA: PalettePostData = {
   title: '',
   paints: [],
   media: [],
-  theme: 'dark',
-  background_color: '',
+  theme: 'light',
+  background_color: '#ffffff',
   layout: 'grid',
   caption: '',
   is_public: false,
+  mode: 'tutorial',
+  steps: [],
+  attribution: 'paintpile.com',
 };
 
 export function PalettePostWizard() {
@@ -28,7 +31,11 @@ export function PalettePostWizard() {
     setData((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  const canNext = step === 0 ? data.paints.length >= 1 : true;
+  const canNext =
+    step === 0
+      ? data.title.trim().length > 0 &&
+        (data.mode === 'single' || data.steps.length > 0)
+      : true;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -42,7 +49,7 @@ export function PalettePostWizard() {
                 i === step
                   ? 'bg-primary text-white'
                   : i < step
-                  ? 'bg-primary/20 text-primary cursor-pointer'
+                  ? 'cursor-pointer bg-primary/20 text-primary'
                   : 'bg-muted text-muted-foreground'
               }`}
             >
@@ -55,29 +62,16 @@ export function PalettePostWizard() {
             >
               {label}
             </span>
-            {i < STEPS.length - 1 && (
-              <div className="mx-2 h-px w-8 bg-border" />
-            )}
+            {i < STEPS.length - 1 && <div className="mx-2 h-px w-8 bg-border" />}
           </div>
         ))}
       </div>
 
       {/* Step content */}
       <div className="min-h-[400px]">
-        {step === 0 && (
-          <StepPaintSelection
-            paints={data.paints}
-            media={data.media}
-            onPaintsChange={(paints) => updateData({ paints })}
-            onMediaChange={(media) => updateData({ media })}
-          />
-        )}
-        {step === 1 && (
-          <StepCardCustomization data={data} onChange={updateData} />
-        )}
-        {step === 2 && (
-          <StepExportShare data={data} onChange={updateData} />
-        )}
+        {step === 0 && <StepBuildSlides data={data} onChange={updateData} />}
+        {step === 1 && <StepCardCustomization data={data} onChange={updateData} />}
+        {step === 2 && <StepExportShare data={data} onChange={updateData} />}
       </div>
 
       {/* Navigation */}

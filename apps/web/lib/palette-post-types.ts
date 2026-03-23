@@ -13,6 +13,14 @@ export interface PalettePostMedia {
   thumbnail?: string;
 }
 
+export interface TutorialStep {
+  id: string;
+  description: string;
+  imageFile?: File;
+  imageUrl?: string;
+  paints: PalettePostPaint[];
+}
+
 export interface PalettePostData {
   id?: string;
   title: string;
@@ -24,4 +32,10 @@ export interface PalettePostData {
   caption: string;
   is_public: boolean;
   project?: string;
+  // Tutorial/carousel fields:
+  mode: 'tutorial' | 'single';
+  steps: TutorialStep[];
+  attribution: string;
+  coverImageFile?: File;
+  coverImageUrl?: string;
 }
