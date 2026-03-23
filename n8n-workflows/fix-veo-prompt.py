@@ -22,7 +22,7 @@ prompt = (
     "2. A Bluesky post caption (under 280 chars)\n\n"
 
     "Here are some recent projects on the site for inspiration (you may or may not feature them):\n"
-    "\" + JSON.stringify($json.projects.map(p => ({ name: p.name, author: p.author_name, description: p.description }))) + \"\n\n"
+    "PROJECTS_PLACEHOLDER\n\n"
 
     "IMPORTANT: Do NOT always make the video about specific projects. Mix it up! Some weeks do:\n"
     "- A general hype commercial for PaintPile as a platform\n"
@@ -69,11 +69,11 @@ inner = json.dumps({
 # The prompt uses string concatenation: "..." + JSON.stringify(...) + "..."
 # So the jsonBody should be a single n8n expression
 
-# Actually, the simplest approach: put the whole thing as an n8n expression
-# with {{ }} around the dynamic part
+# Replace the placeholder with the n8n {{ }} expression in the serialized JSON
+# After json.dumps, the placeholder is inside a JSON string, so we just swap it
 json_body = "=" + inner.replace(
-    '" + JSON.stringify($json.projects.map(p => ({ name: p.name, author: p.author_name, description: p.description }))) + "',
-    '{{ JSON.stringify($json.projects.map(p => ({ name: p.name, author: p.author_name, description: p.description }))) }}'
+    "PROJECTS_PLACEHOLDER",
+    "{{ JSON.stringify($json.projects.map(p => ({ name: p.name, author: p.author_name, description: p.description }))) }}"
 )
 
 for n in nodes:
