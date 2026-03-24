@@ -112,9 +112,21 @@ export async function createNotification(
   // Don't notify yourself
   if (data.user === data.actor_id) return;
 
+  // Build full URL for the url-typed action_url field
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const fullActionUrl = data.action_url
+    ? data.action_url.startsWith('http') ? data.action_url : `${baseUrl}${data.action_url}`
+    : undefined;
+
   try {
     await pb.collection('notifications').create({
-      ...data,
+      user: data.user,
+      type: data.type,
+      actor: data.actor_id,
+      target_id: data.target_id,
+      target_type: data.target_type,
+      message: data.message,
+      action_url: fullActionUrl || '',
       read: false,
     });
 

@@ -2,6 +2,11 @@ import type PocketBase from 'pocketbase';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_POCKETBASE_URL?.replace(':8090', '') || 'https://thepaintpile.com';
 
+function fullUrl(path: string): string {
+  if (path.startsWith('http')) return path;
+  return `${APP_URL}${path}`;
+}
+
 /**
  * Trigger multi-channel delivery (email + push) for a notification.
  * Non-blocking — failures are logged but don't throw.
@@ -50,16 +55,14 @@ export async function notifyFollowersOfNewPost(
         await pb.collection('notifications').create({
           user: f.follower,
           type: 'new_post',
-          actor_id: actorId,
-          actor_name: actorName,
+          actor: actorId,
           target_id: postId,
           target_type: 'project',
           message,
-          action_url: actionUrl,
+          action_url: fullUrl(actionUrl),
           read: false,
         }).catch(() => {});
 
-        // Trigger email + push
         triggerDelivery({
           userId: f.follower,
           type: 'new_post',
@@ -99,12 +102,11 @@ export async function notifyAllUsersOfNews(
         await pb.collection('notifications').create({
           user: u.id,
           type: 'news',
-          actor_id: actorId,
-          actor_name: actorName,
+          actor: actorId,
           target_id: newsId,
           target_type: 'post',
           message,
-          action_url: '/news',
+          action_url: fullUrl('/news'),
           read: false,
         }).catch(() => {});
 
