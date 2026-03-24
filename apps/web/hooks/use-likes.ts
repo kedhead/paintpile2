@@ -57,7 +57,14 @@ export function useToggleLike() {
       }
 
       // Update denormalized like_count on the target record
-      const collection = targetType === 'army' ? 'armies' : targetType === 'recipe' ? 'recipes' : 'projects';
+      const collectionMap: Record<string, string> = {
+        army: 'armies',
+        recipe: 'recipes',
+        project: 'projects',
+        post: 'posts',
+      };
+      const collection = collectionMap[targetType];
+      if (!collection) return;
       try {
         const target = await pb.collection(collection).getOne(targetId, { fields: 'like_count' });
         const newCount = Math.max(0, (target.like_count || 0) + (liked ? -1 : 1));
@@ -90,11 +97,13 @@ export function useToggleLike() {
       }
 
       // Optimistic update on detail page cache
-      const detailKey = targetType === 'army'
-        ? queryKeys.armies.detail(targetId)
-        : targetType === 'recipe'
-        ? queryKeys.recipes.detail(targetId)
-        : queryKeys.projects.detail(targetId);
+      const detailKeyMap: Record<string, readonly string[]> = {
+        army: queryKeys.armies.detail(targetId),
+        recipe: queryKeys.recipes.detail(targetId),
+        project: queryKeys.projects.detail(targetId),
+        post: queryKeys.posts.detail(targetId),
+      };
+      const detailKey = detailKeyMap[targetType] || queryKeys.projects.detail(targetId);
       await queryClient.cancelQueries({ queryKey: detailKey });
       queryClient.setQueryData<RecordModel>(detailKey, (old) => {
         if (!old) return old;
