@@ -56,22 +56,12 @@ export function useToggleLike() {
         });
       }
 
-      // Update denormalized like_count on the target record
-      const collectionMap: Record<string, string> = {
-        army: 'armies',
-        recipe: 'recipes',
-        project: 'projects',
-        post: 'posts',
-      };
-      const collection = collectionMap[targetType];
-      if (!collection) return;
-      try {
-        const target = await pb.collection(collection).getOne(targetId, { fields: 'like_count' });
-        const newCount = Math.max(0, (target.like_count || 0) + (liked ? -1 : 1));
-        await pb.collection(collection).update(targetId, { like_count: newCount });
-      } catch {
-        // Target may not have like_count field, ignore
-      }
+      // Update like_count via server route (has admin auth to bypass ownership rules)
+      fetch('/api/notifications/like-count', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetId, targetType, delta: liked ? -1 : 1 }),
+      }).catch(() => {});
     },
     onMutate: async ({ targetId, targetType, liked }) => {
       const delta = liked ? -1 : 1;
