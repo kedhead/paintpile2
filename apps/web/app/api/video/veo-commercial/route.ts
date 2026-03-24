@@ -11,6 +11,7 @@ interface VeoCommercialRequest {
   aspectRatio?: '16:9' | '9:16' | '1:1';
   resolution?: '720p' | '1080p';
   generateAudio?: boolean;
+  taskType?: 'veo3-video' | 'veo3-video-fast' | 'veo3.1-video' | 'veo3.1-video-fast';
   secret: string;
 }
 
@@ -51,7 +52,7 @@ async function pollForResult(taskId: string, maxWaitMs: number): Promise<string>
 export async function POST(req: NextRequest) {
   try {
     const body: VeoCommercialRequest = await req.json();
-    const { prompt, referenceImageUrls, aspectRatio = '9:16', resolution = '1080p', generateAudio = true, secret } = body;
+    const { prompt, referenceImageUrls, aspectRatio = '9:16', resolution = '1080p', generateAudio = true, taskType = 'veo3-video', secret } = body;
 
     if (!VIDEO_API_SECRET || secret !== VIDEO_API_SECRET) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -68,9 +69,11 @@ export async function POST(req: NextRequest) {
     // Build 1min.ai Veo3 request
     const promptObject: Record<string, unknown> = {
       prompt: prompt.trim(),
+      task_type: taskType,
       aspect_ratio: aspectRatio,
       resolution,
       generate_audio: generateAudio,
+      veo3_duration: '8s',
     };
 
     // Reference images only work with 16:9 aspect ratio
@@ -78,7 +81,7 @@ export async function POST(req: NextRequest) {
       promptObject.reference_image_urls = referenceImageUrls.slice(0, 3);
     }
 
-    console.log('[veo-commercial] Sending request to 1min.ai Veo3...');
+    console.log('[veo-commercial] Sending request to 1min.ai Veo3...', { taskType, aspectRatio, resolution });
 
     const res = await fetch('https://api.1min.ai/api/features', {
       method: 'POST',
@@ -88,7 +91,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         type: 'TEXT_TO_VIDEO',
-        model: 'veo3',
+        model: 'google',
         conversationId: 'TEXT_TO_VIDEO',
         promptObject,
       }),
