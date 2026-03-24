@@ -55,12 +55,22 @@ export function useToggleLike() {
           target_type: targetType,
         });
       }
-    },
-    onMutate: async ({ targetId, liked }) => {
-      // Optimistic update on post like counts in feed caches
-      const delta = liked ? -1 : 1;
-      const feedKeys = [queryKeys.posts.discover(), queryKeys.posts.following()];
 
+      // Update denormalized like_count on the target record
+      const collection = targetType === 'army' ? 'armies' : targetType === 'recipe' ? 'recipes' : 'projects';
+      try {
+        const target = await pb.collection(collection).getOne(targetId, { fields: 'like_count' });
+        const newCount = Math.max(0, (target.like_count || 0) + (liked ? -1 : 1));
+        await pb.collection(collection).update(targetId, { like_count: newCount });
+      } catch {
+        // Target may not have like_count field, ignore
+      }
+    },
+    onMutate: async ({ targetId, targetType, liked }) => {
+      const delta = liked ? -1 : 1;
+
+      // Optimistic update on feed caches
+      const feedKeys = [queryKeys.posts.discover(), queryKeys.posts.following()];
       for (const key of feedKeys) {
         await queryClient.cancelQueries({ queryKey: key });
         queryClient.setQueryData<InfiniteData<ListResult<RecordModel>>>(key, (old) => {
@@ -78,6 +88,22 @@ export function useToggleLike() {
           };
         });
       }
+
+      // Optimistic update on detail page cache
+      const detailKey = targetType === 'army'
+        ? queryKeys.armies.detail(targetId)
+        : targetType === 'recipe'
+        ? queryKeys.recipes.detail(targetId)
+        : queryKeys.projects.detail(targetId);
+      await queryClient.cancelQueries({ queryKey: detailKey });
+      queryClient.setQueryData<RecordModel>(detailKey, (old) => {
+        if (!old) return old;
+        return { ...old, like_count: Math.max(0, (old.like_count || 0) + delta) };
+      });
+
+      // Optimistic update on liked state
+      await queryClient.cancelQueries({ queryKey: queryKeys.likes.check(targetId, user?.id || '') });
+      queryClient.setQueryData(queryKeys.likes.check(targetId, user?.id || ''), !liked);
     },
     onSuccess: async (_data, { targetId, targetType, liked }) => {
       if (!liked && targetType === 'post') {
@@ -100,6 +126,10 @@ export function useToggleLike() {
     onSettled: (_data, _err, { targetId, targetType, liked }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.likes.check(targetId, user?.id || '') });
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(targetId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.armies.detail(targetId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.recipes.detail(targetId) });
       // Log activity for new likes
       if (!liked && user) {
         const activityType = targetType === 'army' ? 'army_liked' : targetType === 'recipe' ? 'recipe_liked' : 'project_liked';
