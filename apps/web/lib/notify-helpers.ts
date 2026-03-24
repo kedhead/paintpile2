@@ -1,5 +1,31 @@
 import type PocketBase from 'pocketbase';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_POCKETBASE_URL?.replace(':8090', '') || 'https://thepaintpile.com';
+
+/**
+ * Trigger multi-channel delivery (email + push) for a notification.
+ * Non-blocking — failures are logged but don't throw.
+ */
+async function triggerDelivery(data: {
+  userId: string;
+  type: string;
+  actorName: string;
+  message: string;
+  actionUrl?: string;
+  targetName?: string;
+  comment?: string;
+}) {
+  try {
+    await fetch(`${APP_URL}/api/notifications/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  } catch {
+    // Delivery failure should not block the caller
+  }
+}
+
 /**
  * Notify all followers of a user that they posted something new.
  * Call this after a project is created/published.
@@ -19,21 +45,30 @@ export async function notifyFollowersOfNewPost(
     });
 
     await Promise.all(
-      followers.map((f) =>
-        pb.collection('notifications').create({
+      followers.map(async (f) => {
+        const message = `${actorName} shared a new project: "${postTitle}"`;
+        await pb.collection('notifications').create({
           user: f.follower,
           type: 'new_post',
           actor_id: actorId,
           actor_name: actorName,
           target_id: postId,
           target_type: 'project',
-          message: `${actorName} shared a new project: "${postTitle}"`,
+          message,
           action_url: actionUrl,
           read: false,
-        }).catch(() => {
-          // Don't let individual notification failures block the rest
-        })
-      )
+        }).catch(() => {});
+
+        // Trigger email + push
+        triggerDelivery({
+          userId: f.follower,
+          type: 'new_post',
+          actorName,
+          message,
+          actionUrl,
+          targetName: postTitle,
+        });
+      })
     );
   } catch (error) {
     console.error('Failed to notify followers:', error);
@@ -59,21 +94,29 @@ export async function notifyAllUsersOfNews(
     const recipients = users.filter((u) => u.id !== actorId);
 
     await Promise.all(
-      recipients.map((u) =>
-        pb.collection('notifications').create({
+      recipients.map(async (u) => {
+        const message = `New ${newsType}: ${newsTitle}`;
+        await pb.collection('notifications').create({
           user: u.id,
           type: 'news',
           actor_id: actorId,
           actor_name: actorName,
           target_id: newsId,
           target_type: 'post',
-          message: `New ${newsType}: ${newsTitle}`,
+          message,
           action_url: '/news',
           read: false,
-        }).catch(() => {
-          // Don't let individual notification failures block the rest
-        })
-      )
+        }).catch(() => {});
+
+        triggerDelivery({
+          userId: u.id,
+          type: 'news',
+          actorName,
+          message,
+          actionUrl: '/news',
+          targetName: newsTitle,
+        });
+      })
     );
   } catch (error) {
     console.error('Failed to notify users of news:', error);

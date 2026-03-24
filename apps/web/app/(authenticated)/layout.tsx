@@ -5,6 +5,7 @@ import { NavBar } from '../../components/nav-bar';
 import { usePresence } from '../../hooks/use-presence';
 import { WelcomeBackModal } from '../../components/welcome-back/welcome-back-modal';
 import { InstallPrompt } from '../../components/pwa/install-prompt';
+import { ServiceWorkerRegister } from '../../components/sw-register';
 
 export default function AuthenticatedLayout({
   children,
@@ -27,6 +28,7 @@ export default function AuthenticatedLayout({
       )}
       <WelcomeBackModal />
       <InstallPrompt />
+      <ServiceWorkerRegister />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { getDisplayName } from '@paintpile/shared';
 import { getAvatarUrl } from '../../lib/pb-helpers';
+import { OnlineIndicator } from './online-indicator';
 import type { RecordModel } from 'pocketbase';
 
 const sizes = {
@@ -17,34 +18,48 @@ const thumbSizes = {
   lg: '128x128',
 };
 
+const indicatorSizes: Record<string, 'sm' | 'md' | 'lg'> = {
+  sm: 'sm',
+  md: 'sm',
+  lg: 'md',
+};
+
 interface UserAvatarProps {
   user: RecordModel;
   size?: keyof typeof sizes;
   className?: string;
+  showOnline?: boolean;
 }
 
-export function UserAvatar({ user, size = 'md', className = '' }: UserAvatarProps) {
+export function UserAvatar({ user, size = 'md', className = '', showOnline = false }: UserAvatarProps) {
   const avatarUrl = getAvatarUrl(user, thumbSizes[size]);
   const name = getDisplayName(user, user.email || '?');
   const initial = (name.startsWith('@') ? name[1] : name[0])?.toUpperCase() || '?';
 
-  if (avatarUrl) {
-    return (
-      <Image
-        src={avatarUrl}
-        alt={name}
-        width={size === 'lg' ? 64 : size === 'md' ? 40 : 32}
-        height={size === 'lg' ? 64 : size === 'md' ? 40 : 32}
-        className={`${sizes[size]} rounded-full object-cover ${className}`}
-      />
-    );
-  }
-
-  return (
+  const avatar = avatarUrl ? (
+    <Image
+      src={avatarUrl}
+      alt={name}
+      width={size === 'lg' ? 64 : size === 'md' ? 40 : 32}
+      height={size === 'lg' ? 64 : size === 'md' ? 40 : 32}
+      className={`${sizes[size]} rounded-full object-cover ${className}`}
+    />
+  ) : (
     <div
       className={`${sizes[size]} flex items-center justify-center rounded-full bg-primary/20 font-bold text-primary ${className}`}
     >
       {initial}
+    </div>
+  );
+
+  if (!showOnline) return avatar;
+
+  return (
+    <div className="relative inline-flex">
+      {avatar}
+      <span className="absolute -bottom-0.5 -right-0.5">
+        <OnlineIndicator lastActiveAt={user.last_active_at} size={indicatorSizes[size]} />
+      </span>
     </div>
   );
 }

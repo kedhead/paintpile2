@@ -105,6 +105,8 @@ export async function createNotification(
     target_type: string;
     message: string;
     action_url?: string;
+    target_name?: string;
+    comment?: string;
   }
 ) {
   // Don't notify yourself
@@ -114,6 +116,23 @@ export async function createNotification(
     await pb.collection('notifications').create({
       ...data,
       read: false,
+    });
+
+    // Trigger multi-channel delivery (email + push)
+    fetch('/api/notifications/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: data.user,
+        type: data.type,
+        actorName: data.actor_name,
+        message: data.message,
+        actionUrl: data.action_url,
+        targetName: data.target_name,
+        comment: data.comment,
+      }),
+    }).catch(() => {
+      // Non-blocking
     });
   } catch {
     // Notification creation failure shouldn't block the main action
