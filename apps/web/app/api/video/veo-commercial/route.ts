@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         type: 'TEXT_TO_VIDEO',
-        model: 'google',
+        model: 'veo3-video',
         conversationId: 'TEXT_TO_VIDEO',
         promptObject,
       }),
