@@ -4,8 +4,8 @@ import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
 import { Image as ImageIcon, Palette } from 'lucide-react';
 import { ProjectStatusBadge } from './project-status-badge';
-import { getFileUrl } from '../../lib/pb-helpers';
-import { relativeTime } from '../../lib/pb-helpers';
+import { UserAvatar } from '../social/user-avatar';
+import { getFileUrl, relativeTime } from '../../lib/pb-helpers';
 
 interface ProjectCardProps {
   project: RecordModel;
@@ -58,6 +58,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </span>
             <span className="ml-auto">{relativeTime(project.created)}</span>
           </div>
+
+          {/* Author */}
+          {project.expand?.user && (
+            <Link
+              href={`/profile/${project.expand.user.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="mt-2 flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <UserAvatar user={project.expand.user} size="sm" className="!h-5 !w-5 !text-[10px]" />
+              <span className="truncate">{project.expand.user.display_name || project.expand.user.username || 'User'}</span>
+            </Link>
+          )}
 
           {/* Tags */}
           {Array.isArray(project.tags) && project.tags.length > 0 && (

@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
 import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, ChefHat, Share2, Check, Link2, Award, Globe, Lock } from 'lucide-react';
 import { useAuth } from '../auth-provider';
 import { useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { ProjectStatusBadge } from './project-status-badge';
 import { LikeButton } from '../social/like-button';
+import { FollowButton } from '../social/follow-button';
+import { UserAvatar } from '../social/user-avatar';
 import { CommentSection } from '../social/comment-section';
 import { AIActionBar } from '../ai/ai-action-bar';
 import { AIQuotaBadge } from '../ai/ai-quota-badge';
@@ -137,6 +140,19 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         )}
       </div>
 
+
+      {/* Author */}
+      {project.expand?.user && !isOwner && (
+        <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
+          <Link href={`/profile/${project.expand.user.id}`} className="flex items-center gap-3 min-w-0 flex-1">
+            <UserAvatar user={project.expand.user} size="sm" showOnline />
+            <span className="text-sm font-medium text-foreground truncate">
+              {project.expand.user.display_name || project.expand.user.username || 'User'}
+            </span>
+          </Link>
+          <FollowButton targetUserId={project.expand.user.id} />
+        </div>
+      )}
 
       {/* Cover Photo */}
       {coverPhoto && (

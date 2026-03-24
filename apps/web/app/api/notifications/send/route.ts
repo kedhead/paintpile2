@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
           }, {
             title: 'Paintpile',
             body: message,
-            icon: '/icon-192x192.png',
+            icon: '/icon-192.png',
             url: actionUrl || '/',
           });
 
