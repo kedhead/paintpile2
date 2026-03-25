@@ -39,6 +39,7 @@ export interface UserSettings {
   theme?: 'light' | 'dark';
   notificationPreferences?: NotificationPreferences;
   socialLinks?: SocialLinks;
+  hasSeenOnboarding?: boolean;
 }
 
 export interface SocialLinks {

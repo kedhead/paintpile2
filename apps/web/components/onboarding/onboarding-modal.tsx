@@ -26,6 +26,9 @@ export function OnboardingModal() {
 
   useEffect(() => {
     if (!user) return;
+    // Check server-side flag first — persists across devices/browsers
+    if ((user.settings as Record<string, unknown>)?.hasSeenOnboarding) return;
+    // Fallback: localStorage (catches cases where PB update hasn't propagated yet)
     const onboarded = localStorage.getItem(`${STORAGE_KEY}-${user.id}`);
     if (!onboarded) {
       setShow(true);
@@ -35,6 +38,10 @@ export function OnboardingModal() {
   const finish = () => {
     if (user) {
       localStorage.setItem(`${STORAGE_KEY}-${user.id}`, 'true');
+      // Persist to PocketBase so it won't re-appear on other devices/browsers
+      pb.collection('users').update(user.id, {
+        settings: { ...(user.settings as object || {}), hasSeenOnboarding: true },
+      }).catch(() => {}); // fire-and-forget — non-critical
     }
     setShow(false);
   };

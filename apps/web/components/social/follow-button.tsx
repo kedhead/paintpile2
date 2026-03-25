@@ -3,17 +3,19 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useIsFollowing, useToggleFollow } from '../../hooks/use-follows';
+import { useAuth } from '../auth-provider';
 
 interface FollowButtonProps {
   targetUserId: string;
 }
 
 export function FollowButton({ targetUserId }: FollowButtonProps) {
+  const { loading: authLoading } = useAuth();
   const { data: isFollowing = false, isLoading } = useIsFollowing(targetUserId);
   const toggleFollow = useToggleFollow();
   const [hovering, setHovering] = useState(false);
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <button disabled className="rounded-full border border-border px-4 py-1.5 text-sm">
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
