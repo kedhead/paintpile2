@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { NavBar } from '../../components/nav-bar';
 import { usePresence } from '../../hooks/use-presence';
 import { WelcomeBackModal } from '../../components/welcome-back/welcome-back-modal';
+import { OnboardingModal } from '../../components/onboarding/onboarding-modal';
 import { InstallPrompt } from '../../components/pwa/install-prompt';
 import { ServiceWorkerRegister } from '../../components/sw-register';
 
@@ -26,6 +27,7 @@ export default function AuthenticatedLayout({
       ) : (
         <main className="relative z-10 mx-auto max-w-7xl px-4 py-6">{children}</main>
       )}
+      <OnboardingModal />
       <WelcomeBackModal />
       <InstallPrompt />
       <ServiceWorkerRegister />
