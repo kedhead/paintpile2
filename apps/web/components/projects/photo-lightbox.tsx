@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { RecordModel } from 'pocketbase';
 import { X, ChevronLeft, ChevronRight, Trash2, PenTool, ImageIcon, Loader2 } from 'lucide-react';
 import { useDeletePhoto } from '../../hooks/use-photos';
@@ -33,6 +33,71 @@ export function PhotoLightbox({
   const { pb } = useAuth();
   const queryClient = useQueryClient();
   const [showAnnotations, setShowAnnotations] = useState(true);
+
+  // Zoom state
+  const [scale, setScale] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+  const pinchDist = useRef<number | null>(null);
+
+  // Reset zoom when image changes
+  useEffect(() => { setScale(1); setOffset({ x: 0, y: 0 }); }, [index]);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    setScale((s) => {
+      const next = Math.max(1, Math.min(4, s - e.deltaY * 0.001));
+      if (next === 1) setOffset({ x: 0, y: 0 });
+      return next;
+    });
+  }, []);
+
+  const handleDoubleClick = useCallback(() => {
+    setScale((s) => { if (s > 1) { setOffset({ x: 0, y: 0 }); return 1; } return 2; });
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (scale <= 1) return;
+    e.preventDefault();
+    setDragging(true);
+    dragStart.current = { x: e.clientX - offset.x, y: e.clientY - offset.y };
+  }, [scale, offset]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!dragging) return;
+    setOffset({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y });
+  }, [dragging]);
+
+  const handleMouseUp = useCallback(() => setDragging(false), []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      pinchDist.current = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY,
+      );
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchDist.current !== null) {
+      e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY,
+      );
+      const ratio = dist / pinchDist.current;
+      setScale((s) => {
+        const next = Math.max(1, Math.min(4, s * ratio));
+        if (next === 1) setOffset({ x: 0, y: 0 });
+        return next;
+      });
+      pinchDist.current = dist;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => { pinchDist.current = null; }, []);
 
   const setCover = useMutation({
     mutationFn: async (photoRecord: RecordModel) => {
@@ -115,18 +180,39 @@ export function PhotoLightbox({
       )}
 
       {/* Image */}
-      <div className="relative max-h-[85vh] max-w-[90vw]">
-        <img
-          src={getFileUrl(photo, photo.image)}
-          alt={photo.caption || 'Project photo'}
-          className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
-        />
+      <div
+        className="relative max-h-[85vh] max-w-[90vw] overflow-hidden"
+        onWheel={handleWheel}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ cursor: scale > 1 ? (dragging ? 'grabbing' : 'grab') : 'default' }}
+      >
+        <div
+          onMouseDown={handleMouseDown}
+          onDoubleClick={handleDoubleClick}
+          style={{
+            transform: `scale(${scale}) translate(${offset.x / scale}px, ${offset.y / scale}px)`,
+            transformOrigin: 'center',
+            transition: dragging ? 'none' : 'transform 0.15s ease',
+          }}
+        >
+          <img
+            src={getFileUrl(photo, photo.image)}
+            alt={photo.caption || 'Project photo'}
+            className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain select-none"
+            draggable={false}
+          />
 
-        {/* Annotation dots */}
-        {showAnnotations &&
-          annotations.map((ann) => (
-            <AnnotationMarker key={ann.id} annotation={ann} />
-          ))}
+          {/* Annotation dots */}
+          {showAnnotations &&
+            annotations.map((ann) => (
+              <AnnotationMarker key={ann.id} annotation={ann} />
+            ))}
+        </div>
       </div>
 
       {/* Bottom bar */}

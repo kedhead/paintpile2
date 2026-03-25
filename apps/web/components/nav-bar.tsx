@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from './auth-provider';
@@ -49,6 +49,18 @@ export function NavBar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (!moreRef.current?.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [moreOpen]);
 
   const allMoreItems = [...moreNavItems, ...toolsItems, ...bottomItems];
   const isMoreActive = allMoreItems.some(({ href }) => pathname.startsWith(href));
@@ -80,7 +92,7 @@ export function NavBar() {
           })}
 
           {/* More dropdown */}
-          <div className="relative">
+          <div className="relative" ref={moreRef}>
             <button
               onClick={() => setMoreOpen(!moreOpen)}
               className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
@@ -94,12 +106,7 @@ export function NavBar() {
             </button>
 
             {moreOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setMoreOpen(false)}
-                />
-                <div className="absolute right-0 top-full z-50 mt-1 max-h-[70vh] w-52 overflow-y-auto rounded-md border border-border bg-card py-1 shadow-lg">
+              <div className="absolute right-0 top-full z-50 mt-1 max-h-[70vh] w-52 overflow-y-auto rounded-md border border-border bg-card py-1 shadow-lg">
                   {moreNavItems.map(({ href, label, icon: Icon }) => {
                     const isActive = pathname.startsWith(href);
                     return (
@@ -165,8 +172,7 @@ export function NavBar() {
                       })}
                     </>
                   )}
-                </div>
-              </>
+              </div>
             )}
           </div>
 

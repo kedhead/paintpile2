@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Film } from 'lucide-react';
 import type { RecordModel } from 'pocketbase';
@@ -35,6 +35,74 @@ function MediaLightbox({
   const [muted, setMuted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const current = items[index];
+
+  // Zoom state (images only)
+  const [scale, setScale] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+  const pinchDist = useRef<number | null>(null);
+
+  useEffect(() => { setScale(1); setOffset({ x: 0, y: 0 }); }, [index]);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (current.type !== 'image') return;
+    e.preventDefault();
+    e.stopPropagation();
+    setScale((s) => {
+      const next = Math.max(1, Math.min(4, s - e.deltaY * 0.001));
+      if (next === 1) setOffset({ x: 0, y: 0 });
+      return next;
+    });
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (current.type !== 'image') return;
+    e.stopPropagation();
+    setScale((s) => { if (s > 1) { setOffset({ x: 0, y: 0 }); return 1; } return 2; });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (scale <= 1 || current.type !== 'image') return;
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(true);
+    dragStart.current = { x: e.clientX - offset.x, y: e.clientY - offset.y };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragging) return;
+    setOffset({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y });
+  };
+
+  const handleMouseUp = () => setDragging(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      pinchDist.current = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY,
+      );
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchDist.current !== null) {
+      e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY,
+      );
+      setScale((s) => {
+        const next = Math.max(1, Math.min(4, s * (dist / pinchDist.current!)));
+        if (next === 1) setOffset({ x: 0, y: 0 });
+        return next;
+      });
+      pinchDist.current = dist;
+    }
+  };
+
+  const handleTouchEnd = () => { pinchDist.current = null; };
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -93,13 +161,34 @@ function MediaLightbox({
         </>
       )}
 
-      <div className="relative max-h-[90vh] max-w-[90vw]" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="relative max-h-[90vh] max-w-[90vw] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+        onWheel={handleWheel}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ cursor: current.type === 'image' && scale > 1 ? (dragging ? 'grabbing' : 'grab') : 'default' }}
+      >
         {current.type === 'image' ? (
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseDown={handleMouseDown}
+            onDoubleClick={handleDoubleClick}
+            style={{
+              transform: `scale(${scale}) translate(${offset.x / scale}px, ${offset.y / scale}px)`,
+              transformOrigin: 'center',
+              transition: dragging ? 'none' : 'transform 0.15s ease',
+            }}
+          >
             <img
               src={current.fullUrl}
               alt="Full size"
-              className="max-h-[90vh] max-w-[90vw] object-contain"
+              className="max-h-[90vh] max-w-[90vw] object-contain select-none"
+              draggable={false}
             />
             <TextOverlayRenderer
               overlays={textOverlays}
