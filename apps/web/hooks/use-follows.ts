@@ -50,10 +50,28 @@ export function useToggleFollow() {
         });
       }
     },
-    onSuccess: async (_data, { targetUserId, isFollowing }) => {
+    // Optimistically flip the button immediately on click
+    onMutate: async ({ targetUserId, isFollowing }) => {
       if (!user) return;
+      const checkKey = queryKeys.follows.check(user.id, targetUserId);
+      await queryClient.cancelQueries({ queryKey: checkKey });
+      const previousValue = queryClient.getQueryData<boolean>(checkKey);
+      queryClient.setQueryData<boolean>(checkKey, !isFollowing);
+      return { previousValue };
+    },
+    // Revert optimistic update if the server call fails
+    onError: (_err, { targetUserId }, context) => {
+      if (!user || !context) return;
+      queryClient.setQueryData(
+        queryKeys.follows.check(user.id, targetUserId),
+        (context as { previousValue: boolean | undefined }).previousValue,
+      );
+    },
+    onSuccess: (_data, { targetUserId, isFollowing }) => {
+      if (!user) return;
+      // Fire notification + activity in the background — don't block cache invalidation
       if (!isFollowing) {
-        await createNotification(pb, {
+        createNotification(pb, {
           user: targetUserId,
           type: 'follow',
           actor_id: user.id,
@@ -62,25 +80,24 @@ export function useToggleFollow() {
           target_type: 'user',
           message: `${getDisplayName(user, 'Someone')} started following you`,
           action_url: `/profile/${user.id}`,
-        });
-      }
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.follows.check(user.id, targetUserId),
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followingIds(user.id) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followers(targetUserId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.follows.following(user.id) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(targetUserId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(user.id) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.following() });
-      // Log activity for new follows
-      if (!isFollowing && user) {
+        }).catch(() => {});
         logActivity(pb, user.id, {
           type: 'user_followed',
           target_id: targetUserId,
           target_type: 'user',
         });
       }
+    },
+    // Always confirm from server after mutation settles (success or error)
+    onSettled: (_data, _err, { targetUserId }) => {
+      if (!user) return;
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.check(user.id, targetUserId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followingIds(user.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followers(targetUserId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.following(user.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(targetUserId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(user.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.following() });
     },
   });
 }
