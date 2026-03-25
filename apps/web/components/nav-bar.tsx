@@ -55,7 +55,7 @@ export function NavBar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
         <Link href={user ? '/feed' : '/'} className="flex items-center gap-2">
           <img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" />
         </Link>
@@ -170,6 +170,7 @@ export function NavBar() {
             )}
           </div>
 
+          <div className="flex-1" />
           <ThemeToggle />
 
           {user ? (
