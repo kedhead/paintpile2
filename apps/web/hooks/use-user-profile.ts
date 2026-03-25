@@ -22,15 +22,15 @@ export function useUserStats(userId: string) {
   return useQuery({
     queryKey: queryKeys.users.stats(userId),
     queryFn: async () => {
-      const [posts, followers, following] = await Promise.all([
+      const [postsResult, followersResult, followingResult] = await Promise.allSettled([
         pb.collection('posts').getList(1, 1, { filter: `user="${userId}"`, fields: 'id' }),
         pb.collection('follows').getList(1, 1, { filter: `following="${userId}"`, fields: 'id' }),
         pb.collection('follows').getList(1, 1, { filter: `follower="${userId}"`, fields: 'id' }),
       ]);
       return {
-        postCount: posts.totalItems,
-        followerCount: followers.totalItems,
-        followingCount: following.totalItems,
+        postCount: postsResult.status === 'fulfilled' ? postsResult.value.totalItems : 0,
+        followerCount: followersResult.status === 'fulfilled' ? followersResult.value.totalItems : 0,
+        followingCount: followingResult.status === 'fulfilled' ? followingResult.value.totalItems : 0,
       };
     },
     enabled: !!userId,

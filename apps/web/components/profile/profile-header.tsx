@@ -67,8 +67,8 @@ export function ProfileHeader({ profileUser }: ProfileHeaderProps) {
           <div className="mt-4">
             <ProfileStats
               postCount={stats?.postCount || 0}
-              followerCount={stats?.followerCount || 0}
-              followingCount={stats?.followingCount || 0}
+              followerCount={followers.length}
+              followingCount={following.length}
               onFollowersClick={() => setModal('followers')}
               onFollowingClick={() => setModal('following')}
             />
