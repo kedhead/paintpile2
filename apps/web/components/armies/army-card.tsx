@@ -15,7 +15,7 @@ export function ArmyCard({ army }: ArmyCardProps) {
     : null;
 
   return (
-    <Link href={`/armies/${army.id}`}>
+    <Link href={`/projects/armies/${army.id}`}>
       <article className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
         {/* Cover Photo */}
         <div className="aspect-[4/3] bg-muted">

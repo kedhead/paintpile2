@@ -14,12 +14,18 @@ const FILTER_TABS = [
   { key: 'follows', label: 'Follows' },
 ];
 
-export function ActivityFeed() {
+interface ActivityFeedProps {
+  limit?: number;
+  showFilters?: boolean;
+}
+
+export function ActivityFeed({ limit, showFilters = true }: ActivityFeedProps) {
   const [filter, setFilter] = useState('all');
   const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useActivityFeed(filter);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const activities = data?.pages.flatMap((p) => p.items) || [];
+  const allActivities = data?.pages.flatMap((p) => p.items) || [];
+  const activities = limit ? allActivities.slice(0, limit) : allActivities;
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -32,30 +38,32 @@ export function ActivityFeed() {
 
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el) return;
+    if (!el || limit) return;
     const observer = new IntersectionObserver(handleObserver, { threshold: 0.1 });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [handleObserver]);
+  }, [handleObserver, limit]);
 
   return (
     <div className="space-y-4">
       {/* Filter tabs */}
-      <div className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
-        {FILTER_TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className={`flex-shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              filter === key
-                ? 'bg-card text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {showFilters && (
+        <div className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
+          {FILTER_TABS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setFilter(key)}
+              className={`flex-shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                filter === key
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Feed */}
       {isLoading ? (
@@ -72,11 +80,15 @@ export function ActivityFeed() {
           {activities.map((activity) => (
             <ActivityItem key={activity.id} activity={activity} />
           ))}
-          <div ref={sentinelRef} className="h-4" />
-          {isFetchingNextPage && (
-            <div className="flex justify-center py-4">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
+          {!limit && (
+            <>
+              <div ref={sentinelRef} className="h-4" />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

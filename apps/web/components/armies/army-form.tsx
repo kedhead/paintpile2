@@ -63,7 +63,7 @@ export function ArmyForm({ army, onClose }: ArmyFormProps) {
     } else {
       const newArmy = await createArmy.mutateAsync(formData);
       onClose();
-      router.push(`/armies/${newArmy.id}`);
+      router.push(`/projects/armies/${newArmy.id}`);
     }
   };
 

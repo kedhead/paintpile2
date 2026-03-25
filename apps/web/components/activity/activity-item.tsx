@@ -31,7 +31,7 @@ const activityConfig: Record<string, { icon: typeof Palette; color: string; labe
 function getTargetLink(activity: RecordModel): string | null {
   const { target_type, target_id } = activity;
   if (target_type === 'project') return `/projects/${target_id}`;
-  if (target_type === 'army') return `/armies/${target_id}`;
+  if (target_type === 'army') return `/projects/armies/${target_id}`;
   if (target_type === 'recipe') return `/recipes/${target_id}`;
   if (target_type === 'user') return `/profile/${target_id}`;
   return null;

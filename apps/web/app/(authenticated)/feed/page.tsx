@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../../../components/auth-provider';
 import { useDiscoverFeed, useFollowingFeed } from '../../../hooks/use-posts';
@@ -13,10 +14,17 @@ import { useActiveAds } from '../../../hooks/use-ads';
 import { FeedTabs } from '../../../components/feed/feed-tabs';
 import { GoLiveButton } from '../../../components/feed/go-live-button';
 import { LiveStreamCard } from '../../../components/feed/live-stream-card';
+import { CommunityGallery } from '../../../components/community/community-gallery';
 
-export default function FeedPage() {
+type FeedTab = 'following' | 'discover' | 'gallery';
+
+function FeedContent() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'following' | 'discover'>('discover');
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as FeedTab) || 'discover';
+  const [activeTab, setActiveTab] = useState<FeedTab>(
+    ['following', 'discover', 'gallery'].includes(initialTab) ? initialTab : 'discover'
+  );
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { data: followingIds = [] } = useFollowingIds(user?.id || '');
@@ -46,22 +54,26 @@ export default function FeedPage() {
     return () => observer.disconnect();
   }, [handleObserver]);
 
-  return (
-    <div className="mx-auto max-w-2xl space-y-4">
-      {/* Create post + Go Live row */}
-      <div className="flex items-start gap-3">
-        <div className="flex-1">
-          <CreatePostForm />
-        </div>
-        {user && (
-          <div className="pt-1">
-            <GoLiveButton />
-          </div>
-        )}
-      </div>
+  const isGallery = activeTab === 'gallery';
 
-      {/* Live Streams */}
-      {liveStreams.length > 0 && (
+  return (
+    <div className={`mx-auto space-y-4 ${isGallery ? 'max-w-4xl' : 'max-w-2xl'}`}>
+      {/* Create post + Go Live row — hidden on gallery tab */}
+      {!isGallery && (
+        <div className="flex items-start gap-3">
+          <div className="flex-1">
+            <CreatePostForm />
+          </div>
+          {user && (
+            <div className="pt-1">
+              <GoLiveButton />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Live Streams — hidden on gallery tab */}
+      {!isGallery && liveStreams.length > 0 && (
         <div className="space-y-2">
           {liveStreams.map((stream) => (
             <LiveStreamCard key={stream.id} stream={stream} />
@@ -75,40 +87,56 @@ export default function FeedPage() {
         </div>
       )}
 
-      <div className="space-y-4">
-        {feed.isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <p className="text-muted-foreground">
-              {activeTab === 'following'
-                ? 'Follow some painters to see their posts here!'
-                : 'No posts yet. Be the first to share!'}
-            </p>
-          </div>
-        ) : (
-          posts.map((post, index) => (
-            <div key={post.id}>
-              <PostCard post={post} />
-              {!isPro && (index + 1) % 5 === 0 && (
-                <div className="mt-4">
-                  <AdCard ad={feedAds[(Math.floor(index / 5)) % Math.max(feedAds.length, 1)] || undefined} />
-                </div>
-              )}
+      {isGallery ? (
+        <CommunityGallery />
+      ) : (
+        <div className="space-y-4">
+          {feed.isLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          ))
-        )}
+          ) : posts.length === 0 ? (
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
+              <p className="text-muted-foreground">
+                {activeTab === 'following'
+                  ? 'Follow some painters to see their posts here!'
+                  : 'No posts yet. Be the first to share!'}
+              </p>
+            </div>
+          ) : (
+            posts.map((post, index) => (
+              <div key={post.id}>
+                <PostCard post={post} />
+                {!isPro && (index + 1) % 5 === 0 && (
+                  <div className="mt-4">
+                    <AdCard ad={feedAds[(Math.floor(index / 5)) % Math.max(feedAds.length, 1)] || undefined} />
+                  </div>
+                )}
+              </div>
+            ))
+          )}
 
-        {/* Infinite scroll sentinel */}
-        <div ref={sentinelRef} className="h-4" />
-        {feed.isFetchingNextPage && (
-          <div className="flex justify-center py-4">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        )}
-      </div>
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} className="h-4" />
+          {feed.isFetchingNextPage && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function FeedPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <FeedContent />
+    </Suspense>
   );
 }

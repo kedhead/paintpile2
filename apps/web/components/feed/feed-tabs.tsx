@@ -1,14 +1,16 @@
 'use client';
 
+type FeedTab = 'following' | 'discover' | 'gallery';
+
 interface FeedTabsProps {
-  activeTab: 'following' | 'discover';
-  onTabChange: (tab: 'following' | 'discover') => void;
+  activeTab: FeedTab;
+  onTabChange: (tab: FeedTab) => void;
 }
 
 export function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
   return (
     <div className="flex border-b border-border">
-      {(['following', 'discover'] as const).map((tab) => (
+      {(['following', 'discover', 'gallery'] as const).map((tab) => (
         <button
           key={tab}
           onClick={() => onTabChange(tab)}

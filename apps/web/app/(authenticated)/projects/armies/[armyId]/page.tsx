@@ -2,8 +2,8 @@
 
 import { use } from 'react';
 import { Loader2 } from 'lucide-react';
-import { useArmy } from '../../../../hooks/use-armies';
-import { ArmyDetail } from '../../../../components/armies/army-detail';
+import { useArmy } from '../../../../../hooks/use-armies';
+import { ArmyDetail } from '../../../../../components/armies/army-detail';
 
 export default function ArmyDetailPage({ params }: { params: Promise<{ armyId: string }> }) {
   const { armyId } = use(params);

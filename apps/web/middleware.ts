@@ -8,7 +8,7 @@ const authRequiredPrefixes = [
   '/notifications',
   '/diary',
   '/pile',
-  '/analytics',
+  '/dashboard',
 ];
 
 export function middleware(request: NextRequest) {

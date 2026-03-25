@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from './auth-provider';
 import {
-  Home, User, Palette, LogOut, Users, Shield,
+  Home, User, Palette, LogOut, Users,
   ChefHat, Boxes, Sun, MoreHorizontal, Settings,
-  Activity, BookOpen, Newspaper, Globe, BarChart3,
+  BookOpen, Newspaper, LayoutDashboard,
   Trophy, Award, Crosshair, LogIn, UserPlus, Crown,
   CreditCard, Image,
 } from 'lucide-react';
@@ -21,15 +21,12 @@ const mainNavItems = [
 ];
 
 const moreNavItems = [
-  { href: '/armies', label: 'Armies', icon: Shield },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/paints', label: 'Paints', icon: Palette },
   { href: '/recipes', label: 'Recipes', icon: ChefHat },
   { href: '/pile', label: 'Pile', icon: Boxes },
-  { href: '/community', label: 'Community', icon: Globe },
-  { href: '/activity', label: 'Activity', icon: Activity },
   { href: '/diary', label: 'Diary', icon: BookOpen },
   { href: '/news', label: 'News', icon: Newspaper },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/challenges', label: 'Challenges', icon: Trophy },
   { href: '/badges', label: 'Badges', icon: Award },
   { href: '/brag-board', label: 'Brag Board', icon: Award },

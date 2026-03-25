@@ -35,7 +35,7 @@ export function ArmyDetail({ army }: ArmyDetailProps) {
   const handleDelete = async () => {
     if (!confirm('Delete this army? This cannot be undone.')) return;
     await deleteArmy.mutateAsync(army.id);
-    router.push('/armies');
+    router.push('/projects?tab=armies');
   };
 
   return (
@@ -43,7 +43,7 @@ export function ArmyDetail({ army }: ArmyDetailProps) {
       {/* Header */}
       <div className="flex items-center gap-3">
         <button
-          onClick={() => router.push('/armies')}
+          onClick={() => router.push('/projects?tab=armies')}
           className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <ArrowLeft className="h-5 w-5" />
