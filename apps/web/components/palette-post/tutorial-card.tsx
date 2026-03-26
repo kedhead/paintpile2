@@ -76,14 +76,13 @@ export function TutorialCard({
       id={cardId}
       style={{
         width: size,
-        height: size,
+        minHeight: size,
         backgroundColor: cardBg,
         display: 'flex',
         flexDirection: 'column',
         padding: pad,
         boxSizing: 'border-box',
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-        overflow: 'hidden',
         flexShrink: 0,
       }}
     >
@@ -197,11 +196,10 @@ export function TutorialCard({
       {/* Content */}
       <div
         style={{
-          flex: 1,
           display: 'flex',
           flexDirection: 'column',
           paddingTop: pad * 0.45,
-          minHeight: 0,
+          flex: 1,
         }}
       >
         {/* Label */}
@@ -227,10 +225,9 @@ export function TutorialCard({
               fontSize: titleSize,
               fontWeight: 800,
               color: textPrimary,
-              lineHeight: 1.05,
-              flex: 1,
+              lineHeight: 1.1,
               wordBreak: 'break-word',
-              overflow: 'hidden',
+              marginBottom: pad * 0.3,
             }}
           >
             {title || 'My Tutorial'}
@@ -242,8 +239,8 @@ export function TutorialCard({
               fontWeight: 400,
               color: textPrimary,
               lineHeight: 1.5,
-              flex: 1,
-              overflow: 'hidden',
+              wordBreak: 'break-word',
+              marginBottom: pad * 0.3,
             }}
           >
             {description}
@@ -256,7 +253,8 @@ export function TutorialCard({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: pad * 0.3,
+            marginTop: 'auto',
+            paddingTop: pad * 0.3,
             flexShrink: 0,
           }}
         >
