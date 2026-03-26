@@ -61,7 +61,6 @@ export function OnboardingModal() {
       if (bio.trim()) formData.append('bio', bio.trim());
       if (avatarFile) formData.append('avatar', avatarFile);
       await pb.collection('users').update(user.id, formData);
-      await pb.collection('users').authRefresh();
     } catch {
       // Non-critical — they can update profile later
     }

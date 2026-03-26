@@ -36,8 +36,6 @@ export function ProfileEditForm({ onClose }: { onClose: () => void }) {
         username: data.username,
         bio: data.bio,
       });
-      // Refresh auth to get updated user data
-      await pb.collection('users').authRefresh();
       window.location.reload();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to update profile';
