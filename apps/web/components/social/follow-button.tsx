@@ -9,19 +9,28 @@ interface FollowButtonProps {
   targetUserId: string;
 }
 
+const Spinner = () => (
+  <button disabled className="rounded-full border border-border px-4 py-1.5 text-sm">
+    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+  </button>
+);
+
 export function FollowButton({ targetUserId }: FollowButtonProps) {
-  const { loading: authLoading } = useAuth();
-  const { data: isFollowing = false, isLoading } = useIsFollowing(targetUserId);
+  const { loading: authLoading, user } = useAuth();
+  // isPending = true whenever there is no cached data yet (covers the
+  // disabled→enabled transition gap that isLoading misses in TanStack v5)
+  const { data: isFollowing = false, isPending } = useIsFollowing(targetUserId);
   const toggleFollow = useToggleFollow();
   const [hovering, setHovering] = useState(false);
 
-  if (authLoading || isLoading) {
-    return (
-      <button disabled className="rounded-full border border-border px-4 py-1.5 text-sm">
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-      </button>
-    );
-  }
+  // Auth still initialising
+  if (authLoading) return <Spinner />;
+
+  // Not logged in — follow button makes no sense for guests
+  if (!user) return null;
+
+  // Query not yet resolved (first fetch after auth becomes available)
+  if (isPending) return <Spinner />;
 
   const handleClick = () => {
     toggleFollow.mutate({ targetUserId, isFollowing });

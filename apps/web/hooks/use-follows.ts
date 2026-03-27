@@ -11,7 +11,7 @@ export function useIsFollowing(targetUserId: string) {
   const { pb, user } = useAuth();
 
   return useQuery({
-    queryKey: queryKeys.follows.check(user?.id || '', targetUserId),
+    queryKey: queryKeys.follows.check(user?.id ?? '', targetUserId),
     queryFn: async () => {
       if (!user) return false;
       const result = await pb.collection('follows').getList(1, 1, {
@@ -20,6 +20,9 @@ export function useIsFollowing(targetUserId: string) {
       return result.totalItems > 0;
     },
     enabled: !!user && !!targetUserId && user.id !== targetUserId,
+    // Don't treat window-focus events as stale — they race with optimistic updates
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
   });
 }
 

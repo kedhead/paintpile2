@@ -17,10 +17,13 @@ export function useUserProfile(userId: string) {
 }
 
 export function useUserStats(userId: string) {
-  const { pb } = useAuth();
+  const { pb, user: authUser } = useAuth();
 
   return useQuery({
-    queryKey: queryKeys.users.stats(userId),
+    // Include the requesting user's id so the query re-runs (and gets the
+    // correct auth context) whenever the logged-in user changes.
+    // invalidateQueries(['users','stats', userId]) still matches by prefix.
+    queryKey: [...queryKeys.users.stats(userId), authUser?.id ?? 'anon'],
     queryFn: async () => {
       const [postsResult, followersResult, followingResult] = await Promise.allSettled([
         pb.collection('posts').getList(1, 1, { filter: `user="${userId}"`, fields: 'id' }),
@@ -34,5 +37,6 @@ export function useUserStats(userId: string) {
       };
     },
     enabled: !!userId,
+    staleTime: 0, // always re-validate on profile visit
   });
 }
