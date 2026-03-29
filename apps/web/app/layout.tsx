@@ -41,12 +41,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Standard favicon */}
-        <link rel="icon" href="/icon-192.png" sizes="any" />
+        {/* Favicons */}
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
         {/* Apple home screen icons — 180px is the correct size for modern iPhones */}
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icon-192.png" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
         {/* Next.js manifest.ts takes precedence; keep for older browsers */}
         <link rel="manifest" href="/manifest.json" />
         {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (

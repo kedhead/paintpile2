@@ -149,7 +149,7 @@ export default async function ShareProjectPage({
       <div className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center">
-            <img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" />
+            <picture><source srcSet="/logosmall.webp" type="image/webp" /><img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" /></picture>
           </Link>
           <Link
             href="/auth/signup"

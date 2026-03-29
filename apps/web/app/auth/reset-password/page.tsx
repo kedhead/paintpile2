@@ -53,7 +53,7 @@ function ResetPasswordForm() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="w-full max-w-sm space-y-6 text-center">
-          <img src="/logofull.png" alt="Paintpile" className="mx-auto h-36 w-auto mb-2" />
+          <picture><source srcSet="/logofull.webp" type="image/webp" /><img src="/logofull.png" alt="Paintpile" className="mx-auto h-36 w-auto mb-2" /></picture>
           <div className="rounded-md bg-red-900/30 p-4 text-sm text-red-400">
             Invalid reset link. Please request a new password reset.
           </div>
@@ -72,7 +72,7 @@ function ResetPasswordForm() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="relative z-10 w-full max-w-sm space-y-6">
         <div className="text-center">
-          <img src="/logofull.png" alt="Paintpile" className="mx-auto h-36 w-auto mb-2" />
+          <picture><source srcSet="/logofull.webp" type="image/webp" /><img src="/logofull.png" alt="Paintpile" className="mx-auto h-36 w-auto mb-2" /></picture>
           <h1 className="text-2xl font-bold text-foreground">Set new password</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Enter your new password below.

@@ -69,7 +69,7 @@ export function NavBar() {
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
         <Link href={user ? '/feed' : '/'} className="flex items-center gap-2">
-          <img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" />
+          <picture><source srcSet="/logosmall.webp" type="image/webp" /><img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" /></picture>
         </Link>
 
         <nav className="flex items-center gap-1">

@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="relative z-10 w-full max-w-sm space-y-6">
         <div className="text-center">
-          <img src="/logofull.png" alt="Paintpile" className="mx-auto h-36 w-auto mb-2" />
+          <picture><source srcSet="/logofull.webp" type="image/webp" /><img src="/logofull.png" alt="Paintpile" className="mx-auto h-36 w-auto mb-2" /></picture>
           <h1 className="text-2xl font-bold text-foreground">Reset your password</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Enter your email and we&apos;ll send you a reset link.
