@@ -1,5 +1,10 @@
 const BASE_URL = process.env.NEXT_PUBLIC_POCKETBASE_URL?.replace(':8090', '') || 'https://thepaintpile.com';
 
+/** Escape user-controlled strings before interpolating into HTML email bodies */
+function esc(text: string): string {
+  return text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c] ?? c));
+}
+
 function layout(content: string, unsubscribeUrl: string) {
   return `<!DOCTYPE html>
 <html>
@@ -23,11 +28,11 @@ function layout(content: string, unsubscribeUrl: string) {
 
 export function followEmail(actorName: string, actorUrl: string, userId: string) {
   return {
-    subject: `${actorName} started following you on Paintpile`,
+    subject: `${esc(actorName)} started following you on Paintpile`,
     html: layout(
-      `<p style="margin:0 0 12px;font-size:15px"><strong>${actorName}</strong> started following you!</p>
-       <a href="${BASE_URL}${actorUrl}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px">View Profile</a>`,
-      `${BASE_URL}/settings/notifications?unsubscribe=${userId}&type=follows`,
+      `<p style="margin:0 0 12px;font-size:15px"><strong>${esc(actorName)}</strong> started following you!</p>
+       <a href="${BASE_URL}${esc(actorUrl)}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px">View Profile</a>`,
+      `${BASE_URL}/settings/notifications?unsubscribe=${esc(userId)}&type=follows`,
     ),
   };
 }
@@ -35,12 +40,12 @@ export function followEmail(actorName: string, actorUrl: string, userId: string)
 export function commentEmail(actorName: string, comment: string, targetName: string, actionUrl: string, userId: string) {
   const snippet = comment.length > 100 ? comment.slice(0, 100) + '...' : comment;
   return {
-    subject: `${actorName} commented on "${targetName}"`,
+    subject: `${esc(actorName)} commented on "${esc(targetName)}"`,
     html: layout(
-      `<p style="margin:0 0 8px;font-size:15px"><strong>${actorName}</strong> commented on <strong>${targetName}</strong>:</p>
-       <p style="margin:0 0 16px;font-size:14px;color:#a3a3a3;border-left:3px solid #404040;padding-left:12px">${snippet}</p>
-       <a href="${BASE_URL}${actionUrl}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px">View Comment</a>`,
-      `${BASE_URL}/settings/notifications?unsubscribe=${userId}&type=comments`,
+      `<p style="margin:0 0 8px;font-size:15px"><strong>${esc(actorName)}</strong> commented on <strong>${esc(targetName)}</strong>:</p>
+       <p style="margin:0 0 16px;font-size:14px;color:#a3a3a3;border-left:3px solid #404040;padding-left:12px">${esc(snippet)}</p>
+       <a href="${BASE_URL}${esc(actionUrl)}" style="display:inline-block;background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px">View Comment</a>`,
+      `${BASE_URL}/settings/notifications?unsubscribe=${esc(userId)}&type=comments`,
     ),
   };
 }
@@ -48,7 +53,7 @@ export function commentEmail(actorName: string, comment: string, targetName: str
 export function digestEmail(notifications: Array<{ message: string; actionUrl: string }>, userId: string) {
   const items = notifications
     .slice(0, 10)
-    .map((n) => `<li style="margin-bottom:8px"><a href="${BASE_URL}${n.actionUrl}" style="color:#60a5fa;text-decoration:none">${n.message}</a></li>`)
+    .map((n) => `<li style="margin-bottom:8px"><a href="${BASE_URL}${esc(n.actionUrl)}" style="color:#60a5fa;text-decoration:none">${esc(n.message)}</a></li>`)
     .join('');
   const extra = notifications.length > 10 ? `<p style="font-size:13px;color:#737373">... and ${notifications.length - 10} more</p>` : '';
 

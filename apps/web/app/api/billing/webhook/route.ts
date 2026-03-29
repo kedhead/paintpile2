@@ -5,11 +5,13 @@ import { getStripe } from '../../../../lib/stripe';
 const pbUrl = process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
 
 async function getAdminPB(): Promise<PocketBase> {
+  const adminEmail = process.env.PB_ADMIN_EMAIL;
+  const adminPassword = process.env.PB_ADMIN_PASSWORD;
+  if (!adminEmail || !adminPassword) {
+    throw new Error('PB_ADMIN_EMAIL and PB_ADMIN_PASSWORD environment variables must be configured');
+  }
   const pb = new PocketBase(pbUrl);
-  await pb.collection('_superusers').authWithPassword(
-    process.env.PB_ADMIN_EMAIL || 'admin@paintpile.app',
-    process.env.PB_ADMIN_PASSWORD || 'paintpile2admin'
-  );
+  await pb.collection('_superusers').authWithPassword(adminEmail, adminPassword);
   return pb;
 }
 

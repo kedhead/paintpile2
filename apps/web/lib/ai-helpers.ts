@@ -86,12 +86,47 @@ export async function validateAndDeductCredits(
   return { creditsUsed: cost };
 }
 
+const ALLOWED_IMAGE_HOSTS = [
+  'thepaintpile.com',
+  '127.0.0.1',
+  'localhost',
+];
+
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
+
 export async function fetchImageAsBase64(imageUrl: string): Promise<{ base64: string; mediaType: string }> {
+  // SSRF prevention: only allow HTTPS (or HTTP for local dev) from known hosts
+  let parsed: URL;
+  try {
+    parsed = new URL(imageUrl);
+  } catch {
+    throw new Error('Invalid image URL');
+  }
+
+  const isLocal = parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost';
+  if (!isLocal && parsed.protocol !== 'https:') {
+    throw new Error('Only HTTPS image URLs are allowed');
+  }
+
+  const pbHost = process.env.POCKETBASE_URL ? new URL(process.env.POCKETBASE_URL).hostname : null;
+  const allowed = [...ALLOWED_IMAGE_HOSTS, ...(pbHost ? [pbHost] : [])];
+  if (!allowed.some((h) => parsed.hostname === h || parsed.hostname.endsWith(`.${h}`))) {
+    throw new Error('Image host not allowed');
+  }
+
   const response = await fetch(imageUrl);
   if (!response.ok) throw new Error('Failed to fetch image');
 
-  const contentType = response.headers.get('content-type') || 'image/jpeg';
+  // Guard against huge responses
+  const contentLength = response.headers.get('content-length');
+  if (contentLength && parseInt(contentLength, 10) > MAX_IMAGE_BYTES) {
+    throw new Error('Image too large');
+  }
+
   const buffer = await response.arrayBuffer();
+  if (buffer.byteLength > MAX_IMAGE_BYTES) throw new Error('Image too large');
+
+  const contentType = response.headers.get('content-type') || 'image/jpeg';
   const base64 = Buffer.from(buffer).toString('base64');
 
   // Map content type to Anthropic's expected media types

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import PocketBase from 'pocketbase';
 
 const pbUrl = process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
@@ -12,7 +13,13 @@ export async function POST(req: NextRequest) {
     }
 
     const adminSecret = process.env.ADMIN_SETUP_SECRET;
-    if (!adminSecret || secret !== adminSecret) {
+    if (!adminSecret) {
+      return NextResponse.json({ success: false, error: 'Admin setup not configured' }, { status: 403 });
+    }
+    // Timing-safe comparison prevents timing-based secret enumeration
+    const secretsMatch = secret.length === adminSecret.length &&
+      crypto.timingSafeEqual(Buffer.from(secret), Buffer.from(adminSecret));
+    if (!secretsMatch) {
       return NextResponse.json({ success: false, error: 'Invalid secret' }, { status: 403 });
     }
 

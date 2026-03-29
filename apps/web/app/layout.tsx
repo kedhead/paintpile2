@@ -28,7 +28,9 @@ export const viewport: Viewport = {
   themeColor: '#14111e',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  // viewport-fit=cover ensures content extends into iPhone notch/Dynamic Island areas
+  // (safe-area-inset-* CSS env vars then let us add padding where needed)
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -39,7 +41,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Standard favicon */}
+        <link rel="icon" href="/icon-192.png" sizes="any" />
+        {/* Apple home screen icons — 180px is the correct size for modern iPhones */}
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icon-192.png" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
+        {/* Next.js manifest.ts takes precedence; keep for older browsers */}
         <link rel="manifest" href="/manifest.json" />
         {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
           <script
