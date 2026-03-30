@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Users, Palette, Database, Download, Trash2, Shield, Award, Trophy, Newspaper, Globe, Workflow, ExternalLink, Megaphone } from 'lucide-react';
+import { Users, Palette, Database, Download, Trash2, Shield, Award, Trophy, Newspaper, Globe, Workflow, ExternalLink, Megaphone, Send } from 'lucide-react';
 
 const adminTools = [
   {
@@ -51,6 +51,12 @@ const adminTools = [
     description: 'Create, edit, and publish news posts',
     icon: Newspaper,
     href: '/admin/news',
+  },
+  {
+    title: 'Social Posting',
+    description: 'Post to X and Bluesky simultaneously',
+    icon: Send,
+    href: '/admin/social-posting',
   },
   {
     title: 'Clear Paint Database',
