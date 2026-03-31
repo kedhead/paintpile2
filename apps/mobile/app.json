@@ -2,6 +2,7 @@
   "expo": {
     "name": "PaintPile",
     "slug": "paintpile",
+    "owner": "paintpile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,7 +13,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#0a0a0a"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.paintpile.app",
@@ -40,9 +43,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "9ac56be0-216d-4b1a-a6e9-29bbf33b287b"
       },
-      "pocketbaseUrl": "https://thepaintpile.com:8090"
+      "pocketbaseUrl": "https://thepaintpile.com:8090",
+      "router": {
+        "origin": false
+      }
     }
   }
 }
