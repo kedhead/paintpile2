@@ -6,10 +6,7 @@
   "build": {
     "base": {
       "node": "20.18.0",
-      "pnpm": "9.15.4",
-      "env": {
-        "NODE_ENV": "production"
-      }
+      "pnpm": "9.15.4"
     },
     "development": {
       "extends": "base",
