@@ -13,11 +13,12 @@ import { Link, router } from 'expo-router';
 import { useAuth } from '@/lib/auth-context';
 
 export default function LoginScreen() {
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email.trim() || !password) return;
@@ -30,6 +31,19 @@ export default function LoginScreen() {
       setError(err instanceof Error ? err.message : 'Login failed');
     }
     setLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    setError('');
+    try {
+      await signInWithGoogle();
+      router.replace('/(tabs)/feed');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Google sign-in failed';
+      if (!msg.includes('cancelled')) setError(msg);
+    }
+    setGoogleLoading(false);
   };
 
   return (
@@ -48,6 +62,24 @@ export default function LoginScreen() {
             <Text className="text-sm text-red-400">{error}</Text>
           </View>
         ) : null}
+
+        <TouchableOpacity
+          onPress={handleGoogleSignIn}
+          disabled={googleLoading}
+          className="mb-4 flex-row items-center justify-center rounded-lg border border-border bg-card py-3.5"
+        >
+          {googleLoading ? (
+            <ActivityIndicator color="#006bcd" />
+          ) : (
+            <Text className="text-sm font-semibold text-foreground">Sign in with Google</Text>
+          )}
+        </TouchableOpacity>
+
+        <View className="mb-4 flex-row items-center">
+          <View className="flex-1 h-px bg-border" />
+          <Text className="mx-3 text-xs text-muted-foreground">OR</Text>
+          <View className="flex-1 h-px bg-border" />
+        </View>
 
         <View className="gap-4">
           <View>
