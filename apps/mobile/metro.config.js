@@ -17,11 +17,27 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, 'node_modules'),
 ];
 
-// Force critical packages to resolve from the mobile workspace
-config.resolver.extraNodeModules = {
-  react: path.resolve(projectRoot, 'node_modules/react'),
-  'react-native': path.resolve(projectRoot, 'node_modules/react-native'),
-  'react-dom': path.resolve(projectRoot, 'node_modules/react-dom'),
+// Force react, react-native, and react-dom to resolve from mobile workspace
+// This prevents the root React 19 (from web app) from being used
+const mobileModules = path.resolve(projectRoot, 'node_modules');
+const originalResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  // Pin these packages to the mobile workspace copy
+  if (moduleName === 'react' || moduleName === 'react-native' || moduleName === 'react-dom' ||
+      moduleName.startsWith('react/') || moduleName.startsWith('react-native/') || moduleName.startsWith('react-dom/')) {
+    const newContext = {
+      ...context,
+      nodeModulesPaths: [mobileModules],
+    };
+    if (originalResolveRequest) {
+      return originalResolveRequest(newContext, moduleName, platform);
+    }
+    return context.resolveRequest(newContext, moduleName, platform);
+  }
+  if (originalResolveRequest) {
+    return originalResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
 };
 
 module.exports = withNativeWind(config, { input: './global.css' });
