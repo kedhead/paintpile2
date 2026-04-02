@@ -58,23 +58,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
     if (!googleProvider) throw new Error('Google auth not configured');
 
-    // Open browser for Google sign-in
-    const redirectUrl = 'paintpile://oauth';
+    // Use HTTPS redirect through the web app, which then deep-links back
+    const redirectUrl = 'https://thepaintpile.com/auth/mobile-callback';
+
+    // Build the Google OAuth URL with our HTTPS redirect
     const authUrl =
       googleProvider.authURL + encodeURIComponent(redirectUrl);
 
-    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
+    // Open browser — WebBrowser will intercept the deep link back to paintpile://
+    const result = await WebBrowser.openAuthSessionAsync(
+      authUrl,
+      'paintpile://oauth' // The scheme to listen for when the web page redirects
+    );
 
     if (result.type !== 'success' || !result.url) {
       throw new Error('Google sign-in was cancelled');
     }
 
-    // Extract code from redirect URL
+    // Extract code from the deep link URL
     const url = new URL(result.url);
     const code = url.searchParams.get('code');
     if (!code) throw new Error('No auth code received');
 
-    // Exchange code for PocketBase auth
+    // Exchange code for PocketBase auth — must use the same redirectUrl we sent to Google
     const authResult = await pb.collection('users').authWithOAuth2Code(
       'google',
       code,
