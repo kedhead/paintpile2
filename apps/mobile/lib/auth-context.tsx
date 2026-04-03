@@ -1,7 +1,15 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { RecordModel } from 'pocketbase';
 import * as WebBrowser from 'expo-web-browser';
-import { getClient } from './pocketbase';
+import {
+  getClient,
+  rawSignIn,
+  rawSignUp,
+  rawSignOut,
+  rawAuthRefresh,
+  rawListAuthMethods,
+  rawAuthWithOAuth2Code,
+} from './pocketbase';
 
 interface AuthContextType {
   user: RecordModel | null;
@@ -29,14 +37,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pb = getClient();
 
   useEffect(() => {
-    // Check initial auth state
     const check = async () => {
-      if (pb.authStore.isValid) {
+      if (pb.authStore.isValid && pb.authStore.token) {
         try {
-          const result = await pb.collection('users').authRefresh();
+          const result = await rawAuthRefresh(pb.authStore.token);
           setUser(result.record);
         } catch {
-          pb.authStore.clear();
+          await rawSignOut();
           setUser(null);
         }
       }
@@ -46,14 +53,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const result = await pb.collection('users').authWithPassword(email, password);
+    const result = await rawSignIn(email, password);
     setUser(result.record);
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    // PocketBase OAuth2 flow: get auth methods, open browser, exchange code
-    const authMethods = await pb.collection('users').listAuthMethods();
-    const googleProvider = authMethods.oauth2?.providers?.find(
+    // Get auth methods via raw fetch
+    const authMethods = await rawListAuthMethods();
+    const providers = authMethods.oauth2?.providers || authMethods.authProviders || [];
+    const googleProvider = providers.find(
       (p: { name: string }) => p.name === 'google'
     );
     if (!googleProvider) throw new Error('Google auth not configured');
@@ -63,12 +71,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Build the Google OAuth URL with our HTTPS redirect
     const authUrl =
-      googleProvider.authURL + encodeURIComponent(redirectUrl);
+      (googleProvider.authURL || googleProvider.authUrl) + encodeURIComponent(redirectUrl);
 
     // Open browser — WebBrowser will intercept the deep link back to paintpile://
     const result = await WebBrowser.openAuthSessionAsync(
       authUrl,
-      'paintpile://oauth' // The scheme to listen for when the web page redirects
+      'paintpile://oauth'
     );
 
     if (result.type !== 'success' || !result.url) {
@@ -80,8 +88,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const code = url.searchParams.get('code');
     if (!code) throw new Error('No auth code received');
 
-    // Exchange code for PocketBase auth — must use the same redirectUrl we sent to Google
-    const authResult = await pb.collection('users').authWithOAuth2Code(
+    // Exchange code for PocketBase auth via raw fetch
+    const authResult = await rawAuthWithOAuth2Code(
       'google',
       code,
       googleProvider.codeVerifier,
@@ -91,30 +99,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, name: string, username: string) => {
-    await pb.collection('users').create({
-      email,
-      password,
-      passwordConfirm: password,
-      name,
-      username,
-    });
-    // Auto sign-in after signup
-    const result = await pb.collection('users').authWithPassword(email, password);
+    const result = await rawSignUp(email, password, name, username);
     setUser(result.record);
   }, []);
 
-  const signOut = useCallback(() => {
-    pb.authStore.clear();
+  const signOut = useCallback(async () => {
+    await rawSignOut();
     setUser(null);
   }, []);
 
   const refresh = useCallback(async () => {
-    if (pb.authStore.isValid) {
+    if (pb.authStore.isValid && pb.authStore.token) {
       try {
-        const result = await pb.collection('users').authRefresh();
+        const result = await rawAuthRefresh(pb.authStore.token);
         setUser(result.record);
       } catch {
-        pb.authStore.clear();
+        await rawSignOut();
         setUser(null);
       }
     }
