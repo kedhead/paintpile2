@@ -12,6 +12,8 @@ import {
 import { Link, router } from 'expo-router';
 import { useAuth } from '@/lib/auth-context';
 
+const PB_URL = 'https://thepaintpile.com';
+
 export default function LoginScreen() {
   const { signIn, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
@@ -19,16 +21,60 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [debug, setDebug] = useState('');
 
   const handleLogin = async () => {
     if (!email.trim() || !password) return;
     setLoading(true);
     setError('');
+    setDebug('');
+
+    // Step 1: Test raw fetch to PB health endpoint
     try {
+      setDebug('Testing API health...');
+      const healthRes = await fetch(`${PB_URL}/api/health`);
+      const healthData = await healthRes.text();
+      setDebug(`Health: ${healthRes.status} ${healthData}\n`);
+    } catch (e: any) {
+      setDebug(`Health FAILED: ${e.message}\n`);
+      setLoading(false);
+      return;
+    }
+
+    // Step 2: Test raw fetch to auth endpoint (bypass PB SDK)
+    try {
+      setDebug(prev => prev + 'Testing raw auth...');
+      const authRes = await fetch(`${PB_URL}/api/collections/users/auth-with-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identity: email.trim(), password }),
+      });
+      const authData = await authRes.text();
+      setDebug(prev => prev + `Auth: ${authRes.status} ${authData.substring(0, 200)}\n`);
+    } catch (e: any) {
+      setDebug(prev => prev + `Auth FAILED: ${e.message}\n`);
+      setLoading(false);
+      return;
+    }
+
+    // Step 3: Try actual PB SDK login
+    try {
+      setDebug(prev => prev + 'Trying PB SDK signIn...');
       await signIn(email.trim(), password);
+      setDebug(prev => prev + 'SDK SUCCESS');
       router.replace('/(tabs)/feed');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+    } catch (err: any) {
+      const errDetail = JSON.stringify({
+        message: err?.message,
+        status: err?.status,
+        data: err?.data,
+        response: err?.response,
+        originalError: err?.originalError?.message,
+        name: err?.name,
+        url: err?.url,
+      }, null, 2);
+      setDebug(prev => prev + `SDK FAILED: ${errDetail}`);
+      setError(err?.message || JSON.stringify(err));
     }
     setLoading(false);
   };
@@ -36,11 +82,19 @@ export default function LoginScreen() {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     setError('');
+    setDebug('');
     try {
       await signInWithGoogle();
       router.replace('/(tabs)/feed');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Google sign-in failed';
+    } catch (err: any) {
+      const errDetail = JSON.stringify({
+        message: err?.message,
+        status: err?.status,
+        data: err?.data,
+        response: err?.response,
+      }, null, 2);
+      setDebug(`Google error: ${errDetail}`);
+      const msg = err?.message || JSON.stringify(err);
       if (!msg.includes('cancelled')) setError(msg);
     }
     setGoogleLoading(false);
@@ -60,6 +114,12 @@ export default function LoginScreen() {
         {error ? (
           <View className="mb-4 rounded-lg bg-red-900/30 p-3">
             <Text className="text-sm text-red-400">{error}</Text>
+          </View>
+        ) : null}
+
+        {debug ? (
+          <View className="mb-4 rounded-lg bg-blue-900/30 p-3">
+            <Text className="text-xs text-blue-300 font-mono">{debug}</Text>
           </View>
         ) : null}
 
