@@ -5,7 +5,7 @@ import Constants from 'expo-constants';
 const PB_URL =
   Constants.expoConfig?.extra?.pocketbaseUrl ||
   process.env.EXPO_PUBLIC_POCKETBASE_URL ||
-  'https://thepaintpile.com:8090';
+  'https://thepaintpile.com';
 
 const TOKEN_KEY = 'pb_auth_token';
 const MODEL_KEY = 'pb_auth_model';
