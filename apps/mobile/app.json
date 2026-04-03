@@ -36,7 +36,8 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-image-picker"
+      "expo-image-picker",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true
@@ -45,7 +46,7 @@
       "eas": {
         "projectId": "9ac56be0-216d-4b1a-a6e9-29bbf33b287b"
       },
-      "pocketbaseUrl": "https://thepaintpile.com:8090",
+      "pocketbaseUrl": "https://thepaintpile.com",
       "router": {
         "origin": false
       }
