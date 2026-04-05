@@ -17,7 +17,7 @@ function SubscriptionContent() {
   const { user } = useAuth();
   const { isPro, subscribe, manageBilling, loading } = useSubscription();
   const searchParams = useSearchParams();
-  const status = searchParams.get('status');
+  const status = searchParams?.get('status');
 
   if (!user) {
     return (

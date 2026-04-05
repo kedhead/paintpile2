@@ -8,7 +8,7 @@ import type { RecordModel } from 'pocketbase';
 export default function GroupPage() {
   const params = useParams();
   const router = useRouter();
-  const groupId = params.groupId as string;
+  const groupId = params?.groupId as string;
   const { data: channels, isLoading } = useGroupChannels(groupId);
 
   useEffect(() => {

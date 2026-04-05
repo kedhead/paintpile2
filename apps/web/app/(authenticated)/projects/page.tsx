@@ -18,7 +18,7 @@ type ProjectTab = 'my' | 'armies' | 'discover';
 function ProjectsContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get('tab') as ProjectTab) || (user ? 'my' : 'discover');
+  const initialTab = (searchParams?.get('tab') as ProjectTab) || (user ? 'my' : 'discover');
   const [tab, setTab] = useState<ProjectTab>(
     ['my', 'armies', 'discover'].includes(initialTab) ? initialTab : (user ? 'my' : 'discover')
   );

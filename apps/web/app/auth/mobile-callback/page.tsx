@@ -9,8 +9,8 @@ function MobileCallbackContent() {
 
   useEffect(() => {
     // Forward all OAuth params to the mobile app via deep link
-    const code = searchParams.get('code');
-    const state = searchParams.get('state');
+    const code = searchParams?.get('code');
+    const state = searchParams?.get('state');
 
     if (code) {
       const params = new URLSearchParams();
@@ -29,7 +29,7 @@ function MobileCallbackContent() {
         <p className="mt-2 text-sm text-muted-foreground">
           If the app doesn&apos;t open automatically,{' '}
           <a
-            href={`paintpile://oauth?${searchParams.toString()}`}
+            href={`paintpile://oauth?${searchParams?.toString() ?? ''}`}
             className="text-primary underline"
           >
             tap here

@@ -6,7 +6,7 @@ import { GroupSettings } from '../../../../../components/groups/group-settings';
 
 export default function GroupSettingsPage() {
   const params = useParams();
-  const groupId = params.groupId as string;
+  const groupId = params?.groupId as string;
   const { data: group, isLoading } = useGroup(groupId);
 
   if (isLoading || !group) {

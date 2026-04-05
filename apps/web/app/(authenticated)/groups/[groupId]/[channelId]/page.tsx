@@ -21,8 +21,8 @@ import { VoiceChannel } from '../../../../../components/groups/voice/voice-chann
 
 export default function ChannelPage() {
   const params = useParams();
-  const groupId = params.groupId as string;
-  const channelId = params.channelId as string;
+  const groupId = params?.groupId as string;
+  const channelId = params?.channelId as string;
   const { user } = useAuth();
 
   const { data: channels } = useGroupChannels(groupId);

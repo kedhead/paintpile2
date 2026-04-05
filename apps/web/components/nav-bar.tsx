@@ -51,7 +51,7 @@ export function NavBar() {
   const [moreOpen, setMoreOpen] = useState(false);
 
   const allMoreItems = [...moreNavItems, ...toolsItems, ...bottomItems];
-  const isMoreActive = allMoreItems.some(({ href }) => pathname.startsWith(href));
+  const isMoreActive = allMoreItems.some(({ href }) => pathname?.startsWith(href));
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
@@ -62,7 +62,7 @@ export function NavBar() {
 
         <nav className="flex items-center gap-1">
           {mainNavItems.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname.startsWith(href);
+            const isActive = pathname?.startsWith(href);
             return (
               <Link
                 key={href}
@@ -101,7 +101,7 @@ export function NavBar() {
                 />
                 <div className="absolute right-0 top-full z-50 mt-1 max-h-[70vh] w-52 overflow-y-auto rounded-md border border-border bg-card py-1 shadow-lg">
                   {moreNavItems.map(({ href, label, icon: Icon }) => {
-                    const isActive = pathname.startsWith(href);
+                    const isActive = pathname?.startsWith(href);
                     return (
                       <Link
                         key={href}
@@ -122,7 +122,7 @@ export function NavBar() {
                   <div className="my-1 border-t border-border" />
                   <p className="px-4 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Tools</p>
                   {toolsItems.map(({ href, label, icon: Icon }) => {
-                    const isActive = pathname.startsWith(href);
+                    const isActive = pathname?.startsWith(href);
                     return (
                       <Link
                         key={href}
@@ -146,7 +146,7 @@ export function NavBar() {
                       {bottomItems
                         .filter(({ href }) => href !== '/settings/subscription' || user?.role === 'admin')
                         .map(({ href, label, icon: Icon }) => {
-                        const isActive = pathname.startsWith(href);
+                        const isActive = pathname?.startsWith(href);
                         return (
                           <Link
                             key={href}

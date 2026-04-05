@@ -21,7 +21,7 @@ type FeedTab = 'following' | 'discover' | 'gallery';
 function FeedContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get('tab') as FeedTab) || 'discover';
+  const initialTab = (searchParams?.get('tab') as FeedTab) || 'discover';
   const [activeTab, setActiveTab] = useState<FeedTab>(
     ['following', 'discover', 'gallery'].includes(initialTab) ? initialTab : 'discover'
   );

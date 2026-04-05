@@ -10,7 +10,7 @@ type DashboardTab = 'overview' | 'activity';
 
 function DashboardContent() {
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'activity' ? 'activity' : 'overview';
+  const initialTab = searchParams?.get('tab') === 'activity' ? 'activity' : 'overview';
   const [tab, setTab] = useState<DashboardTab>(initialTab);
 
   return (
