@@ -23,16 +23,18 @@ export async function validatePBAuth(pbToken: string): Promise<{ pb: PocketBase;
   let userId: string;
   try {
     const parts = pbToken.split('.');
-    if (parts.length !== 3) throw new Error('Malformed token');
+    if (parts.length !== 3) throw new Error(`Malformed token: ${parts.length} parts`);
     const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
     userId = payload.id;
-    if (!userId) throw new Error('No user ID in token');
+    if (!userId) throw new Error(`No user ID in token payload: ${JSON.stringify(Object.keys(payload))}`);
 
     // Check token expiration
     if (payload.exp && payload.exp * 1000 < Date.now()) {
-      throw new Error('Token expired');
+      throw new Error(`Token expired at ${new Date(payload.exp * 1000).toISOString()}`);
     }
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'unknown decode error';
+    console.error('validatePBAuth JWT decode failed:', msg, 'token preview:', pbToken?.substring(0, 20));
     throw new Error('Invalid auth token');
   }
 
@@ -40,14 +42,23 @@ export async function validatePBAuth(pbToken: string): Promise<{ pb: PocketBase;
   const pb = new PocketBase(pbUrl);
   const adminEmail = process.env.PB_ADMIN_EMAIL;
   const adminPassword = process.env.PB_ADMIN_PASSWORD;
-  if (adminEmail && adminPassword) {
+  if (!adminEmail || !adminPassword) {
+    console.error('validatePBAuth: PB_ADMIN_EMAIL or PB_ADMIN_PASSWORD not set');
+    throw new Error('Invalid auth token');
+  }
+
+  try {
     await pb.collection('_superusers').authWithPassword(adminEmail, adminPassword);
+  } catch (err) {
+    console.error('validatePBAuth admin login failed:', err instanceof Error ? err.message : err);
+    throw new Error('Invalid auth token');
   }
 
   try {
     const user = await pb.collection('users').getOne(userId);
     return { pb, userId: user.id, user: user as unknown as Record<string, unknown> };
-  } catch {
+  } catch (err) {
+    console.error('validatePBAuth user lookup failed for', userId, ':', err instanceof Error ? err.message : err);
     throw new Error('Invalid auth token');
   }
 }
