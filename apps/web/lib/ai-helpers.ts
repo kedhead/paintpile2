@@ -126,7 +126,7 @@ export async function fetchImageAsBase64(imageUrl: string): Promise<{ base64: st
 
   const contentType = response.headers.get('content-type') || 'image/jpeg';
   const originalBuffer = Buffer.from(await response.arrayBuffer());
-  let imgBuffer = originalBuffer;
+  let imgBuffer: Buffer = originalBuffer as Buffer;
   let wasResized = false;
 
   // Anthropic limit is 5MB for base64 images — resize if raw size hints it'll exceed

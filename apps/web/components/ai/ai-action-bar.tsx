@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Sparkles, Palette, BookOpen, ChefHat, ZoomIn, Paintbrush, Loader2 } from 'lucide-react';
 import { useAICritique, usePaintSuggestions, useTechniqueAdvisor, useRecipeGeneration, useUpscale } from '../../hooks/use-ai';
+import { queryKeys } from '../../lib/query-keys';
 import { CritiqueCard } from './critique-card';
 import { PaintSuggestionsPanel } from './paint-suggestions-panel';
 import { TechniqueAdvisorPanel } from './technique-advisor-panel';
@@ -20,6 +22,7 @@ interface AIActionBarProps {
 type AIPanel = 'critique' | 'suggestions' | 'technique' | 'recipe' | null;
 
 export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarProps) {
+  const queryClient = useQueryClient();
   const [activePanel, setActivePanel] = useState<AIPanel>(null);
   const [showRecolor, setShowRecolor] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,13 +59,16 @@ export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarPro
 
     setActivePanel(action);
 
-    if (results[action]) return;
+    // Always re-run critique to get fresh scores; cache others
+    if (action !== 'critique' && results[action]) return;
 
     try {
       switch (action) {
         case 'critique': {
           const res = await critique.mutateAsync({ projectId, imageUrl });
           setResults((prev) => ({ ...prev, critique: res.data.critique }));
+          // Refresh the project detail so the saved critique badge updates
+          queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(projectId) });
           break;
         }
         case 'suggestions': {
