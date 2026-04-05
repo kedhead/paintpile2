@@ -125,11 +125,24 @@ export async function fetchImageAsBase64(imageUrl: string): Promise<{ base64: st
   if (!response.ok) throw new Error('Failed to fetch image');
 
   const contentType = response.headers.get('content-type') || 'image/jpeg';
-  const buffer = await response.arrayBuffer();
-  const base64 = Buffer.from(buffer).toString('base64');
+  const originalBuffer = Buffer.from(await response.arrayBuffer());
+  let imgBuffer = originalBuffer;
+  let wasResized = false;
+
+  // Anthropic limit is 5MB for base64 images — resize if raw size hints it'll exceed
+  if (imgBuffer.byteLength > 3_700_000) {
+    const sharp = (await import('sharp')).default;
+    imgBuffer = await sharp(imgBuffer)
+      .resize({ width: 2048, height: 2048, fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+    wasResized = true;
+  }
+
+  const base64 = imgBuffer.toString('base64');
 
   // Map content type to Anthropic's expected media types
-  let mediaType = contentType.split(';')[0].trim();
+  let mediaType = wasResized ? 'image/jpeg' : contentType.split(';')[0].trim();
   if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(mediaType)) {
     mediaType = 'image/jpeg';
   }
