@@ -1,7 +1,18 @@
 import { useRef } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { C } from '../lib/constants';
+
+// Google blocks OAuth from embedded WebViews by detecting "wv" in the UA.
+// Use a standard Chrome mobile UA so Google treats this as a normal browser.
+const OAUTH_USER_AGENT = Platform.select({
+  android:
+    'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+  ios:
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+  default:
+    'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+});
 
 interface OAuthModalProps {
   url: string | null;
@@ -33,6 +44,7 @@ export function OAuthModal({ url, onClose, onComplete, paddingTop }: OAuthModalP
             ref={oauthWebViewRef}
             source={{ uri: url }}
             style={styles.webview}
+            userAgent={OAUTH_USER_AGENT}
             javaScriptEnabled={true}
             domStorageEnabled={true}
             sharedCookiesEnabled={true}

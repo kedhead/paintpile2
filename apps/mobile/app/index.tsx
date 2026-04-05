@@ -13,8 +13,6 @@ import type { WebViewOpenWindowEvent } from 'react-native-webview/lib/WebViewTyp
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Network from 'expo-network';
 import * as Linking from 'expo-linking';
-import * as WebBrowser from 'expo-web-browser';
-
 import { BASE_URL, TABS, C, type Tab } from '../lib/constants';
 import { buildInjectedJS, type BridgeMessage, type CachedPost } from '../lib/bridge';
 import { triggerHaptic } from '../lib/haptics';
@@ -156,23 +154,9 @@ export default function AppScreen() {
     );
   }, []);
 
-  // ── OAuth popup — use system browser (Google blocks embedded WebViews) ──
-  const handleOpenWindow = useCallback(async (event: WebViewOpenWindowEvent) => {
-    const targetUrl = event.nativeEvent.targetUrl;
-
-    if (targetUrl.includes('accounts.google.com') || targetUrl.includes('oauth') || targetUrl.includes('auth')) {
-      // Open in system browser (Chrome Custom Tabs / SFSafariViewController)
-      // which Google allows for OAuth
-      await WebBrowser.openBrowserAsync(targetUrl, {
-        dismissButtonStyle: 'cancel',
-        showTitle: true,
-      });
-      // When user returns from browser, reload WebView to pick up auth state
-      webViewRef.current?.reload();
-    } else {
-      // Non-OAuth popups: open in modal WebView as before
-      setOauthUrl(targetUrl);
-    }
+  // ── OAuth popup ──
+  const handleOpenWindow = useCallback((event: WebViewOpenWindowEvent) => {
+    setOauthUrl(event.nativeEvent.targetUrl);
   }, []);
 
   // ── Message router ──
