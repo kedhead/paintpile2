@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     }
 
     const pb = new PocketBase(pbUrl);
-    pb.authStore.save(pbToken, null);
+    pb.authStore.save(pbToken);
 
     const authResult = await pb.collection('users').authRefresh();
     const userId = authResult.record.id;

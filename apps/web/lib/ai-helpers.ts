@@ -19,7 +19,8 @@ export function createAnthropicClient(): Anthropic {
 
 export async function validatePBAuth(pbToken: string): Promise<{ pb: PocketBase; userId: string; user: Record<string, unknown> }> {
   const pb = new PocketBase(pbUrl);
-  pb.authStore.save(pbToken, null);
+  // PB SDK v0.25+ needs save(token) without null record to keep isValid=true
+  pb.authStore.save(pbToken);
 
   try {
     const result = await pb.collection('users').authRefresh();

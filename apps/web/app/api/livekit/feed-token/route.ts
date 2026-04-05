@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
   // Validate PocketBase auth token
   const pb = new PocketBase(pbUrl);
-  pb.authStore.save(pbToken, null);
+  pb.authStore.save(pbToken);
 
   try {
     const authResult = await pb.collection('users').authRefresh();

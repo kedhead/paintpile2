@@ -4,7 +4,7 @@ const pbUrl = process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
 
 export async function validateAdminAuth(pbToken: string): Promise<{ pb: PocketBase; userId: string }> {
   const pb = new PocketBase(pbUrl);
-  pb.authStore.save(pbToken, null);
+  pb.authStore.save(pbToken);
 
   try {
     const result = await pb.collection('users').authRefresh();
