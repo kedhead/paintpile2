@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0a0a0a"
+      "backgroundColor": "#140A18"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -19,15 +19,44 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.paintpile.app",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "associatedDomains": ["applinks:thepaintpile.com"],
+      "infoPlist": {
+        "NSCameraUsageDescription": "PaintPile needs camera access so you can take photos of your miniatures and hobby projects.",
+        "NSPhotoLibraryUsageDescription": "PaintPile needs photo library access so you can share images of your miniatures.",
+        "NSFaceIDUsageDescription": "Use Face ID to quickly unlock PaintPile."
+      },
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#140A18",
+        "dark": {
+          "image": "./assets/splash.png",
+          "backgroundColor": "#140A18"
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0a0a0a"
+        "backgroundColor": "#140A18"
       },
       "package": "com.paintpile.app",
-      "versionCode": 1
+      "versionCode": 1,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "thepaintpile.com",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -35,9 +64,19 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store",
-      "expo-image-picker",
-      "expo-image"
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FA4FD1"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow PaintPile to use Face ID to unlock the app."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

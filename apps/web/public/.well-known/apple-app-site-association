@@ -1,0 +1,20 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["TEAM_ID.com.paintpile.app"],
+        "paths": [
+          "/feed/*",
+          "/projects/*",
+          "/project/*",
+          "/profile/*",
+          "/groups/*",
+          "/share/*",
+          "/notifications",
+          "/notifications/*"
+        ]
+      }
+    ]
+  }
+}

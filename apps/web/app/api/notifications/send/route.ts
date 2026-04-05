@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import PocketBase from 'pocketbase';
 import { sendEmail, isRateLimited } from '../../../../lib/email';
-import { sendPushNotification } from '../../../../lib/push';
+import { sendPushNotification, sendExpoPushNotification } from '../../../../lib/push';
 import { followEmail, commentEmail } from '../../../../emails/notification-templates';
 import type { NotificationPreferences } from '@paintpile/shared';
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '@paintpile/shared';
@@ -93,6 +93,34 @@ export async function POST(req: NextRequest) {
         }
       } catch {
         // push_subscriptions collection may not exist yet
+      }
+
+      // Expo push notifications (native mobile app)
+      try {
+        const expoTokens = await pb.collection('expo_push_tokens').getFullList({
+          filter: `user="${userId}"`,
+        });
+
+        for (const tokenRecord of expoTokens) {
+          const success = await sendExpoPushNotification(tokenRecord.expo_token, {
+            title: 'Paintpile',
+            body: message,
+            url: actionUrl || '/',
+          });
+
+          if (!success) {
+            // Clean up invalid token
+            try {
+              await pb.collection('expo_push_tokens').delete(tokenRecord.id);
+            } catch {
+              // ignore cleanup errors
+            }
+          } else {
+            results.push = true;
+          }
+        }
+      } catch {
+        // expo_push_tokens collection may not exist yet
       }
     }
 

@@ -57,3 +57,43 @@ export async function sendPushNotification(
 export function getVapidPublicKey() {
   return VAPID_PUBLIC_KEY;
 }
+
+// ── Expo Push Notifications (for native mobile app) ──
+
+interface ExpoPushPayload {
+  title: string;
+  body: string;
+  url?: string;
+}
+
+export async function sendExpoPushNotification(
+  expoToken: string,
+  payload: ExpoPushPayload,
+): Promise<boolean> {
+  try {
+    const res = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        to: expoToken,
+        title: payload.title,
+        body: payload.body,
+        sound: 'default',
+        data: { url: payload.url || '/' },
+      }),
+    });
+
+    const result = await res.json();
+    if (result.data?.status === 'error') {
+      console.error('Expo push error:', result.data.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Expo push notification failed:', err);
+    return false;
+  }
+}
