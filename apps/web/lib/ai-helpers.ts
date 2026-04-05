@@ -18,13 +18,35 @@ export function createAnthropicClient(): Anthropic {
 }
 
 export async function validatePBAuth(pbToken: string): Promise<{ pb: PocketBase; userId: string; user: Record<string, unknown> }> {
+  // Decode the JWT to extract the user ID without relying on authRefresh
+  // (authRefresh can fail if the token was issued via OAuth or impersonation)
+  let userId: string;
+  try {
+    const parts = pbToken.split('.');
+    if (parts.length !== 3) throw new Error('Malformed token');
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+    userId = payload.id;
+    if (!userId) throw new Error('No user ID in token');
+
+    // Check token expiration
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      throw new Error('Token expired');
+    }
+  } catch {
+    throw new Error('Invalid auth token');
+  }
+
+  // Use admin auth to verify user exists and perform operations
   const pb = new PocketBase(pbUrl);
-  // PB SDK v0.25+ needs save(token) without null record to keep isValid=true
-  pb.authStore.save(pbToken);
+  const adminEmail = process.env.PB_ADMIN_EMAIL;
+  const adminPassword = process.env.PB_ADMIN_PASSWORD;
+  if (adminEmail && adminPassword) {
+    await pb.collection('_superusers').authWithPassword(adminEmail, adminPassword);
+  }
 
   try {
-    const result = await pb.collection('users').authRefresh();
-    return { pb, userId: result.record.id, user: result.record as unknown as Record<string, unknown> };
+    const user = await pb.collection('users').getOne(userId);
+    return { pb, userId: user.id, user: user as unknown as Record<string, unknown> };
   } catch {
     throw new Error('Invalid auth token');
   }
