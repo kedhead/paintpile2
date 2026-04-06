@@ -7,18 +7,21 @@ import { OnlineIndicator } from './online-indicator';
 import type { RecordModel } from 'pocketbase';
 
 const sizes = {
+  xs: 'h-6 w-6 text-[10px]',
   sm: 'h-8 w-8 text-xs',
   md: 'h-10 w-10 text-sm',
   lg: 'h-16 w-16 text-xl',
 };
 
 const thumbSizes = {
+  xs: '48x48',
   sm: '64x64',
   md: '80x80',
   lg: '128x128',
 };
 
 const indicatorSizes: Record<string, 'sm' | 'md' | 'lg'> = {
+  xs: 'sm',
   sm: 'sm',
   md: 'sm',
   lg: 'md',
@@ -40,8 +43,8 @@ export function UserAvatar({ user, size = 'md', className = '', showOnline = fal
     <Image
       src={avatarUrl}
       alt={name}
-      width={size === 'lg' ? 64 : size === 'md' ? 40 : 32}
-      height={size === 'lg' ? 64 : size === 'md' ? 40 : 32}
+      width={size === 'lg' ? 64 : size === 'md' ? 40 : size === 'sm' ? 32 : 24}
+      height={size === 'lg' ? 64 : size === 'md' ? 40 : size === 'sm' ? 32 : 24}
       className={`${sizes[size]} rounded-full object-cover ${className}`}
     />
   ) : (

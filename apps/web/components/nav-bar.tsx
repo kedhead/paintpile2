@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
 import { ThemeToggle } from './theme-toggle';
+import { UserAvatar } from './social/user-avatar';
 
 const mainNavItems = [
   { href: '/feed', label: 'Feed', icon: Home },
@@ -175,13 +176,22 @@ export function NavBar() {
 
           {user ? (
             <>
-              {user.subscription === 'pro' && user.role === 'admin' && (
+              {user.subscription === 'pro' && (
                 <span className="flex items-center gap-1 rounded-full bg-yellow-500/20 px-2 py-0.5 text-xs font-semibold text-yellow-500">
                   <Crown className="h-3 w-3" />
                   PRO
                 </span>
               )}
               <NotificationBell />
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <UserAvatar user={user} size="xs" />
+                <span className="hidden sm:inline max-w-[100px] truncate">
+                  {user.display_name || user.username || user.name || 'Profile'}
+                </span>
+              </Link>
               <button
                 onClick={signOut}
                 className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
