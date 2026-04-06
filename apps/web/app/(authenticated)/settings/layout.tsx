@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CreditCard, Bell } from 'lucide-react';
+import { CreditCard, Bell, UserCog } from 'lucide-react';
 
 const settingsNav = [
   { href: '/settings/subscription', label: 'Subscription', icon: CreditCard },
   { href: '/settings/notifications', label: 'Notifications', icon: Bell },
+  { href: '/settings/account', label: 'Account', icon: UserCog },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
