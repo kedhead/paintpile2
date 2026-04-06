@@ -1,19 +1,37 @@
 import { useRef, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Platform } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 import type { WebView as WebViewType } from 'react-native-webview';
 import { C } from '../lib/constants';
 
 // Google blocks OAuth from embedded WebViews by detecting "wv" in the UA.
-// Use a standard Chrome mobile UA so Google treats this as a normal browser.
 const OAUTH_USER_AGENT = Platform.select({
   android:
     'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
   ios:
     'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
-  default:
-    'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+  default: undefined,
 });
+
+// This JS runs BEFORE content loads on EVERY page navigation in the modal.
+// When PB's /api/oauth2-redirect page loads, it calls window.opener.postMessage({code, state}).
+// We fake window.opener so that call bridges the result back to native.
+const BRIDGE_JS = `
+(function() {
+  window.opener = {
+    postMessage: function(data) {
+      if (data && data.state && data.code) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: 'oauth_result',
+          code: data.code,
+          state: data.state
+        }));
+      }
+    }
+  };
+})();
+true;
+`;
 
 interface OAuthModalProps {
   url: string | null;
@@ -26,36 +44,17 @@ export function OAuthModal({ url, onClose, onComplete, paddingTop }: OAuthModalP
   const oauthWebViewRef = useRef<WebViewType>(null);
   const didComplete = useRef(false);
 
-  const handleNavChange = useCallback((navUrl: string) => {
+  const handleMessage = useCallback((event: WebViewMessageEvent) => {
     if (didComplete.current) return;
-
-    // Detect PocketBase's OAuth redirect page — extract code & state from URL
-    if (navUrl.includes('/api/oauth2-redirect')) {
-      try {
-        const parsed = new URL(navUrl);
-        const code = parsed.searchParams.get('code');
-        const state = parsed.searchParams.get('state');
-        if (code && state) {
-          didComplete.current = true;
-          onClose();
-          onComplete({ code, state });
-          return;
-        }
-      } catch {
-        // URL parse failed, fall through
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'oauth_result' && data.code && data.state) {
+        didComplete.current = true;
+        onClose();
+        onComplete({ code: data.code, state: data.state });
       }
-    }
-
-    // Fallback: landed back on the site after auth
-    if (
-      navUrl.includes('thepaintpile.com') &&
-      !navUrl.includes('accounts.google.com') &&
-      !navUrl.includes('/api/') &&
-      !navUrl.includes('/auth/')
-    ) {
-      didComplete.current = true;
-      onClose();
-      onComplete();
+    } catch {
+      // ignore
     }
   }, [onClose, onComplete]);
 
@@ -85,13 +84,8 @@ export function OAuthModal({ url, onClose, onComplete, paddingTop }: OAuthModalP
             domStorageEnabled={true}
             sharedCookiesEnabled={true}
             thirdPartyCookiesEnabled={true}
-            onShouldStartLoadWithRequest={(request) => {
-              handleNavChange(request.url);
-              return !didComplete.current;
-            }}
-            onNavigationStateChange={(navState) => {
-              handleNavChange(navState.url);
-            }}
+            injectedJavaScriptBeforeContentLoaded={BRIDGE_JS}
+            onMessage={handleMessage}
           />
         )}
       </View>
