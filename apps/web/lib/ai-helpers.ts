@@ -91,18 +91,33 @@ export async function validateAndDeductCredits(
     const defaultLimit = user.subscription === 'pro' ? 2000 : 500;
     const limit = quota.monthly_limit || defaultLimit;
 
-    if (currentMonthUsage + cost > limit) {
+    const bonusCredits = quota.bonus_credits || 0;
+    const totalAvailable = limit - currentMonthUsage + bonusCredits;
+
+    if (totalAvailable < cost) {
       const isPro = user.subscription === 'pro';
-      const upgradeHint = isPro ? '' : ' Upgrade to Pro for 4x more credits!';
-      throw new Error(`Insufficient credits. ${limit - currentMonthUsage} remaining, ${cost} needed.${upgradeHint}`);
+      const upgradeHint = isPro ? '' : ' Upgrade to Pro for 4x more credits, or buy a credit pack!';
+      throw new Error(`Insufficient credits. ${totalAvailable} remaining, ${cost} needed.${upgradeHint}`);
     }
 
-    // Deduct credits
-    monthlyUsage[monthKey] = currentMonthUsage + cost;
-    await pb.collection('ai_quota').update(quota.id, {
-      monthly_usage: monthlyUsage,
-      total_used: (quota.total_used || 0) + cost,
-    });
+    // Deduct from monthly first, then bonus
+    const monthlyRemaining = limit - currentMonthUsage;
+    if (monthlyRemaining >= cost) {
+      monthlyUsage[monthKey] = currentMonthUsage + cost;
+      await pb.collection('ai_quota').update(quota.id, {
+        monthly_usage: monthlyUsage,
+        total_used: (quota.total_used || 0) + cost,
+      });
+    } else {
+      // Use remaining monthly + dip into bonus
+      const bonusUsed = cost - Math.max(monthlyRemaining, 0);
+      monthlyUsage[monthKey] = currentMonthUsage + Math.max(monthlyRemaining, 0);
+      await pb.collection('ai_quota').update(quota.id, {
+        monthly_usage: monthlyUsage,
+        total_used: (quota.total_used || 0) + cost,
+        bonus_credits: Math.max(0, bonusCredits - bonusUsed),
+      });
+    }
   }
 
   // Log usage

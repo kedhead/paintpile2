@@ -50,7 +50,37 @@ export async function POST(request: Request) {
       case 'checkout.session.completed': {
         const session = event.data.object;
         const userId = session.metadata?.userId;
-        if (userId && session.customer) {
+        const checkoutType = session.metadata?.type;
+
+        if (checkoutType === 'credit_pack' && userId) {
+          // One-time credit pack purchase — add credits to quota
+          const credits = parseInt(session.metadata?.credits || '0', 10);
+          if (credits > 0) {
+            const pb = await getAdminPB();
+            try {
+              const quotas = await pb.collection('ai_quota').getFullList({
+                filter: `user="${userId}"`,
+              });
+              if (quotas[0]) {
+                await pb.collection('ai_quota').update(quotas[0].id, {
+                  bonus_credits: (quotas[0].bonus_credits || 0) + credits,
+                });
+              } else {
+                await pb.collection('ai_quota').create({
+                  user: userId,
+                  bonus_credits: credits,
+                });
+              }
+            } catch (err) {
+              console.error('Failed to add credit pack:', err);
+            }
+          }
+          // Save customer ID if present
+          if (session.customer) {
+            await updateUserSubscription(userId, 'free', session.customer as string).catch(() => {});
+          }
+        } else if (userId && session.customer) {
+          // Subscription checkout
           await updateUserSubscription(userId, 'pro', session.customer as string);
         }
         break;

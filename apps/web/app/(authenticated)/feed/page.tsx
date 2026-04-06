@@ -107,9 +107,9 @@ function FeedContent() {
             posts.map((post, index) => (
               <div key={post.id}>
                 <PostCard post={post} />
-                {!isPro && (index + 1) % 5 === 0 && (
+                {!isPro && (index + 1) % 8 === 0 && (
                   <div className="mt-4">
-                    <AdCard ad={feedAds[(Math.floor(index / 5)) % Math.max(feedAds.length, 1)] || undefined} />
+                    <AdCard ad={feedAds[(Math.floor(index / 8)) % Math.max(feedAds.length, 1)] || undefined} />
                   </div>
                 )}
               </div>

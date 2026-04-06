@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { Loader2, Check, Crown, Zap, Image, Ban } from 'lucide-react';
 import { useSubscription } from '../../../../hooks/use-subscription';
 import { useAuth } from '../../../../components/auth-provider';
@@ -13,11 +13,38 @@ const features = [
   { name: 'Pro Badge', free: 'No', pro: 'Yes', icon: Crown },
 ];
 
+const creditPacks = [
+  { size: 'small' as const, credits: 200, price: '$2', label: 'Starter' },
+  { size: 'medium' as const, credits: 500, price: '$4', label: 'Popular', highlight: true },
+  { size: 'large' as const, credits: 1200, price: '$8', label: 'Best Value' },
+];
+
 function SubscriptionContent() {
-  const { user } = useAuth();
+  const { user, pb } = useAuth();
   const { isPro, subscribe, manageBilling, loading } = useSubscription();
   const searchParams = useSearchParams();
   const status = searchParams?.get('status');
+  const creditsAdded = searchParams?.get('credits');
+  const [packLoading, setPackLoading] = useState<string | null>(null);
+
+  const handleBuyPack = async (packSize: 'small' | 'medium' | 'large') => {
+    setPackLoading(packSize);
+    try {
+      const res = await fetch('/api/billing/credit-pack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pbToken: pb.authStore.token, packSize }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Failed to create checkout');
+      }
+    } finally {
+      setPackLoading(null);
+    }
+  };
 
   if (!user) {
     return (
@@ -40,9 +67,15 @@ function SubscriptionContent() {
         </div>
       )}
 
+      {status === 'credits-added' && creditsAdded && (
+        <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-400">
+          {creditsAdded} bonus credits added to your account!
+        </div>
+      )}
+
       {status === 'canceled' && (
         <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-400">
-          Checkout was canceled. You can try again whenever you're ready.
+          Checkout was canceled. You can try again whenever you&apos;re ready.
         </div>
       )}
 
@@ -87,7 +120,7 @@ function SubscriptionContent() {
         })}
       </div>
 
-      {/* Action */}
+      {/* Subscription action */}
       <div className="rounded-lg border border-border bg-card p-6 text-center">
         {isPro ? (
           <button
@@ -113,6 +146,45 @@ function SubscriptionContent() {
             </button>
           </>
         )}
+      </div>
+
+      {/* Credit Packs */}
+      <div id="credits" className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Credit Packs</h2>
+          <p className="text-sm text-muted-foreground">
+            One-time purchases. Credits never expire and stack with your monthly allowance.
+          </p>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {creditPacks.map((pack) => (
+            <button
+              key={pack.size}
+              onClick={() => handleBuyPack(pack.size)}
+              disabled={!!packLoading}
+              className={`relative rounded-lg border p-4 text-center transition-colors disabled:opacity-50 ${
+                pack.highlight
+                  ? 'border-primary bg-primary/5 hover:bg-primary/10'
+                  : 'border-border bg-card hover:bg-muted'
+              }`}
+            >
+              {pack.highlight && (
+                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+                  POPULAR
+                </span>
+              )}
+              <p className="text-xs font-medium text-muted-foreground">{pack.label}</p>
+              <p className="mt-1 text-2xl font-bold text-foreground">{pack.credits}</p>
+              <p className="text-xs text-muted-foreground">credits</p>
+              <p className="mt-2 text-sm font-semibold text-foreground">{pack.price}</p>
+              {packLoading === pack.size ? (
+                <Loader2 className="mx-auto mt-2 h-4 w-4 animate-spin text-muted-foreground" />
+              ) : (
+                <p className="mt-2 text-xs text-primary font-medium">Buy Now</p>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

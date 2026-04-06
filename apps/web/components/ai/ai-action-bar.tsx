@@ -12,6 +12,7 @@ import { RecipeResult } from './recipe-result';
 import { RecolorDialog } from './recolor-dialog';
 import { ShareScoreButton } from '../brag-board/share-score-button';
 import { SaveRecolorToDiaryButton } from './save-recolor-to-diary-button';
+import { ProUpsellBanner } from './pro-upsell-banner';
 
 interface AIActionBarProps {
   projectId: string;
@@ -29,6 +30,7 @@ export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarPro
   const [results, setResults] = useState<Record<string, any>>({});
   const [upscaleResult, setUpscaleResult] = useState<string | null>(null);
   const [recolorResult, setRecolorResult] = useState<string | null>(null);
+  const [creditError, setCreditError] = useState(false);
 
   const critique = useAICritique();
   const paintSuggestions = usePaintSuggestions();
@@ -88,6 +90,10 @@ export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarPro
         }
       }
     } catch (error) {
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.includes('Insufficient credits')) {
+        setCreditError(true);
+      }
       console.error(`AI ${action} error:`, error);
     }
   };
@@ -167,6 +173,7 @@ export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarPro
             critique={results.critique}
             imageUrl={imageUrl}
           />
+          <ProUpsellBanner context="critique" />
         </div>
       )}
 
@@ -212,6 +219,9 @@ export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarPro
           />
         </div>
       )}
+
+      {/* Credit limit upsell */}
+      {creditError && <ProUpsellBanner context="credits-out" />}
 
       {/* Recolor Dialog */}
       {showRecolor && (
