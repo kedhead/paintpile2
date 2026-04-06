@@ -14,7 +14,8 @@ import { ProfileEditForm } from './profile-edit-form';
 import { useFollowers, useFollowing } from '../../hooks/use-follows';
 import { useUserStats } from '../../hooks/use-user-profile';
 import { useAuth } from '../auth-provider';
-import { Pencil } from 'lucide-react';
+import Link from 'next/link';
+import { Pencil, Settings } from 'lucide-react';
 
 interface ProfileHeaderProps {
   profileUser: RecordModel;
@@ -44,13 +45,22 @@ export function ProfileHeader({ profileUser }: ProfileHeaderProps) {
             </div>
             {!isOwnProfile && <FollowButton targetUserId={profileUser.id} />}
             {isOwnProfile && (
-              <button
-                onClick={() => setShowEdit(true)}
-                className="rounded-md border border-border px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-1"
-              >
-                <Pencil className="h-3 w-3" />
-                Edit Profile
-              </button>
+              <>
+                <button
+                  onClick={() => setShowEdit(true)}
+                  className="rounded-md border border-border px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-1"
+                >
+                  <Pencil className="h-3 w-3" />
+                  Edit Profile
+                </button>
+                <Link
+                  href="/settings/account"
+                  className="rounded-md border border-border px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-1"
+                >
+                  <Settings className="h-3 w-3" />
+                  Settings
+                </Link>
+              </>
             )}
           </div>
           {profileUser.username && profileUser.name && (
