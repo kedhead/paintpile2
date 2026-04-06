@@ -113,11 +113,18 @@ export function OAuthModal({ url, onClose, onComplete, paddingTop }: OAuthModalP
             injectedJavaScript={OAUTH_BRIDGE_JS}
             onMessage={handleMessage}
             onNavigationStateChange={(navState) => {
-              // Fallback: if we somehow land back on the site without the bridge firing
+              // Auto-close when PB redirect page loads (shows "close this window")
+              if (navState.url.includes('/api/oauth2-redirect')) {
+                // Give the injected JS a moment to extract code+state
+                setTimeout(() => {
+                  onClose();
+                }, 300);
+                return;
+              }
+              // Fallback: if we land back on the site
               if (
                 navState.url.includes('thepaintpile.com') &&
                 !navState.url.includes('accounts.google.com') &&
-                !navState.url.includes('/api/oauth2-redirect') &&
                 !navState.url.includes('/auth/')
               ) {
                 onClose();
