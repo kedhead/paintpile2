@@ -290,7 +290,20 @@ export default function AppScreen() {
       <OAuthModal
         url={oauthUrl}
         onClose={() => setOauthUrl(null)}
-        onComplete={() => webViewRef.current?.reload()}
+        onComplete={(oauthResult) => {
+          if (oauthResult?.code && oauthResult?.state) {
+            // Inject the OAuth result back into the main WebView.
+            // The PB SDK is listening for a postMessage with {code, state}
+            // from the popup it opened — we simulate that message.
+            webViewRef.current?.injectJavaScript(`
+              window.postMessage(${JSON.stringify(oauthResult)}, '*');
+              true;
+            `);
+          } else {
+            // Fallback: just reload to pick up any cookie-based auth
+            webViewRef.current?.reload();
+          }
+        }}
         paddingTop={insets.top}
       />
 

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Platform } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { WebView, type WebViewMessageEvent } from 'react-native-webview';
+import type { WebView as WebViewType } from 'react-native-webview';
 import { C } from '../lib/constants';
 
 // Google blocks OAuth from embedded WebViews by detecting "wv" in the UA.
@@ -14,15 +15,75 @@ const OAUTH_USER_AGENT = Platform.select({
     'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
 });
 
+// JS injected into the OAuth modal WebView.
+// PocketBase's /api/oauth2-redirect page tries window.opener.postMessage({state, code}).
+// Since window.opener is null in a separate WebView, we intercept it and bridge
+// the result back to native via ReactNativeWebView.postMessage.
+const OAUTH_BRIDGE_JS = `
+(function() {
+  // Watch for PocketBase's OAuth redirect page
+  function checkRedirect() {
+    var url = window.location.href;
+    if (url.indexOf('/api/oauth2-redirect') !== -1) {
+      // Extract code and state from URL params
+      var params = new URLSearchParams(window.location.search);
+      var code = params.get('code');
+      var state = params.get('state');
+      if (code && state) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: 'oauth_result',
+          code: code,
+          state: state,
+        }));
+      }
+    }
+  }
+
+  // Also intercept window.opener.postMessage which PB redirect page calls
+  window.opener = {
+    postMessage: function(data) {
+      if (data && data.code && data.state) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: 'oauth_result',
+          code: data.code,
+          state: data.state,
+        }));
+      }
+    }
+  };
+
+  // Check on load in case we're already on the redirect page
+  checkRedirect();
+  // Also check on navigation
+  var origPush = history.pushState;
+  history.pushState = function() { origPush.apply(this, arguments); checkRedirect(); };
+  var origReplace = history.replaceState;
+  history.replaceState = function() { origReplace.apply(this, arguments); checkRedirect(); };
+})();
+true;
+`;
+
 interface OAuthModalProps {
   url: string | null;
   onClose: () => void;
-  onComplete: () => void;
+  onComplete: (oauthResult?: { code: string; state: string }) => void;
   paddingTop: number;
 }
 
 export function OAuthModal({ url, onClose, onComplete, paddingTop }: OAuthModalProps) {
-  const oauthWebViewRef = useRef<WebView>(null);
+  const oauthWebViewRef = useRef<WebViewType>(null);
+
+  const handleMessage = (event: WebViewMessageEvent) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'oauth_result' && data.code && data.state) {
+        onClose();
+        onComplete({ code: data.code, state: data.state });
+      }
+    } catch {
+      // ignore non-JSON messages
+    }
+  };
 
   return (
     <Modal
@@ -49,10 +110,15 @@ export function OAuthModal({ url, onClose, onComplete, paddingTop }: OAuthModalP
             domStorageEnabled={true}
             sharedCookiesEnabled={true}
             thirdPartyCookiesEnabled={true}
+            injectedJavaScript={OAUTH_BRIDGE_JS}
+            onMessage={handleMessage}
             onNavigationStateChange={(navState) => {
+              // Fallback: if we somehow land back on the site without the bridge firing
               if (
                 navState.url.includes('thepaintpile.com') &&
-                !navState.url.includes('accounts.google.com')
+                !navState.url.includes('accounts.google.com') &&
+                !navState.url.includes('/api/oauth2-redirect') &&
+                !navState.url.includes('/auth/')
               ) {
                 onClose();
                 onComplete();
