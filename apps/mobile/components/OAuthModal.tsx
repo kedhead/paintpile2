@@ -16,6 +16,7 @@ const OAUTH_USER_AGENT = Platform.select({
 // This JS runs BEFORE content loads on EVERY page navigation in the modal.
 // When PB's /api/oauth2-redirect page loads, it calls window.opener.postMessage({code, state}).
 // We fake window.opener so that call bridges the result back to native.
+// Also replaces the "close this window" page with a styled completion screen.
 const BRIDGE_JS = `
 (function() {
   window.opener = {
@@ -26,6 +27,15 @@ const BRIDGE_JS = `
           code: data.code,
           state: data.state
         }));
+        // Replace page content with a "done" screen and close button
+        setTimeout(function() {
+          document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#140A18;color:#F0F0F0;font-family:system-ui,sans-serif;padding:20px;text-align:center;">'
+            + '<div style="font-size:48px;margin-bottom:16px;">&#10003;</div>'
+            + '<h1 style="font-size:20px;font-weight:700;margin:0 0 8px;">Signed In!</h1>'
+            + '<p style="font-size:14px;color:#999;margin:0 0 24px;">Tap the button below to continue.</p>'
+            + '<button onclick="window.ReactNativeWebView.postMessage(JSON.stringify({type:\\'close_modal\\'}))" style="background:#FA4FD1;color:#fff;border:none;border-radius:12px;padding:14px 48px;font-size:16px;font-weight:600;cursor:pointer;">Continue</button>'
+            + '</div>';
+        }, 100);
       }
     }
   };
@@ -44,14 +54,20 @@ export function OAuthModal({ url, onClose, onComplete, paddingTop }: OAuthModalP
   const oauthWebViewRef = useRef<WebViewType>(null);
   const didComplete = useRef(false);
 
+  const oauthResult = useRef<{ code: string; state: string } | null>(null);
+
   const handleMessage = useCallback((event: WebViewMessageEvent) => {
-    if (didComplete.current) return;
     try {
       const data = JSON.parse(event.nativeEvent.data);
       if (data.type === 'oauth_result' && data.code && data.state) {
+        // Store result but don't close yet — wait for user to tap Continue
+        oauthResult.current = { code: data.code, state: data.state };
+      } else if (data.type === 'close_modal' && oauthResult.current) {
         didComplete.current = true;
+        const result = oauthResult.current;
+        oauthResult.current = null;
         onClose();
-        onComplete({ code: data.code, state: data.state });
+        onComplete(result);
       }
     } catch {
       // ignore
