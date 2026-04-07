@@ -100,6 +100,7 @@ export function useToggleFollow() {
       if (!user) return;
       queryClient.invalidateQueries({ queryKey: queryKeys.follows.check(user.id, targetUserId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.follows.followingIds(user.id) });
+      queryClient.invalidateQueries({ queryKey: ['follows', 'my-following-set', user.id] });
       queryClient.invalidateQueries({ queryKey: queryKeys.follows.followers(targetUserId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.follows.following(user.id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(targetUserId) });

@@ -20,7 +20,6 @@ export function PeopleSearch() {
     return () => clearTimeout(t);
   }, [query]);
 
-  // Sanitize to prevent breaking PocketBase filter syntax
   const safe = debounced.replace(/["\\%]/g, '');
 
   const { data: results = [], isLoading } = useQuery({
@@ -37,28 +36,28 @@ export function PeopleSearch() {
       return result.items as RecordModel[];
     },
     enabled: !!user,
-    staleTime: 30 * 1000,
+    staleTime: 30_000,
   });
 
-  // Batch-load follow status for all visible users in one query
-  const userIds = results.map((u) => u.id);
-  const { data: followingSet = new Set<string>() } = useQuery({
-    queryKey: ['follows', 'batch-check', user?.id || '', ...userIds.sort()],
+  // Single query to get ALL users the current user follows — not dependent on results list
+  const { data: followingSet, isLoading: followsLoading } = useQuery({
+    queryKey: ['follows', 'my-following-set', user?.id || ''],
     queryFn: async () => {
-      if (!user || userIds.length === 0) return new Set<string>();
+      if (!user) return new Set<string>();
       const records = await pb.collection('follows').getFullList({
         filter: `follower="${user.id}"`,
         fields: 'following',
       });
       return new Set(records.map((r) => r.following as string));
     },
-    enabled: !!user && userIds.length > 0,
+    enabled: !!user,
     staleTime: 10_000,
   });
 
+  const loading = isLoading || followsLoading;
+
   return (
     <div className="space-y-3">
-      {/* Search input */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
         <input
@@ -70,8 +69,7 @@ export function PeopleSearch() {
         />
       </div>
 
-      {/* Results */}
-      {isLoading ? (
+      {loading ? (
         <div className="flex justify-center py-10">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
@@ -111,7 +109,10 @@ export function PeopleSearch() {
                     <p className="mt-0.5 truncate text-xs text-muted-foreground">{u.bio}</p>
                   )}
                 </div>
-                <FollowButton targetUserId={u.id} initialIsFollowing={followingSet.has(u.id)} />
+                <FollowButton
+                  targetUserId={u.id}
+                  initialIsFollowing={followingSet ? followingSet.has(u.id) : undefined}
+                />
               </div>
             ))}
           </div>
