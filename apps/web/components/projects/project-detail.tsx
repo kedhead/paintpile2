@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
-import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, ChefHat, Share2, Check, Link2, Award, Globe, Lock } from 'lucide-react';
+import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, ChefHat, Share2, Check, Link2, Award, Globe, Lock, Send, Loader2, MessageSquarePlus } from 'lucide-react';
 import { useAuth } from '../auth-provider';
 import { useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
+import { useCreatePost } from '../../hooks/use-posts';
 import { ProjectStatusBadge } from './project-status-badge';
 import { LikeButton } from '../social/like-button';
 import { FollowButton } from '../social/follow-button';
@@ -39,6 +40,10 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const [activeTab, setActiveTab] = useState<'photos' | 'paints' | 'recipes'>('photos');
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showPostToFeed, setShowPostToFeed] = useState(false);
+  const [feedCaption, setFeedCaption] = useState('');
+  const [feedPosted, setFeedPosted] = useState(false);
+  const createPost = useCreatePost();
 
   const coverPhoto = project.cover_photo
     ? getFileUrl(project, project.cover_photo, '800x600')
@@ -312,6 +317,19 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
       {/* Actions */}
       <div className="flex items-center gap-4 border-t border-border pt-3">
         <LikeButton targetId={project.id} targetType="project" initialCount={project.like_count || 0} />
+        {isOwner && coverPhoto && (
+          <button
+            onClick={() => {
+              setFeedCaption(`Check out my project "${project.name}"! 🎨`);
+              setShowPostToFeed(true);
+              setFeedPosted(false);
+            }}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <MessageSquarePlus className="h-4 w-4" />
+            Post to Feed
+          </button>
+        )}
         <div className="relative">
           <button
             onClick={() => setShowShare(!showShare)}
@@ -374,6 +392,70 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           )}
         </div>
       </div>
+
+      {/* Post to Feed Dialog */}
+      {showPostToFeed && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setShowPostToFeed(false)} />
+          <div className="fixed inset-x-4 top-1/2 z-50 mx-auto max-w-md -translate-y-1/2 rounded-lg border border-border bg-card p-5 shadow-xl">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Share to Feed</h3>
+            {coverPhoto && (
+              <img src={coverPhoto} alt={project.name} className="w-full rounded-md mb-3 max-h-48 object-cover" />
+            )}
+            <textarea
+              value={feedCaption}
+              onChange={(e) => setFeedCaption(e.target.value)}
+              rows={3}
+              placeholder="Write a caption..."
+              className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+            {feedPosted && (
+              <p className="mt-2 text-xs text-green-400 flex items-center gap-1">
+                <Check className="h-3 w-3" /> Posted to feed!
+              </p>
+            )}
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                onClick={() => setShowPostToFeed(false)}
+                className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted"
+              >
+                {feedPosted ? 'Close' : 'Cancel'}
+              </button>
+              {!feedPosted && (
+                <button
+                  onClick={async () => {
+                    if (!user || !project.cover_photo) return;
+                    const fullUrl = getFileUrl(project, project.cover_photo);
+                    const imgRes = await fetch(fullUrl);
+                    const blob = await imgRes.blob();
+                    const ext = project.cover_photo.split('.').pop() || 'jpg';
+                    const file = new File([blob], `project-${project.id}.${ext}`, { type: blob.type });
+
+                    const formData = new FormData();
+                    formData.append('content', feedCaption || project.name);
+                    formData.append('is_public', 'true');
+                    formData.append('user', user.id);
+                    formData.append('images', file);
+                    formData.append('tags', JSON.stringify([project.status || 'painting', 'project']));
+
+                    await createPost.mutateAsync(formData);
+                    setFeedPosted(true);
+                  }}
+                  disabled={createPost.isPending}
+                  className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/80 disabled:opacity-50"
+                >
+                  {createPost.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  Post
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Comments */}
       <CommentSection targetId={project.id} targetType="project" commentCount={project.comment_count || 0} />
