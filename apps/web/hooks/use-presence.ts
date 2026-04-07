@@ -1,20 +1,30 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../components/auth-provider';
 import { queryKeys } from '../lib/query-keys';
 
 export function usePresence() {
   const { pb, user } = useAuth();
+  const userIdRef = useRef(user?.id);
+  userIdRef.current = user?.id;
 
   useEffect(() => {
-    if (!user) return;
+    const userId = userIdRef.current;
+    if (!userId) return;
 
     const updatePresence = async () => {
       try {
-        await pb.collection('users').update(user.id, {
-          last_active_at: new Date().toISOString(),
+        const token = pb.authStore.token;
+        if (!token) return;
+        await fetch(`${pb.baseURL}/api/collections/users/records/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+          },
+          body: JSON.stringify({ last_active_at: new Date().toISOString() }),
         });
       } catch {
         // Presence update failure is non-critical
@@ -28,7 +38,7 @@ export function usePresence() {
     const interval = setInterval(updatePresence, 2 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [pb, user]);
+  }, [pb, user?.id]);
 }
 
 export function useIsUserOnline(userId: string) {
