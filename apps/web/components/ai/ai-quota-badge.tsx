@@ -13,7 +13,7 @@ export function AIQuotaBadge() {
 
   const monthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
   const used = quota.monthly_usage?.[monthKey] || 0;
-  const limit = quota.monthly_limit || (user?.subscription === 'pro' ? 2000 : 500);
+  const limit = quota.monthly_limit || (user?.subscription === 'pro' ? 1500 : 150);
   const bonus = quota.bonus_credits || 0;
   const remaining = Math.max(0, limit - used + bonus);
   const isLow = remaining < 50 && user?.subscription !== 'pro';

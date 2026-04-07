@@ -7,7 +7,7 @@ import { useSubscription } from '../../../../hooks/use-subscription';
 import { useAuth } from '../../../../components/auth-provider';
 
 const features = [
-  { name: 'AI Credits / month', free: '500', pro: '2,000', icon: Zap },
+  { name: 'AI Credits / month', free: '150', pro: '1,500', icon: Zap },
   { name: 'Feed Ads', free: 'Yes', pro: 'No ads', icon: Ban },
   { name: 'AI Image Upscaling', free: 'Basic', pro: 'Priority', icon: Image },
   { name: 'Pro Badge', free: 'No', pro: 'Yes', icon: Crown },

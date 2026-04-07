@@ -86,9 +86,9 @@ export async function validateAndDeductCredits(
     const monthKey = getMonthKey();
     const monthlyUsage = quota.monthly_usage || {};
     const currentMonthUsage = monthlyUsage[monthKey] || 0;
-    // Pro users get 2000 credits, free users get 500
+    // Pro users get 1500 credits, free users get 150
     const user = await pb.collection('users').getOne(userId);
-    const defaultLimit = user.subscription === 'pro' ? 2000 : 500;
+    const defaultLimit = user.subscription === 'pro' ? 1500 : 150;
     const limit = quota.monthly_limit || defaultLimit;
 
     const bonusCredits = quota.bonus_credits || 0;
@@ -96,7 +96,7 @@ export async function validateAndDeductCredits(
 
     if (totalAvailable < cost) {
       const isPro = user.subscription === 'pro';
-      const upgradeHint = isPro ? '' : ' Upgrade to Pro for 4x more credits, or buy a credit pack!';
+      const upgradeHint = isPro ? '' : ' Upgrade to Pro for 10x more credits, or buy a credit pack!';
       throw new Error(`Insufficient credits. ${totalAvailable} remaining, ${cost} needed.${upgradeHint}`);
     }
 

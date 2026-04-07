@@ -37,16 +37,16 @@ export interface UsageStats {
  * 1 credit = $0.001
  */
 export const OPERATION_COSTS = {
-  enhancement: 10,
-  upscaling: 10,
-  paintSuggestions: 8,
-  aiCleanup: 25,
-  recolor: 20,
-  recipeGeneration: 25,
-  techniqueAdvisor: 8,
-  recipeVideoScript: 15,
-  recipeVideoAI: 50,
-  palettePostCaption: 5,
+  enhancement: 15,
+  upscaling: 20,
+  paintSuggestions: 15,
+  aiCleanup: 40,
+  recolor: 35,
+  recipeGeneration: 40,
+  techniqueAdvisor: 15,
+  recipeVideoScript: 25,
+  recipeVideoAI: 80,
+  palettePostCaption: 8,
 } as const;
 
 export function creditsToDollars(credits: number): string {

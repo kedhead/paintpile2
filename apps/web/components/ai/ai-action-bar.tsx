@@ -109,10 +109,10 @@ export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarPro
   };
 
   const actions = [
-    { key: 'critique' as const, label: 'Critique', icon: Sparkles, credits: 8, loading: critique.isPending },
-    { key: 'suggestions' as const, label: 'Paints', icon: Palette, credits: 8, loading: paintSuggestions.isPending },
-    { key: 'technique' as const, label: 'Technique', icon: BookOpen, credits: 8, loading: techniqueAdvisor.isPending },
-    { key: 'recipe' as const, label: 'Recipe', icon: ChefHat, credits: 25, loading: recipeGeneration.isPending },
+    { key: 'critique' as const, label: 'Critique', icon: Sparkles, credits: 15, loading: critique.isPending },
+    { key: 'suggestions' as const, label: 'Paints', icon: Palette, credits: 15, loading: paintSuggestions.isPending },
+    { key: 'technique' as const, label: 'Technique', icon: BookOpen, credits: 15, loading: techniqueAdvisor.isPending },
+    { key: 'recipe' as const, label: 'Recipe', icon: ChefHat, credits: 40, loading: recipeGeneration.isPending },
   ];
 
   return (
@@ -147,7 +147,7 @@ export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarPro
         >
           {upscale.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ZoomIn className="h-3.5 w-3.5" />}
           Upscale
-          <span className="text-muted-foreground">(10)</span>
+          <span className="text-muted-foreground">(20)</span>
         </button>
 
         <button
@@ -157,7 +157,7 @@ export function AIActionBar({ projectId, projectName, imageUrl }: AIActionBarPro
         >
           <Paintbrush className="h-3.5 w-3.5" />
           Recolor
-          <span className="text-muted-foreground">(20)</span>
+          <span className="text-muted-foreground">(35)</span>
         </button>
       </div>
 

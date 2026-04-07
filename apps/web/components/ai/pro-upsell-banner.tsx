@@ -15,7 +15,7 @@ export function ProUpsellBanner({ context = 'critique' }: ProUpsellBannerProps) 
   const messages = {
     critique: {
       title: 'Want more critiques?',
-      body: 'Upgrade to Pro for 2,000 credits/month and an ad-free experience.',
+      body: 'Upgrade to Pro for 1,500 credits/month and an ad-free experience.',
     },
     'credits-low': {
       title: 'Running low on credits',
@@ -23,7 +23,7 @@ export function ProUpsellBanner({ context = 'critique' }: ProUpsellBannerProps) 
     },
     'credits-out': {
       title: 'Out of credits',
-      body: 'Your free credits reset next month. Upgrade to Pro for 2,000/month or buy a credit pack.',
+      body: 'Your free credits reset next month. Upgrade to Pro for 1,500/month or buy a credit pack.',
     },
   };
 
