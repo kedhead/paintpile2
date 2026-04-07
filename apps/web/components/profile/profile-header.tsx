@@ -16,6 +16,7 @@ import { useUserStats } from '../../hooks/use-user-profile';
 import { useAuth } from '../auth-provider';
 import Link from 'next/link';
 import { Pencil, Settings } from 'lucide-react';
+import { AIQuotaBadge } from '../ai/ai-quota-badge';
 
 interface ProfileHeaderProps {
   profileUser: RecordModel;
@@ -74,7 +75,7 @@ export function ProfileHeader({ profileUser }: ProfileHeaderProps) {
               <SocialLinksDisplay links={profileUser.social_links} />
             </div>
           )}
-          <div className="mt-4">
+          <div className="mt-4 flex items-center gap-4">
             <ProfileStats
               postCount={stats?.postCount || 0}
               followerCount={stats?.followerCount || 0}
@@ -82,6 +83,7 @@ export function ProfileHeader({ profileUser }: ProfileHeaderProps) {
               onFollowersClick={() => setModal('followers')}
               onFollowingClick={() => setModal('following')}
             />
+            {isOwnProfile && <AIQuotaBadge />}
           </div>
         </div>
       </div>
