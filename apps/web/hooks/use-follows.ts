@@ -20,6 +20,8 @@ export function useIsFollowing(targetUserId: string) {
       return result.totalItems > 0;
     },
     enabled: !!user && !!targetUserId && user.id !== targetUserId,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -28,19 +30,6 @@ export function useToggleFollow() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    onMutate: async ({ targetUserId, isFollowing }: { targetUserId: string; isFollowing: boolean }) => {
-      if (!user) return undefined;
-      const key = queryKeys.follows.check(user.id, targetUserId);
-      await queryClient.cancelQueries({ queryKey: key });
-      const previous = queryClient.getQueryData<boolean>(key);
-      queryClient.setQueryData(key, !isFollowing);
-      return { key, previous };
-    },
-    onError: (_err: unknown, _vars: unknown, context: { key: readonly string[]; previous: boolean | undefined } | undefined) => {
-      if (context?.key) {
-        queryClient.setQueryData(context.key, context.previous);
-      }
-    },
     mutationFn: async ({
       targetUserId,
       isFollowing,
@@ -69,10 +58,25 @@ export function useToggleFollow() {
         }
       }
     },
-    onSuccess: async (_data, { targetUserId, isFollowing }) => {
+    onMutate: async ({ targetUserId, isFollowing }) => {
+      if (!user) return;
+      const checkKey = queryKeys.follows.check(user.id, targetUserId);
+      await queryClient.cancelQueries({ queryKey: checkKey });
+      const previousValue = queryClient.getQueryData<boolean>(checkKey);
+      queryClient.setQueryData<boolean>(checkKey, !isFollowing);
+      return { previousValue, checkKey };
+    },
+    onError: (_err, { targetUserId }, context) => {
+      if (!user || !context) return;
+      queryClient.setQueryData(
+        queryKeys.follows.check(user.id, targetUserId),
+        context.previousValue,
+      );
+    },
+    onSuccess: (_data, { targetUserId, isFollowing }) => {
       if (!user) return;
       if (!isFollowing) {
-        await createNotification(pb, {
+        createNotification(pb, {
           user: targetUserId,
           type: 'follow',
           actor_id: user.id,
@@ -81,25 +85,23 @@ export function useToggleFollow() {
           target_type: 'user',
           message: `${getDisplayName(user, 'Someone')} started following you`,
           action_url: `/profile/${user.id}`,
-        });
-      }
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.follows.check(user.id, targetUserId),
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followingIds(user.id) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followers(targetUserId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.follows.following(user.id) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(targetUserId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(user.id) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.following() });
-      // Log activity for new follows
-      if (!isFollowing && user) {
+        }).catch(() => {});
         logActivity(pb, user.id, {
           type: 'user_followed',
           target_id: targetUserId,
           target_type: 'user',
         });
       }
+    },
+    onSettled: (_data, _err, { targetUserId }) => {
+      if (!user) return;
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.check(user.id, targetUserId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followingIds(user.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.followers(targetUserId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.follows.following(user.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(targetUserId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.stats(user.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.following() });
     },
   });
 }
