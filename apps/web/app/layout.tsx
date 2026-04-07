@@ -41,6 +41,7 @@ export default function RootLayout({
       <head>
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <link rel="manifest" href="/manifest.json" />
+        <link rel="alternate" type="application/rss+xml" title="Paintpile Feed" href="/feed.xml" />
         {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
           <script
             async
