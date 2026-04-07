@@ -7,7 +7,7 @@ import { queryKeys } from '../lib/query-keys';
 import { createNotification } from './use-notifications';
 import { logActivity } from './use-activities';
 
-export function useIsFollowing(targetUserId: string) {
+export function useIsFollowing(targetUserId: string, skip = false) {
   const { pb, user } = useAuth();
 
   return useQuery({
@@ -19,7 +19,7 @@ export function useIsFollowing(targetUserId: string) {
       });
       return result.totalItems > 0;
     },
-    enabled: !!user && !!targetUserId && user.id !== targetUserId,
+    enabled: !skip && !!user && !!targetUserId && user.id !== targetUserId,
     staleTime: 30_000,
     refetchOnWindowFocus: false,
   });
@@ -55,7 +55,9 @@ export function useToggleFollow() {
             follower: user.id,
             following: targetUserId,
           });
+          return { created: true };
         }
+        return { created: false };
       }
     },
     onMutate: async ({ targetUserId, isFollowing }) => {
@@ -73,9 +75,10 @@ export function useToggleFollow() {
         context.previousValue,
       );
     },
-    onSuccess: (_data, { targetUserId, isFollowing }) => {
+    onSuccess: (result, { targetUserId, isFollowing }) => {
       if (!user) return;
-      if (!isFollowing) {
+      // Only send notification if a new follow was actually created
+      if (!isFollowing && result?.created) {
         createNotification(pb, {
           user: targetUserId,
           type: 'follow',

@@ -11,19 +11,18 @@ import { CreatePostForm } from '../../../components/feed/create-post-form';
 import { PostCard } from '../../../components/feed/post-card';
 import { AdCard } from '../../../components/feed/ad-card';
 import { useActiveAds } from '../../../hooks/use-ads';
-import { FeedTabs } from '../../../components/feed/feed-tabs';
+import { FeedTabs, type FeedTab } from '../../../components/feed/feed-tabs';
 import { GoLiveButton } from '../../../components/feed/go-live-button';
 import { LiveStreamCard } from '../../../components/feed/live-stream-card';
 import { CommunityGallery } from '../../../components/community/community-gallery';
-
-type FeedTab = 'following' | 'discover' | 'gallery';
+import { PeopleSearch } from '../../../components/feed/people-search';
 
 function FeedContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const initialTab = (searchParams?.get('tab') as FeedTab) || 'discover';
   const [activeTab, setActiveTab] = useState<FeedTab>(
-    ['following', 'discover', 'gallery'].includes(initialTab) ? initialTab : 'discover'
+    (['following', 'discover', 'gallery', 'people'] as FeedTab[]).includes(initialTab) ? initialTab : 'discover'
   );
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +32,7 @@ function FeedContent() {
   const { data: liveStreams = [] } = useLiveStreams();
   const { data: feedAds = [] } = useActiveAds('feed');
   const isPro = user?.subscription === 'pro';
+  const isPeople = activeTab === 'people';
 
   const feed = activeTab === 'discover' ? discover : following;
   const posts = feed.data?.pages.flatMap((p) => p.items) || [];
@@ -58,8 +58,8 @@ function FeedContent() {
 
   return (
     <div className={`mx-auto space-y-4 ${isGallery ? 'max-w-4xl' : 'max-w-2xl'}`}>
-      {/* Create post + Go Live row — hidden on gallery tab */}
-      {!isGallery && (
+      {/* Create post + Go Live row — hidden on gallery/people tabs */}
+      {!isGallery && !isPeople && (
         <div className="flex items-start gap-3">
           <div className="flex-1">
             <CreatePostForm />
@@ -72,8 +72,8 @@ function FeedContent() {
         </div>
       )}
 
-      {/* Live Streams — hidden on gallery tab */}
-      {!isGallery && liveStreams.length > 0 && (
+      {/* Live Streams — hidden on gallery/people tabs */}
+      {!isGallery && !isPeople && liveStreams.length > 0 && (
         <div className="space-y-2">
           {liveStreams.map((stream) => (
             <LiveStreamCard key={stream.id} stream={stream} />
@@ -89,6 +89,8 @@ function FeedContent() {
 
       {isGallery ? (
         <CommunityGallery />
+      ) : isPeople ? (
+        <PeopleSearch />
       ) : (
         <div className="space-y-4">
           {feed.isLoading ? (
