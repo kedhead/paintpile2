@@ -44,10 +44,16 @@ export function useToggleFollow() {
           await pb.collection('follows').delete(existing.items[0].id);
         }
       } else {
-        await pb.collection('follows').create({
-          follower: user.id,
-          following: targetUserId,
+        // Check for existing follow to prevent duplicates
+        const existing = await pb.collection('follows').getList(1, 1, {
+          filter: `follower="${user.id}" && following="${targetUserId}"`,
         });
+        if (existing.items.length === 0) {
+          await pb.collection('follows').create({
+            follower: user.id,
+            following: targetUserId,
+          });
+        }
       }
     },
     onSuccess: async (_data, { targetUserId, isFollowing }) => {
