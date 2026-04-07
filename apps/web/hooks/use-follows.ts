@@ -28,15 +28,15 @@ export function useToggleFollow() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    onMutate: async ({ targetUserId, isFollowing }) => {
-      if (!user) return;
+    onMutate: async ({ targetUserId, isFollowing }: { targetUserId: string; isFollowing: boolean }) => {
+      if (!user) return undefined;
       const key = queryKeys.follows.check(user.id, targetUserId);
       await queryClient.cancelQueries({ queryKey: key });
-      const previous = queryClient.getQueryData(key);
+      const previous = queryClient.getQueryData<boolean>(key);
       queryClient.setQueryData(key, !isFollowing);
       return { key, previous };
     },
-    onError: (_err, _vars, context) => {
+    onError: (_err: unknown, _vars: unknown, context: { key: readonly string[]; previous: boolean | undefined } | undefined) => {
       if (context?.key) {
         queryClient.setQueryData(context.key, context.previous);
       }
