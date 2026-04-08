@@ -39,25 +39,30 @@ export default async function HomePage() {
     // PB unreachable
   }
 
-  // Non-authenticated visitors see a minimal page with real content, then redirect via JS
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <noscript>
-        <meta httpEquiv="refresh" content="0;url=/auth/login" />
-      </noscript>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `window.location.replace('/auth/login');`,
-        }}
-      />
-
       <h1 className="mb-4 text-3xl font-bold text-foreground">
         Paintpile — The Community for Miniature Painters
       </h1>
-      <p className="mb-8 text-lg text-muted-foreground">
+      <p className="mb-6 text-lg text-muted-foreground">
         Track your miniature painting projects, get AI-powered critiques, manage 4,700+ paints,
         share recipes, and connect with fellow hobbyists.
       </p>
+
+      <div className="mb-8 flex gap-3">
+        <a
+          href="/auth/login"
+          className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-white hover:bg-primary/80"
+        >
+          Sign In
+        </a>
+        <a
+          href="/auth/signup"
+          className="rounded-md border border-border px-6 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+        >
+          Create Account
+        </a>
+      </div>
 
       <h2 className="mb-4 text-xl font-semibold text-foreground">Recent Posts</h2>
       <ul className="space-y-3">
