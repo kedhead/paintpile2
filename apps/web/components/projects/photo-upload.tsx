@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { useUploadPhoto } from '../../hooks/use-photos';
 
@@ -17,6 +17,7 @@ interface PendingPhoto {
 export function PhotoUpload({ projectId }: PhotoUploadProps) {
   const [pending, setPending] = useState<PendingPhoto[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadPhoto = useUploadPhoto();
   const [uploading, setUploading] = useState(false);
 
@@ -96,19 +97,29 @@ export function PhotoUpload({ projectId }: PhotoUploadProps) {
             : 'border-border hover:border-muted-foreground'
         }`}
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              addFiles(e.target.files);
+            }
+            e.target.value = '';
+          }}
+        />
         <Upload className="mx-auto h-6 w-6 text-muted-foreground" />
         <p className="mt-2 text-sm text-muted-foreground">
           Drag photos here or{' '}
-          <label className="cursor-pointer text-primary hover:underline">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="text-primary hover:underline"
+          >
             browse
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => e.target.files && addFiles(e.target.files)}
-            />
-          </label>
+          </button>
         </p>
       </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Upload } from 'lucide-react';
 import { useAuth } from '../auth-provider';
@@ -21,6 +21,7 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
   const [isPublic, setIsPublic] = useState(true);
   const [addToShame, setAddToShame] = useState(false);
   const [coverPhoto, setCoverPhoto] = useState<File | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +59,21 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Cover Photo */}
           <div className="flex justify-center">
-            <label className="flex h-32 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-border hover:border-primary-400 transition-colors overflow-hidden">
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                setCoverPhoto(e.target.files?.[0] || null);
+                e.target.value = '';
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => coverInputRef.current?.click()}
+              className="flex h-32 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-border hover:border-primary-400 transition-colors overflow-hidden"
+            >
               {coverPhoto ? (
                 <img
                   src={URL.createObjectURL(coverPhoto)}
@@ -71,13 +86,7 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
                   <span className="mt-1 text-xs">Cover Photo</span>
                 </div>
               )}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => setCoverPhoto(e.target.files?.[0] || null)}
-              />
-            </label>
+            </button>
           </div>
 
           <div>
