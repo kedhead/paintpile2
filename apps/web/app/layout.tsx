@@ -49,6 +49,12 @@ export default function RootLayout({
             crossOrigin="anonymous"
           />
         )}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-KQQ8WWKRQB" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-KQQ8WWKRQB');`,
+          }}
+        />
       </head>
       <body>
         <Providers>{children}</Providers>
