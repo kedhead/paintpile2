@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { Providers } from './providers';
 
@@ -49,14 +50,15 @@ export default function RootLayout({
             crossOrigin="anonymous"
           />
         )}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-KQQ8WWKRQB" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-KQQ8WWKRQB');`,
-          }}
-        />
       </head>
       <body>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-KQQ8WWKRQB"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-KQQ8WWKRQB');`}
+        </Script>
         <Providers>{children}</Providers>
       </body>
     </html>
