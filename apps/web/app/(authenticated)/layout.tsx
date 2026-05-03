@@ -12,7 +12,7 @@ import { ServiceWorkerRegister } from '../../components/sw-register';
 import {
   Home, FolderOpen, Layers, Palette, Wrench, Settings,
   ChefHat, BookOpen, Trophy, Users, Newspaper, Award,
-  LayoutDashboard, Image, Sun, Crosshair, Boxes,
+  LayoutDashboard, Image, Sun, Crosshair, Boxes, MoreHorizontal, X,
 } from 'lucide-react';
 
 // ── Navigation items ─────────────────────────────────────────────────────────
@@ -159,48 +159,160 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
 }
 
 // ── Mobile bottom nav ────────────────────────────────────────────────────────
+const MOBILE_NAV = [
+  { href: '/feed',     label: 'Feed',     icon: Home },
+  { href: '/projects', label: 'Projects', icon: FolderOpen },
+  { href: '/pile',     label: 'Pile',     icon: Layers },
+  { href: '/paints',   label: 'Paints',   icon: Palette },
+];
+
+const MORE_DRAWER_ITEMS = [
+  { href: '/groups',       label: 'Groups',       icon: Users },
+  { href: '/recipes',      label: 'Recipes',      icon: ChefHat },
+  { href: '/diary',        label: 'Diary',        icon: BookOpen },
+  { href: '/news',         label: 'News',         icon: Newspaper },
+  { href: '/challenges',   label: 'Challenges',   icon: Trophy },
+  { href: '/badges',       label: 'Badges',       icon: Award },
+  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
+  { href: '/palette-post', label: 'Palette Post', icon: Image },
+  { href: '/tools',        label: 'Tools',        icon: Wrench },
+  { href: '/settings/account', label: 'Settings', icon: Settings },
+];
+
 function MobileBottomNav({ pathname }: { pathname: string | null }) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   const isActive = (href: string) => {
     if (href === '/feed') return pathname === '/feed' || pathname === '/';
     return !!pathname?.startsWith(href);
   };
 
+  const moreActive = MORE_DRAWER_ITEMS.some(i => isActive(i.href));
+
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 flex md:hidden z-50 border-t"
-      style={{
-        height: 60,
-        background: '#16161e',
-        borderTopColor: 'rgba(255,255,255,.07)',
-        boxShadow: '0 -4px 20px rgba(0,0,0,.4)',
-      }}
-    >
-      {PRIMARY_NAV.map(({ href, label, icon: Icon }) => {
-        const active = isActive(href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 3,
-              color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
-              textDecoration: 'none',
-              transition: 'color .15s',
-            }}
+    <>
+      {/* Backdrop */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          style={{ background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setDrawerOpen(false)}
+        />
+      )}
+
+      {/* More drawer */}
+      <div
+        className="fixed left-0 right-0 z-50 md:hidden"
+        style={{
+          bottom: 60,
+          background: '#16161e',
+          borderTop: '1px solid rgba(255,255,255,.08)',
+          borderRadius: '16px 16px 0 0',
+          padding: '12px 16px 8px',
+          transform: drawerOpen ? 'translateY(0)' : 'translateY(110%)',
+          transition: 'transform .25s cubic-bezier(.4,0,.2,1)',
+          boxShadow: '0 -8px 40px rgba(0,0,0,.5)',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <span style={{ fontFamily: '"Bebas Neue", cursive', fontSize: 18, letterSpacing: '.06em', color: '#f0eeff' }}>MORE</span>
+          <button
+            onClick={() => setDrawerOpen(false)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(122,120,152,1)', padding: 4 }}
           >
-            <Icon style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
-            <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
-              {label}
-            </span>
-          </Link>
-        );
-      })}
-    </nav>
+            <X style={{ width: 18, height: 18 } as React.CSSProperties} />
+          </button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
+          {MORE_DRAWER_ITEMS.map(({ href, label, icon: Icon }) => {
+            const active = isActive(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setDrawerOpen(false)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '10px 4px',
+                  borderRadius: 10,
+                  background: active ? 'rgba(124,58,237,.12)' : 'transparent',
+                  color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
+                  textDecoration: 'none',
+                }}
+              >
+                <Icon style={{ width: 20, height: 20, color: 'inherit' } as React.CSSProperties} />
+                <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.02em', textAlign: 'center', color: 'inherit' }}>
+                  {label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 flex md:hidden z-50 border-t"
+        style={{
+          height: 60,
+          background: '#16161e',
+          borderTopColor: 'rgba(255,255,255,.07)',
+          boxShadow: '0 -4px 20px rgba(0,0,0,.4)',
+        }}
+      >
+        {MOBILE_NAV.map(({ href, label, icon: Icon }) => {
+          const active = isActive(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 3,
+                color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
+                textDecoration: 'none',
+                transition: 'color .15s',
+              }}
+            >
+              <Icon style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
+              <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
+                {label}
+              </span>
+            </Link>
+          );
+        })}
+
+        {/* More button */}
+        <button
+          onClick={() => setDrawerOpen(v => !v)}
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 3,
+            color: moreActive || drawerOpen ? '#7c3aed' : 'rgba(122,120,152,1)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'color .15s',
+          }}
+        >
+          <MoreHorizontal style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
+          <span style={{ fontSize: 9, fontWeight: moreActive || drawerOpen ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
+            More
+          </span>
+        </button>
+      </nav>
+    </>
   );
 }
 
