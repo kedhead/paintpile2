@@ -1,225 +1,123 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useAuth } from './auth-provider';
-import {
-  Home, User, Palette, LogOut, Users,
-  ChefHat, Boxes, Sun, MoreHorizontal, Settings,
-  BookOpen, Newspaper, LayoutDashboard,
-  Trophy, Award, Crosshair, LogIn, UserPlus, Crown,
-  CreditCard, Image,
-} from 'lucide-react';
+import { Crown, LogIn, UserPlus, LogOut } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
-import { ThemeToggle } from './theme-toggle';
 import { UserAvatar } from './social/user-avatar';
 
-const mainNavItems = [
-  { href: '/feed', label: 'Feed', icon: Home },
-  { href: '/groups', label: 'Groups', icon: Users },
-  { href: '/projects', label: 'Projects', icon: Palette },
-];
-
-const moreNavItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/paints', label: 'Paints', icon: Palette },
-  { href: '/recipes', label: 'Recipes', icon: ChefHat },
-  { href: '/pile', label: 'Pile', icon: Boxes },
-  { href: '/diary', label: 'Diary', icon: BookOpen },
-  { href: '/news', label: 'News', icon: Newspaper },
-  { href: '/challenges', label: 'Challenges', icon: Trophy },
-  { href: '/badges', label: 'Badges', icon: Award },
-  { href: '/brag-board', label: 'Brag Board', icon: Award },
-];
-
-const toolsItems = [
-  { href: '/palette-post', label: 'Palette Post', icon: Image },
-  { href: '/tools/lighting-ref', label: 'Lighting Ref', icon: Sun },
-  { href: '/tools/color-matcher', label: 'Color Matcher', icon: Crosshair },
-  { href: '/tools/paint-mixer', label: 'Paint Mixer', icon: Palette },
-];
-
-const bottomItems = [
-  { href: '/profile', label: 'Profile', icon: User },
-  { href: '/settings/subscription', label: 'Subscription', icon: CreditCard },
-  { href: '/admin', label: 'Admin', icon: Settings },
-];
-
 export function NavBar() {
-  const pathname = usePathname();
   const { user, signOut } = useAuth();
-  const [moreOpen, setMoreOpen] = useState(false);
-
-  const allMoreItems = [...moreNavItems, ...toolsItems, ...bottomItems];
-  const isMoreActive = allMoreItems.some(({ href }) => pathname?.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
-        <Link href={user ? '/feed' : '/'} className="flex items-center gap-2">
-          <img src="/logosmall.png" alt="Paintpile" className="h-9 w-auto" />
-        </Link>
+    <header
+      className="sticky top-0 z-50 flex items-center border-b"
+      style={{
+        height: 52,
+        background: '#0e0e16',
+        borderBottomColor: 'rgba(255,255,255,.07)',
+        boxShadow: '0 1px 0 rgba(124,58,237,.08)',
+        padding: '0 16px',
+        gap: 12,
+        flexShrink: 0,
+      }}
+    >
+      {/* Logo */}
+      <Link href={user ? '/feed' : '/'} className="flex items-center gap-2.5 shrink-0">
+        <img src="/logosmall.png" alt="Paintpile" style={{ height: 30, width: 'auto' }} />
+        <span
+          className="hidden sm:block"
+          style={{
+            fontFamily: '"Bebas Neue", cursive',
+            fontSize: 20,
+            letterSpacing: '.06em',
+            color: '#f0eeff',
+            opacity: .9,
+            lineHeight: 1,
+            marginTop: 1,
+          }}
+        >
+          PAINTPILE
+        </span>
+      </Link>
 
-        <nav className="flex items-center gap-1">
-          {mainNavItems.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname?.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{label}</span>
-              </Link>
-            );
-          })}
+      <div className="flex-1" />
 
-          {/* More dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setMoreOpen(!moreOpen)}
-              className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                isMoreActive
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
-            >
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="hidden sm:inline">More</span>
-            </button>
+      {/* Search (desktop only, decorative) */}
+      {user && (
+        <div className="relative hidden md:block w-44">
+          <svg
+            className="absolute left-2.5 top-1/2 -translate-y-1/2"
+            width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="rgba(122,120,152,.6)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
+          >
+            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input
+            placeholder="Search…"
+            readOnly
+            style={{
+              width: '100%', padding: '7px 12px 7px 30px',
+              background: '#111118', border: '1px solid rgba(255,255,255,.07)',
+              borderRadius: 8, color: '#f0eeff', fontSize: 13, outline: 'none',
+              fontFamily: 'DM Sans, sans-serif',
+            }}
+          />
+        </div>
+      )}
 
-            {moreOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setMoreOpen(false)}
-                />
-                <div className="absolute right-0 top-full z-50 mt-1 max-h-[70vh] w-52 overflow-y-auto rounded-md border border-border bg-card py-1 shadow-lg">
-                  {moreNavItems.map(({ href, label, icon: Icon }) => {
-                    const isActive = pathname?.startsWith(href);
-                    return (
-                      <Link
-                        key={href}
-                        href={href}
-                        onClick={() => setMoreOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                          isActive
-                            ? 'bg-primary/10 text-primary'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {label}
-                      </Link>
-                    );
-                  })}
-
-                  <div className="my-1 border-t border-border" />
-                  <p className="px-4 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Tools</p>
-                  {toolsItems.map(({ href, label, icon: Icon }) => {
-                    const isActive = pathname?.startsWith(href);
-                    return (
-                      <Link
-                        key={href}
-                        href={href}
-                        onClick={() => setMoreOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                          isActive
-                            ? 'bg-primary/10 text-primary'
-                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {label}
-                      </Link>
-                    );
-                  })}
-
-                  {user && (
-                    <>
-                      <div className="my-1 border-t border-border" />
-                      {bottomItems
-                        .filter(({ href }) => href !== '/settings/subscription' || user?.role === 'admin')
-                        .map(({ href, label, icon: Icon }) => {
-                        const isActive = pathname?.startsWith(href);
-                        return (
-                          <Link
-                            key={href}
-                            href={href}
-                            onClick={() => setMoreOpen(false)}
-                            className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                              isActive
-                                ? 'bg-primary/10 text-primary'
-                                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                            }`}
-                          >
-                            <Icon className="h-4 w-4" />
-                            {label}
-                          </Link>
-                        );
-                      })}
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="flex-1" />
-          <ThemeToggle />
-
-          {user ? (
-            <>
-              {user.subscription === 'pro' && (
-                <span className="flex items-center gap-1 rounded-full bg-yellow-500/20 px-2 py-0.5 text-xs font-semibold text-yellow-500">
-                  <Crown className="h-3 w-3" />
-                  PRO
-                </span>
-              )}
-              <NotificationBell />
-              <Link
-                href="/profile"
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <UserAvatar user={user} size="xs" />
-                <span className="hidden sm:inline max-w-[100px] truncate">
-                  {user.display_name || user.username || user.name || 'Profile'}
-                </span>
-              </Link>
-              <button
-                onClick={signOut}
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/auth/login"
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <LogIn className="h-4 w-4" />
-                <span className="hidden sm:inline">Login</span>
-              </Link>
-              <Link
-                href="/auth/signup"
-                className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/80"
-              >
-                <UserPlus className="h-4 w-4" />
-                <span className="hidden sm:inline">Sign Up</span>
-              </Link>
-            </>
+      {user ? (
+        <div className="flex items-center gap-1.5">
+          {user.subscription === 'pro' && (
+            <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: 'rgba(245,158,11,.15)', color: '#f59e0b' }}>
+              <Crown className="h-3 w-3" />
+              PRO
+            </span>
           )}
-        </nav>
-      </div>
+          <NotificationBell />
+          <Link
+            href="/profile"
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-all"
+            style={{ color: 'rgba(122,120,152,1)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.05)'; (e.currentTarget as HTMLElement).style.color = '#f0eeff'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(122,120,152,1)'; }}
+          >
+            <UserAvatar user={user} size="xs" />
+            <span className="hidden sm:inline max-w-[80px] truncate text-xs">
+              {user.display_name || user.username || user.name || 'Profile'}
+            </span>
+          </Link>
+          <button
+            onClick={signOut}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all"
+            style={{ color: 'rgba(122,120,152,1)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.05)'; (e.currentTarget as HTMLElement).style.color = '#f0eeff'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(122,120,152,1)'; }}
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <Link
+            href="/auth/login"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all"
+            style={{ color: 'rgba(122,120,152,1)' }}
+          >
+            <LogIn className="h-4 w-4" />
+            <span className="hidden sm:inline">Login</span>
+          </Link>
+          <Link
+            href="/auth/signup"
+            className="flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-sm font-bold text-white transition-all"
+            style={{ background: '#7c3aed', boxShadow: '0 0 20px rgba(124,58,237,.3)' }}
+          >
+            <UserPlus className="h-4 w-4" />
+            <span className="hidden sm:inline">Sign Up</span>
+          </Link>
+        </div>
+      )}
     </header>
   );
 }

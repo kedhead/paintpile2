@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 @layer base {
-  /* ─── Light mode ─── */
+  /* ─── Light mode (Arctic) ─── */
   :root {
-    --background: 250 20% 97%;
+    --background: 240 20% 98%;
     --foreground: 250 15% 12%;
 
     --card: 0 0% 100%;
     --card-foreground: 250 15% 12%;
 
-    --primary: 310 75% 48%;
+    --primary: 265 72% 50%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 250 15% 92%;
@@ -20,7 +20,7 @@
     --muted: 250 12% 92%;
     --muted-foreground: 250 8% 45%;
 
-    --accent: 145 60% 42%;
+    --accent: 265 72% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 63% 50%;
@@ -28,56 +28,55 @@
 
     --border: 250 15% 88%;
     --input: 250 15% 88%;
-    --ring: 310 75% 48%;
+    --ring: 265 72% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
-    --neon-green: 145 55% 38%;
+    --neon-green: 160 84% 39%;
     --neon-blue: 200 70% 42%;
-    --neon-orange: 30 80% 48%;
-    --neon-pink: 310 75% 48%;
+    --neon-orange: 38 92% 50%;
+    --neon-pink: 265 72% 50%;
   }
 
-  /* ─── Dark mode (original neon theme) ─── */
+  /* ─── Dark mode — "The Vault" ─── */
   .dark {
-    --background: 250 15% 8%;
-    --foreground: 60 10% 94%;
+    --background: 250 13% 6%;
+    --foreground: 252 100% 97%;
 
-    --card: 250 15% 12%;
-    --card-foreground: 60 10% 94%;
+    --card: 250 13% 10%;
+    --card-foreground: 252 100% 97%;
 
-    --primary: 310 85% 58%;
+    --primary: 265 81% 57%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 250 12% 18%;
-    --secondary-foreground: 60 10% 94%;
+    --secondary: 250 13% 13%;
+    --secondary-foreground: 252 100% 97%;
 
-    --muted: 250 12% 18%;
-    --muted-foreground: 250 8% 58%;
+    --muted: 250 13% 13%;
+    --muted-foreground: 252 14% 54%;
 
-    --accent: 145 70% 50%;
-    --accent-foreground: 250 15% 8%;
+    --accent: 265 81% 57%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 63% 50%;
-    --destructive-foreground: 60 10% 94%;
+    --destructive-foreground: 252 100% 97%;
 
-    --border: 185 20% 20%;
-    --input: 185 20% 20%;
-    --ring: 310 85% 58%;
+    --border: 250 13% 14%;
+    --input: 250 13% 14%;
+    --ring: 265 81% 57%;
 
-    --neon-green: 145 70% 50%;
+    --neon-green: 160 84% 39%;
     --neon-blue: 200 85% 55%;
-    --neon-orange: 30 90% 55%;
-    --neon-pink: 310 85% 58%;
+    --neon-orange: 38 92% 50%;
+    --neon-pink: 265 81% 57%;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'DM Sans', sans-serif;
   }
 
-
-
-  /* Form elements: dark backgrounds with readable text */
+  /* Form elements */
   input,
   textarea,
   select {
@@ -90,70 +89,89 @@
     color: hsl(var(--muted-foreground));
   }
 
-  /* Color input needs different treatment */
   input[type="color"] {
     background-color: transparent;
   }
 
-  /* Range inputs */
   input[type="range"] {
     background-color: transparent;
   }
 
-  /* Custom scrollbar */
+  /* Thin Vault-style scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 4px;
+    height: 4px;
   }
 
   ::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground));
+    background: rgba(255, 255, 255, 0.2);
   }
 }
 
-/* Dark mode: glowing borders on cards */
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.animate-fade-up   { animation: fadeUp  0.35s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.animate-fade-in   { animation: fadeIn  0.3s ease both; }
+.animate-scale-up  { animation: scaleUp 0.3s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+.animate-float     { animation: float   4s ease-in-out infinite; }
+.animate-pulse-glow{ animation: pulse-glow 2s ease-in-out infinite; }
+
+/* ─── Dark mode card styles (Vault glow) ─────────────────────── */
 @layer components {
   .dark .bg-card {
     box-shadow:
-      0 0 0 1px hsl(185 45% 32% / 0.5),
-      0 0 8px hsl(185 50% 30% / 0.15),
-      0 1px 3px hsl(185 40% 15% / 0.2);
+      0 0 0 1px rgba(124, 58, 237, 0.12),
+      0 1px 3px rgba(0, 0, 0, 0.5),
+      0 4px 16px rgba(0, 0, 0, 0.3);
   }
   .dark .bg-card:hover {
     box-shadow:
-      0 0 0 1px hsl(185 50% 38% / 0.65),
-      0 0 15px hsl(185 55% 35% / 0.25),
-      0 2px 8px hsl(185 45% 20% / 0.3);
+      0 0 0 1px rgba(124, 58, 237, 0.25),
+      0 0 20px rgba(124, 58, 237, 0.1),
+      0 2px 8px rgba(0, 0, 0, 0.5);
   }
 
-  /* Nav bar bottom glow line */
+  /* Top header bottom border glow */
   .dark header.border-b {
-    border-image: linear-gradient(
-      90deg,
-      hsl(185 50% 35% / 0.1) 0%,
-      hsl(185 60% 45% / 0.6) 30%,
-      hsl(185 60% 45% / 0.6) 70%,
-      hsl(185 50% 35% / 0.1) 100%
-    ) 1;
-  }
-
-  /* Horizontal dividers get a teal glow */
-  .dark .border-t {
-    border-image: linear-gradient(
-      90deg,
-      hsl(185 40% 28% / 0.05) 0%,
-      hsl(185 50% 38% / 0.5) 50%,
-      hsl(185 40% 28% / 0.05) 100%
-    ) 1;
+    border-bottom-color: rgba(124, 58, 237, 0.15);
+    box-shadow: 0 1px 0 rgba(124, 58, 237, 0.08);
   }
 }
-
