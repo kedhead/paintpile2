@@ -27,7 +27,7 @@ function FeedContent() {
   );
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const { data: followingIds = [] } = useFollowingIds(user?.id || '');
+  const { data: followingIds = [], isLoading: isFollowingIdsLoading } = useFollowingIds(user?.id || '');
   const discover = useDiscoverFeed();
   const following = useFollowingFeed(user ? followingIds : []);
   const { data: liveStreams = [] } = useLiveStreams();
@@ -97,7 +97,7 @@ function FeedContent() {
         <PeopleSearch />
       ) : (
         <div className="space-y-4">
-          {feed.isLoading ? (
+          {feed.isLoading || (activeTab === 'following' && isFollowingIdsLoading) ? (
             <div className="flex justify-center py-12">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>

@@ -26,13 +26,12 @@ export function useDiscoverFeed() {
 
 export function useFollowingFeed(followingIds: string[]) {
   const { pb } = useAuth();
+  // Sort IDs for a stable cache key regardless of fetch order
+  const idsKey = [...followingIds].sort().join(',');
 
   return useInfiniteQuery({
-    queryKey: queryKeys.posts.following(),
+    queryKey: [...queryKeys.posts.following(), idsKey],
     queryFn: async ({ pageParam = 1 }) => {
-      if (followingIds.length === 0) {
-        return { items: [], page: 1, perPage: PAGE_SIZE, totalItems: 0, totalPages: 0 };
-      }
       const filter = followingIds.map((id) => `user="${id}"`).join(' || ');
       return pb.collection('posts').getList(pageParam, PAGE_SIZE, {
         sort: '-created',
