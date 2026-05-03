@@ -42,7 +42,7 @@ const MORE_NAV = [
 function SideNavItem({
   href, label, icon: Icon, collapsed, active,
 }: {
-  href: string; label: string; icon: React.ComponentType<{ className?: string }>; collapsed: boolean; active: boolean;
+  href: string; label: string; icon: React.ComponentType<{ className?: string; size?: number }>; collapsed: boolean; active: boolean;
 }) {
   return (
     <Link
@@ -78,7 +78,7 @@ function SideNavItem({
         }
       }}
     >
-      <Icon className="shrink-0" style={{ width: 17, height: 17, color: 'inherit' } as React.CSSProperties} />
+      <Icon className="shrink-0" size={17} />
       {!collapsed && <span>{label}</span>}
     </Link>
   );
