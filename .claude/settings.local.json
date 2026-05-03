@@ -42,7 +42,10 @@
       "Bash(cat:*)",
       "Bash(python3:*)",
       "WebFetch(domain:gemini.google.com)",
-      "WebFetch(domain:replicate.com)"
+      "WebFetch(domain:replicate.com)",
+      "Bash(cp \"/root/.claude/projects/-home-user-paintpile2/ff520003-5020-4159-9c9f-3ef952f8c98c/tool-results/webfetch-1777768280161-hpcift.bin\" /tmp/design.gz)",
+      "Bash(gunzip -c /tmp/design.gz)",
+      "Read(//tmp/**)"
     ]
   }
 }
