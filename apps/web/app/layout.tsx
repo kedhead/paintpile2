@@ -5,17 +5,43 @@ import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'Paintpile - The Community for Miniature Painters',
-  description: 'Track your miniature painting projects, get AI-powered critiques, manage 4,700+ paints, share recipes, and connect with fellow hobbyists.',
+  description:
+    'The all-in-one app for Warhammer and tabletop miniature painters. Track projects with Kanban, manage 4,700+ paints, get AI critique, share recipes, and connect with a passionate community. Free to start.',
+  keywords: [
+    'miniature painting',
+    'Warhammer 40k',
+    'tabletop',
+    'paint tracker',
+    'Warhammer',
+    'mini painting app',
+    'painting recipes',
+    'paint inventory',
+    'AI art critique',
+    'miniature hobby',
+    'Warhammer community',
+  ],
   openGraph: {
     title: 'Paintpile - The Community for Miniature Painters',
-    description: 'Track your miniature painting projects, get AI-powered critiques, manage 4,700+ paints, and connect with fellow hobbyists.',
+    description:
+      'Track your Warhammer and tabletop miniature painting projects. 4,700+ paints database, AI-powered critiques, recipes, and a passionate community.',
     siteName: 'Paintpile',
     type: 'website',
+    url: 'https://thepaintpile.com',
+    images: [
+      {
+        url: 'https://thepaintpile.com/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Paintpile - The Community for Miniature Painters',
+      },
+    ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Paintpile - The Community for Miniature Painters',
-    description: 'Track your miniature painting projects, get AI-powered critiques, and connect with fellow hobbyists.',
+    description:
+      'Track Warhammer & tabletop mini painting projects. AI critique, 4,700+ paints database, recipes, community. Free to start.',
+    images: ['https://thepaintpile.com/og-image.png'],
   },
   appleWebApp: {
     capable: true,
@@ -49,6 +75,25 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="alternate" type="application/rss+xml" title="Paintpile Feed" href="/feed.xml" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'Paintpile',
+              url: 'https://thepaintpile.com',
+              description:
+                'The all-in-one platform for Warhammer and tabletop miniature painters. Track projects, manage paints, get AI critique, and connect with a community.',
+              applicationCategory: 'LifestyleApplication',
+              operatingSystem: 'Web, iOS, Android',
+              offers: [
+                { '@type': 'Offer', name: 'Free Plan', price: '0', priceCurrency: 'USD' },
+                { '@type': 'Offer', name: 'Pro Plan', price: '5', priceCurrency: 'USD' },
+              ],
+            }),
+          }}
+        />
         {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
           <script
             async

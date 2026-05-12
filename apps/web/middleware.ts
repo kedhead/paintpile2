@@ -20,6 +20,13 @@ export function middleware(request: NextRequest) {
   const isApiRoute = pathname.startsWith('/api');
   const isAuthRequired = authRequiredPrefixes.some((prefix) => pathname.startsWith(prefix));
 
+  // Redirect authenticated users away from landing page
+  if (isAuthenticated && pathname === '/') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/feed';
+    return NextResponse.redirect(url);
+  }
+
   // Redirect unauthenticated users away from auth-required routes
   if (!isAuthenticated && !isApiRoute && isAuthRequired) {
     const url = request.nextUrl.clone();
