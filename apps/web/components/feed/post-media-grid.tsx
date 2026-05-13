@@ -269,7 +269,7 @@ export function PostMediaGrid({ post }: PostMediaGridProps) {
   if (items.length === 1) {
     return (
       <>
-        <div className="mt-3 overflow-hidden rounded-lg">
+        <div className="mt-3 overflow-hidden rounded-lg border border-white/20">
           {renderTile(items[0], 0, 'aspect-[4/3]', '(max-width: 640px) 100vw, 600px')}
         </div>
         {lightboxIndex !== null && (
@@ -287,7 +287,7 @@ export function PostMediaGrid({ post }: PostMediaGridProps) {
   if (items.length === 2) {
     return (
       <>
-        <div className="mt-3 grid grid-cols-2 gap-1 overflow-hidden rounded-lg">
+        <div className="mt-3 grid grid-cols-2 gap-1 overflow-hidden rounded-lg border border-white/20">
           {items.map((item, i) => renderTile(item, i, 'aspect-square', '300px'))}
         </div>
         {lightboxIndex !== null && (
@@ -305,7 +305,7 @@ export function PostMediaGrid({ post }: PostMediaGridProps) {
   if (items.length === 3) {
     return (
       <>
-        <div className="mt-3 grid grid-cols-2 gap-1 overflow-hidden rounded-lg">
+        <div className="mt-3 grid grid-cols-2 gap-1 overflow-hidden rounded-lg border border-white/20">
           {renderTile(items[0], 0, 'row-span-2 aspect-[2/3]', '300px')}
           {items.slice(1).map((item, i) => renderTile(item, i + 1, 'aspect-square', '300px'))}
         </div>
@@ -327,7 +327,7 @@ export function PostMediaGrid({ post }: PostMediaGridProps) {
 
   return (
     <>
-      <div className="mt-3 grid grid-cols-2 gap-1 overflow-hidden rounded-lg">
+      <div className="mt-3 grid grid-cols-2 gap-1 overflow-hidden rounded-lg border border-white/20">
         {shown.map((item, i) => (
           <div key={i} className="relative">
             {renderTile(item, i, 'aspect-square', '300px')}
