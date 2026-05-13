@@ -441,6 +441,9 @@ export function OnboardingModal() {
 
   useEffect(() => {
     if (!user) return;
+    // Server-side flag takes priority so new devices don't re-show the modal
+    if (user.settings?.onboarded) return;
+    // Fall back to localStorage for users who completed onboarding before the server-side flag existed
     const done = localStorage.getItem(`${STORAGE_KEY}-${user.id}`);
     if (!done) setShow(true);
   }, [user]);
@@ -448,8 +451,11 @@ export function OnboardingModal() {
   const finish = () => {
     if (user) {
       localStorage.setItem(`${STORAGE_KEY}-${user.id}`, 'true');
-      // Persist non-critical prefs to localStorage
       localStorage.setItem(`paintpile-prefs-${user.id}`, JSON.stringify(userData));
+      // Persist to server so the modal doesn't reappear on other devices
+      pb.collection('users').update(user.id, {
+        settings: { ...(user.settings || {}), onboarded: true },
+      }).catch(() => {});
     }
     setShow(false);
   };
