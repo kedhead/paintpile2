@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { RecordModel } from 'pocketbase';
 import { ArrowLeft, Edit2, Trash2, Shield, Users } from 'lucide-react';
 import { useAuth } from '../auth-provider';
+import { useConfirm } from '../ui/confirm-dialog';
 import { useDeleteArmy, useArmyMembers } from '../../hooks/use-armies';
 import { ArmyForm } from './army-form';
 import { ArmyMemberManager } from './army-member-manager';
@@ -19,6 +20,7 @@ interface ArmyDetailProps {
 export function ArmyDetail({ army }: ArmyDetailProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const confirm = useConfirm();
   const deleteArmy = useDeleteArmy();
   const membersQuery = useArmyMembers(army.id);
   const isOwner = user?.id === army.user;
@@ -33,7 +35,12 @@ export function ArmyDetail({ army }: ArmyDetailProps) {
   const members = (membersQuery.data as any)?.pages?.flatMap((p: any) => p.items) || [];
 
   const handleDelete = async () => {
-    if (!confirm('Delete this army? This cannot be undone.')) return;
+    const ok = await confirm({
+      title: 'Delete this army?',
+      message: 'This cannot be undone.',
+      destructive: true,
+    });
+    if (!ok) return;
     await deleteArmy.mutateAsync(army.id);
     router.push('/projects?tab=armies');
   };

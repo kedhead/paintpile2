@@ -5,12 +5,14 @@ import { Plus, Boxes } from 'lucide-react';
 import { usePileItems, usePileStats, useUpdatePileStatus, useDeletePileItem } from '../../../hooks/use-pile';
 import { PileStats } from '../../../components/pile/pile-stats';
 import { PileItemCard } from '../../../components/pile/pile-item-card';
+import { useConfirm } from '../../../components/ui/confirm-dialog';
 
 export default function PilePage() {
   const pileItems = usePileItems();
   const pileStats = usePileStats();
   const updateStatus = useUpdatePileStatus();
   const deleteItem = useDeletePileItem();
+  const confirm = useConfirm();
 
   const allItems = pileItems.data?.pages.flatMap((page) => page.items) ?? [];
 
@@ -18,10 +20,13 @@ export default function PilePage() {
     updateStatus.mutate({ projectId, status });
   };
 
-  const handleDelete = (projectId: string) => {
-    if (confirm('Remove this item from your Pile of Shame?')) {
-      deleteItem.mutate(projectId);
-    }
+  const handleDelete = async (projectId: string) => {
+    const ok = await confirm({
+      title: 'Remove from your Pile of Shame?',
+      destructive: true,
+      confirmLabel: 'Remove',
+    });
+    if (ok) deleteItem.mutate(projectId);
   };
 
   return (

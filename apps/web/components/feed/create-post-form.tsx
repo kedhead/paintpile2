@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { postSchema, type PostInput } from '@paintpile/shared/src/validation/schemas';
 import type { TextOverlay } from '@paintpile/shared/src/types/post';
 import { useAuth } from '../auth-provider';
+import { useToast } from '../ui/toast';
 import { useCreatePost } from '../../hooks/use-posts';
 import { MediaUpload, type MediaFile } from './media-upload';
 import { TextOverlayEditor } from './text-overlay-editor';
@@ -16,6 +17,7 @@ import { Loader2, Send, PenSquare } from 'lucide-react';
 export function CreatePostForm() {
   const { user } = useAuth();
   const createPost = useCreatePost();
+  const { toast } = useToast();
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [textOverlays, setTextOverlays] = useState<TextOverlay[]>([]);
   const [overlayEditorIndex, setOverlayEditorIndex] = useState<number | null>(null);
@@ -55,11 +57,16 @@ export function CreatePostForm() {
       formData.append('text_overlays', JSON.stringify(textOverlays));
     }
 
-    await createPost.mutateAsync(formData);
-    reset();
-    setMediaFiles([]);
-    setTextOverlays([]);
-    setExpanded(false);
+    try {
+      await createPost.mutateAsync(formData);
+      reset();
+      setMediaFiles([]);
+      setTextOverlays([]);
+      setExpanded(false);
+      toast('Post published');
+    } catch {
+      toast('Failed to publish post', 'error');
+    }
   };
 
   const handleOverlaySave = useCallback(

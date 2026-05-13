@@ -5,6 +5,7 @@ import type { RecordModel } from 'pocketbase';
 import { X, ChevronLeft, ChevronRight, Trash2, PenTool, ImageIcon, Loader2 } from 'lucide-react';
 import { useDeletePhoto } from '../../hooks/use-photos';
 import { useAuth } from '../auth-provider';
+import { useConfirm } from '../ui/confirm-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../lib/query-keys';
 import { getFileUrl, relativeTime } from '../../lib/pb-helpers';
@@ -31,6 +32,7 @@ export function PhotoLightbox({
   const [index, setIndex] = useState(initialIndex);
   const deletePhoto = useDeletePhoto();
   const { pb } = useAuth();
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
   const [showAnnotations, setShowAnnotations] = useState(true);
 
@@ -74,7 +76,8 @@ export function PhotoLightbox({
   }, [onClose, goPrev, goNext]);
 
   const handleDelete = async () => {
-    if (!confirm('Delete this photo?')) return;
+    const ok = await confirm({ title: 'Delete this photo?', destructive: true });
+    if (!ok) return;
     await deletePhoto.mutateAsync({ photoId: photo.id, projectId });
     if (photos.length <= 1) {
       onClose();

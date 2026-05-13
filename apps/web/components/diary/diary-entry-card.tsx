@@ -5,6 +5,7 @@ import type { RecordModel } from 'pocketbase';
 import { Edit2, Trash2, ExternalLink, Tag } from 'lucide-react';
 import { relativeTime } from '../../lib/pb-helpers';
 import { useDeleteDiaryEntry } from '../../hooks/use-diary';
+import { useConfirm } from '../ui/confirm-dialog';
 
 interface DiaryEntryCardProps {
   entry: RecordModel;
@@ -13,13 +14,15 @@ interface DiaryEntryCardProps {
 
 export function DiaryEntryCard({ entry, onEdit }: DiaryEntryCardProps) {
   const deleteEntry = useDeleteDiaryEntry();
+  const confirm = useConfirm();
   const [expanded, setExpanded] = useState(false);
 
   const links = typeof entry.links === 'string' ? JSON.parse(entry.links || '[]') : (entry.links || []);
   const tags = typeof entry.tags === 'string' ? JSON.parse(entry.tags || '[]') : (entry.tags || []);
 
   const handleDelete = async () => {
-    if (!confirm('Delete this diary entry?')) return;
+    const ok = await confirm({ title: 'Delete this diary entry?', destructive: true });
+    if (!ok) return;
     await deleteEntry.mutateAsync(entry.id);
   };
 
