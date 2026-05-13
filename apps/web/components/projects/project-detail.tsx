@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
 import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, ChefHat, Share2, Check, Link2, Award, Globe, Lock, Send, Loader2, MessageSquarePlus } from 'lucide-react';
 import { useAuth } from '../auth-provider';
+import { useConfirm } from '../ui/confirm-dialog';
 import { useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
 import { useCreatePost } from '../../hooks/use-posts';
 import { ProjectStatusBadge } from './project-status-badge';
@@ -28,6 +29,7 @@ interface ProjectDetailProps {
 export function ProjectDetail({ project }: ProjectDetailProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const confirm = useConfirm();
   const deleteProject = useDeleteProject();
   const updateProject = useUpdateProject();
   const isOwner = user?.id === project.user;
@@ -69,7 +71,12 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Delete this project? This cannot be undone.')) return;
+    const ok = await confirm({
+      title: 'Delete this project?',
+      message: 'This cannot be undone.',
+      destructive: true,
+    });
+    if (!ok) return;
     await deleteProject.mutateAsync(project.id);
     router.push('/projects');
   };

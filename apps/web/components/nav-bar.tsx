@@ -54,7 +54,7 @@ export function NavBar() {
           <NotificationBell />
           <Link
             href="/profile"
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-all"
+            className="flex items-center gap-2 rounded-lg px-2.5 py-2.5 text-sm font-medium transition-all"
             style={{ color: 'rgba(122,120,152,1)' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.05)'; (e.currentTarget as HTMLElement).style.color = '#f0eeff'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(122,120,152,1)'; }}
@@ -66,7 +66,7 @@ export function NavBar() {
           </Link>
           <button
             onClick={signOut}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all"
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-2.5 text-xs font-medium transition-all"
             style={{ color: 'rgba(122,120,152,1)' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.05)'; (e.currentTarget as HTMLElement).style.color = '#f0eeff'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(122,120,152,1)'; }}

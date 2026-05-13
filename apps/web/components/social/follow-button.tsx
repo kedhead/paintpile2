@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useIsFollowing, useToggleFollow } from '../../hooks/use-follows';
 import { useAuth } from '../auth-provider';
+import { useToast } from '../ui/toast';
 
 interface FollowButtonProps {
   targetUserId: string;
@@ -21,6 +22,7 @@ export function FollowButton({ targetUserId, initialIsFollowing }: FollowButtonP
   const { loading: authLoading, user } = useAuth();
   const { data: queryIsFollowing, isPending } = useIsFollowing(targetUserId, initialIsFollowing !== undefined);
   const toggleFollow = useToggleFollow();
+  const { toast } = useToast();
   const [hovering, setHovering] = useState(false);
 
   if (authLoading) return <Spinner />;
@@ -33,7 +35,9 @@ export function FollowButton({ targetUserId, initialIsFollowing }: FollowButtonP
   if (initialIsFollowing === undefined && isPending) return <Spinner />;
 
   const handleClick = () => {
-    toggleFollow.mutate({ targetUserId, isFollowing });
+    toggleFollow.mutate({ targetUserId, isFollowing }, {
+      onSuccess: () => toast(isFollowing ? 'Unfollowed' : 'Followed'),
+    });
   };
 
   if (isFollowing) {

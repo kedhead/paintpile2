@@ -6,6 +6,7 @@ import { Plus, X, Loader2, Hash, Pencil, Check } from 'lucide-react';
 import { useMyProjects } from '../../hooks/use-projects';
 import { useAddArmyMember, useRemoveArmyMember } from '../../hooks/use-armies';
 import { useAuth } from '../auth-provider';
+import { useConfirm } from '../ui/confirm-dialog';
 import PocketBase from 'pocketbase';
 
 interface ArmyMemberManagerProps {
@@ -23,6 +24,7 @@ export function ArmyMemberManager({ armyId, members }: ArmyMemberManagerProps) {
   const addMember = useAddArmyMember();
   const removeMember = useRemoveArmyMember();
   const { pb } = useAuth();
+  const confirm = useConfirm();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allProjects = (myProjects.data as any)?.pages?.flatMap((p: any) => p.items) || [];
@@ -38,7 +40,8 @@ export function ArmyMemberManager({ armyId, members }: ArmyMemberManagerProps) {
   };
 
   const handleRemove = async (memberId: string) => {
-    if (!confirm('Remove this project from the army?')) return;
+    const ok = await confirm({ title: 'Remove this project from the army?', destructive: true, confirmLabel: 'Remove' });
+    if (!ok) return;
     await removeMember.mutateAsync({ memberId, armyId });
   };
 

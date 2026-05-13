@@ -244,7 +244,7 @@ function MobileBottomNav({ pathname }: { pathname: string | null }) {
                 }}
               >
                 <Icon style={{ width: 20, height: 20, color: 'inherit' } as React.CSSProperties} />
-                <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.02em', textAlign: 'center', color: 'inherit' }}>
+                <span style={{ fontSize: 11, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.02em', textAlign: 'center', color: 'inherit' }}>
                   {label}
                 </span>
               </Link>
@@ -282,7 +282,7 @@ function MobileBottomNav({ pathname }: { pathname: string | null }) {
               }}
             >
               <Icon style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
-              <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
+              <span style={{ fontSize: 11, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
                 {label}
               </span>
             </Link>
@@ -307,7 +307,7 @@ function MobileBottomNav({ pathname }: { pathname: string | null }) {
           }}
         >
           <MoreHorizontal style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
-          <span style={{ fontSize: 9, fontWeight: moreActive || drawerOpen ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
+          <span style={{ fontSize: 11, fontWeight: moreActive || drawerOpen ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
             More
           </span>
         </button>

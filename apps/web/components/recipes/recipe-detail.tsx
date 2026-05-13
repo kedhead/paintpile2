@@ -7,6 +7,7 @@ import type { RecordModel } from 'pocketbase';
 import { ArrowLeft, Edit2, Trash2, Clock } from 'lucide-react';
 import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../auth-provider';
+import { useConfirm } from '../ui/confirm-dialog';
 import { useDeleteRecipe, useUpdateRecipe } from '../../hooks/use-recipes';
 import type { RecipeStep, RecipeIngredient, RecipeStepAnnotation } from '../../hooks/use-recipes';
 import { useRecipeMedia } from '../../hooks/use-recipe-media';
@@ -40,6 +41,7 @@ interface RecipeDetailProps {
 export function RecipeDetail({ recipe }: RecipeDetailProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const confirm = useConfirm();
   const deleteRecipe = useDeleteRecipe();
   const updateRecipe = useUpdateRecipe();
   const isOwner = user?.id === recipe.user;
@@ -65,7 +67,12 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
   }, [allMedia]);
 
   const handleDelete = async () => {
-    if (!confirm('Delete this recipe? This cannot be undone.')) return;
+    const ok = await confirm({
+      title: 'Delete this recipe?',
+      message: 'This cannot be undone.',
+      destructive: true,
+    });
+    if (!ok) return;
     await deleteRecipe.mutateAsync(recipe.id);
     router.push('/recipes');
   };

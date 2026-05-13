@@ -113,7 +113,7 @@ export function MediaUpload({
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); onOverlayClick(i); }}
-                      className="absolute bottom-0.5 left-0.5 rounded bg-black/60 px-1 py-0.5 text-[10px] font-medium text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
+                      className="absolute bottom-0.5 left-0.5 rounded bg-black/60 px-1 py-0.5 text-[10px] font-medium text-white opacity-100 transition-opacity hover:bg-black/80 md:opacity-0 md:group-hover:opacity-100"
                       title="Add text overlay"
                     >
                       Aa
@@ -140,7 +140,7 @@ export function MediaUpload({
               <button
                 type="button"
                 onClick={() => removeFile(i)}
-                className="absolute -right-1 -top-1 rounded-full bg-red-600 p-0.5 text-white opacity-0 shadow transition-opacity group-hover:opacity-100"
+                className="absolute -right-1 -top-1 rounded-full bg-red-600 p-0.5 text-white opacity-100 shadow transition-opacity md:opacity-0 md:group-hover:opacity-100"
               >
                 <X className="h-3 w-3" />
               </button>

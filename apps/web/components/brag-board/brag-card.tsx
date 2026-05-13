@@ -4,6 +4,7 @@ import type { RecordModel } from 'pocketbase';
 import { Award, Star, Trash2 } from 'lucide-react';
 import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../auth-provider';
+import { useConfirm } from '../ui/confirm-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../lib/query-keys';
 
@@ -23,6 +24,7 @@ const gradeColors: Record<string, string> = {
 export function BragCard({ activity }: BragCardProps) {
   const { pb, user } = useAuth();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   const deleteBrag = useMutation({
     mutationFn: async () => {
@@ -61,13 +63,16 @@ export function BragCard({ activity }: BragCardProps) {
             </div>
             {isOwn && (
               <button
-                onClick={() => {
-                  if (confirm('Remove this from the brag board?')) {
-                    deleteBrag.mutate();
-                  }
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: 'Remove from brag board?',
+                    destructive: true,
+                    confirmLabel: 'Remove',
+                  });
+                  if (ok) deleteBrag.mutate();
                 }}
                 disabled={deleteBrag.isPending}
-                className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-400 transition-all"
+                className="opacity-100 md:opacity-0 md:group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-400 transition-all"
                 title="Remove"
               >
                 <Trash2 className="h-3.5 w-3.5" />

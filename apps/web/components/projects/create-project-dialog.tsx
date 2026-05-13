@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Upload } from 'lucide-react';
 import { useAuth } from '../auth-provider';
+import { useToast } from '../ui/toast';
 import { useCreateProject } from '../../hooks/use-projects';
 
 interface CreateProjectDialogProps {
@@ -14,6 +15,7 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
   const router = useRouter();
   const { user } = useAuth();
   const createProject = useCreateProject();
+  const { toast } = useToast();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<string>('not-started');
@@ -38,9 +40,14 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
     if (addToShame && !tagList.includes('shame')) tagList.push('shame');
     tagList.forEach((tag) => formData.append('tags', tag));
 
-    const project = await createProject.mutateAsync(formData);
-    onClose();
-    router.push(`/projects/${project.id}`);
+    try {
+      const project = await createProject.mutateAsync(formData);
+      toast('Project created');
+      onClose();
+      router.push(`/projects/${project.id}`);
+    } catch {
+      toast('Failed to create project', 'error');
+    }
   };
 
   return (
