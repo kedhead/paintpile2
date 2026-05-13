@@ -43,29 +43,6 @@ export function NavBar() {
 
       <div className="flex-1" />
 
-      {/* Search (desktop only, decorative) */}
-      {user && (
-        <div className="relative hidden md:block w-44">
-          <svg
-            className="absolute left-2.5 top-1/2 -translate-y-1/2"
-            width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="rgba(122,120,152,.6)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"
-          >
-            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-          <input
-            placeholder="Search…"
-            readOnly
-            style={{
-              width: '100%', padding: '7px 12px 7px 30px',
-              background: '#111118', border: '1px solid rgba(255,255,255,.07)',
-              borderRadius: 8, color: '#f0eeff', fontSize: 13, outline: 'none',
-              fontFamily: 'DM Sans, sans-serif',
-            }}
-          />
-        </div>
-      )}
-
       {user ? (
         <div className="flex items-center gap-1.5">
           {user.subscription === 'pro' && (

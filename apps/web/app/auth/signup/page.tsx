@@ -94,6 +94,11 @@ export default function SignupPage() {
         target_type: 'user',
         metadata: { display_name: data.displayName },
       });
+      fetch('/api/email/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: data.displayName, email: data.email }),
+      }).catch(() => {});
       router.push('/feed');
       router.refresh();
     } catch (err: unknown) {
