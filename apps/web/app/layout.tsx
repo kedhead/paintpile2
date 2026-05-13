@@ -27,21 +27,12 @@ export const metadata: Metadata = {
     siteName: 'Paintpile',
     type: 'website',
     url: 'https://thepaintpile.com',
-    images: [
-      {
-        url: 'https://thepaintpile.com/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Paintpile - The Community for Miniature Painters',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Paintpile - The Community for Miniature Painters',
     description:
       'Track Warhammer & tabletop mini painting projects. AI critique, 4,700+ paints database, recipes, community. Free to start.',
-    images: ['https://thepaintpile.com/og-image.png'],
   },
   appleWebApp: {
     capable: true,
