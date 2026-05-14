@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useAuth } from '../components/auth-provider';
+import { useToast } from '../components/ui/toast';
 import { queryKeys } from '../lib/query-keys';
 
 export function useNotifications() {
@@ -48,12 +49,16 @@ export function useMarkNotificationRead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
+    onError: (err: unknown) => {
+      console.error('Failed to mark notification read:', err);
+    },
   });
 }
 
 export function useMarkAllRead() {
   const { pb, user } = useAuth();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async () => {
@@ -61,12 +66,19 @@ export function useMarkAllRead() {
         filter: `user="${user!.id}" && read=false`,
         fields: 'id',
       });
-      await Promise.all(
-        unread.map((n) => pb.collection('notifications').update(n.id, { read: true }))
-      );
+      if (unread.length === 0) return;
+      // Update sequentially to avoid rate-limiting with many concurrent requests
+      for (const n of unread) {
+        await pb.collection('notifications').update(n.id, { read: true });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      toast('All notifications marked as read');
+    },
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : 'Failed to mark notifications as read';
+      toast(message, 'error');
     },
   });
 }
