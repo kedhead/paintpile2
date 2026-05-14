@@ -46,11 +46,21 @@ export function useMarkNotificationRead() {
     mutationFn: async (notificationId: string) => {
       return pb.collection('notifications').update(notificationId, { read: true });
     },
+    onMutate: async (notificationId: string) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.notifications.list() });
+      const previous = queryClient.getQueryData(queryKeys.notifications.list());
+      queryClient.setQueryData(queryKeys.notifications.list(), (old: any) => {
+        if (!old) return old;
+        return { ...old, items: old.items.map((n: any) => n.id === notificationId ? { ...n, read: true } : n) };
+      });
+      return { previous };
+    },
+    onError: (err: unknown, _, context: any) => {
+      if (context?.previous) queryClient.setQueryData(queryKeys.notifications.list(), context.previous);
+      console.error('Failed to mark notification read:', err);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
-    },
-    onError: (err: unknown) => {
-      console.error('Failed to mark notification read:', err);
     },
   });
 }
@@ -67,18 +77,27 @@ export function useMarkAllRead() {
         fields: 'id',
       });
       if (unread.length === 0) return;
-      // Update sequentially to avoid rate-limiting with many concurrent requests
       for (const n of unread) {
         await pb.collection('notifications').update(n.id, { read: true });
       }
     },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.notifications.list() });
+      const previous = queryClient.getQueryData(queryKeys.notifications.list());
+      queryClient.setQueryData(queryKeys.notifications.list(), (old: any) => {
+        if (!old) return old;
+        return { ...old, items: old.items.map((n: any) => ({ ...n, read: true })) };
+      });
+      return { previous };
+    },
+    onError: (err: unknown, _, context: any) => {
+      if (context?.previous) queryClient.setQueryData(queryKeys.notifications.list(), context.previous);
+      const message = err instanceof Error ? err.message : 'Failed to mark notifications as read';
+      toast(message, 'error');
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
       toast('All notifications marked as read');
-    },
-    onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Failed to mark notifications as read';
-      toast(message, 'error');
     },
   });
 }
