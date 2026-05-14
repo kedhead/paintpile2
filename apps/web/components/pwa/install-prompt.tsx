@@ -15,9 +15,8 @@ export function InstallPrompt() {
   const [showIOSGuide, setShowIOSGuide] = useState(false);
 
   useEffect(() => {
-    // Check if dismissed recently
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
-    if (dismissed && Date.now() - parseInt(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
+    // Check if ever dismissed — respect the user's choice permanently
+    if (localStorage.getItem('pwa-install-dismissed')) return;
 
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) return;
