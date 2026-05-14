@@ -16,7 +16,7 @@ export function NotificationList() {
     );
   }
 
-  const notifications = data?.items || [];
+  const notifications = (data?.items || []).filter((n) => !n.read);
 
   return (
     <div className="space-y-1">
@@ -33,7 +33,7 @@ export function NotificationList() {
       )}
 
       {notifications.length === 0 ? (
-        <div className="py-8 text-center text-sm text-muted-foreground">No notifications yet</div>
+        <div className="py-8 text-center text-sm text-muted-foreground">You&apos;re all caught up!</div>
       ) : (
         notifications.map((n) => <NotificationItem key={n.id} notification={n} />)
       )}
