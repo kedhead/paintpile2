@@ -66,21 +66,21 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Cover Photo */}
           <div className="flex justify-center">
-            <input
-              ref={coverInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                setCoverPhoto(e.target.files?.[0] || null);
-                e.target.value = '';
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => coverInputRef.current?.click()}
-              className="flex h-32 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-border hover:border-primary-400 transition-colors overflow-hidden"
+            <label
+              htmlFor="cover-photo-input"
+              className="flex h-32 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-border hover:border-primary/60 transition-colors overflow-hidden"
             >
+              <input
+                id="cover-photo-input"
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  setCoverPhoto(e.target.files?.[0] || null);
+                  e.target.value = '';
+                }}
+              />
               {coverPhoto ? (
                 <img
                   src={URL.createObjectURL(coverPhoto)}
@@ -93,7 +93,7 @@ export function CreateProjectDialog({ onClose }: CreateProjectDialogProps) {
                   <span className="mt-1 text-xs">Cover Photo</span>
                 </div>
               )}
-            </button>
+            </label>
           </div>
 
           <div>
