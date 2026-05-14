@@ -86,23 +86,25 @@ export function PhotoUpload({ projectId }: PhotoUploadProps) {
 
   return (
     <div className="space-y-3">
-      {/* Drop zone */}
-      <div
+      {/* Drop zone — label activates file input natively (iOS compatible) */}
+      <label
+        htmlFor="photo-upload-input"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`relative rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
+        className={`block cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
           isDragging
             ? 'border-primary bg-primary/5'
             : 'border-border hover:border-muted-foreground'
         }`}
       >
         <input
+          id="photo-upload-input"
           ref={fileInputRef}
           type="file"
           multiple
           accept="image/*"
-          className="hidden"
+          className="sr-only"
           onChange={(e) => {
             if (e.target.files && e.target.files.length > 0) {
               addFiles(e.target.files);
@@ -112,16 +114,9 @@ export function PhotoUpload({ projectId }: PhotoUploadProps) {
         />
         <Upload className="mx-auto h-6 w-6 text-muted-foreground" />
         <p className="mt-2 text-sm text-muted-foreground">
-          Drag photos here or{' '}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="text-primary hover:underline"
-          >
-            browse
-          </button>
+          Tap to add photos or drag here
         </p>
-      </div>
+      </label>
 
       {/* Pending photos */}
       {pending.length > 0 && (
