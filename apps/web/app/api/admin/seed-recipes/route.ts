@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateAdminAuth } from '../../../../lib/admin-helpers';
-import { createAnthropicClient, parseAIJson } from '../../../../lib/ai-helpers';
+import { validatePBAuth, createAnthropicClient, parseAIJson } from '../../../../lib/ai-helpers';
 import { CURATED_RECIPES } from '../../../../lib/seed-recipe-data';
+
+async function validateAdminPBAuth(pbToken: string) {
+  const { pb, userId, user } = await validatePBAuth(pbToken);
+  if (user.role !== 'admin') {
+    throw new Error('Unauthorized');
+  }
+  return { pb, userId };
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,7 +16,7 @@ export async function GET(req: NextRequest) {
     if (!pbToken) {
       return NextResponse.json({ success: false, error: 'Missing token' }, { status: 400 });
     }
-    const { pb } = await validateAdminAuth(pbToken);
+    const { pb } = await validateAdminPBAuth(pbToken);
     const result = await pb.collection('recipes').getList(1, 1, { filter: 'is_public = true' });
     return NextResponse.json({ success: true, total: result.totalItems });
   } catch (error) {
