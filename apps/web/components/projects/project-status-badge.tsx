@@ -21,7 +21,7 @@ interface ProjectStatusBadgeProps {
 export function ProjectStatusBadge({ status }: ProjectStatusBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[status] || STATUS_STYLES['not-started']}`}
+      className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[status] || STATUS_STYLES['not-started']}`}
     >
       {STATUS_LABELS[status] || status}
     </span>

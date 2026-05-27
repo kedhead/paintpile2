@@ -16,7 +16,6 @@ import { GoLiveButton } from '../../../components/feed/go-live-button';
 import { LiveStreamCard } from '../../../components/feed/live-stream-card';
 import { CommunityGallery } from '../../../components/community/community-gallery';
 import { PeopleSearch } from '../../../components/feed/people-search';
-import { AdSenseSlot } from '../../../components/ads/adsense-slot';
 
 function FeedContent() {
   const { user } = useAuth();
@@ -87,9 +86,6 @@ function FeedContent() {
           <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       )}
-
-      {/* AdSense */}
-      {!isPro && <AdSenseSlot className="my-2" />}
 
       {isGallery ? (
         <CommunityGallery />
