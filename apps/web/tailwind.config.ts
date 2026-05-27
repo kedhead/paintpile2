@@ -46,8 +46,8 @@ const config: Config = {
           pink: 'hsl(var(--neon-pink))',
         },
         vault: {
-          bg:      '#09091a',
-          surface: '#181726',
+          bg:      '#07071a',
+          surface: '#1e1c2e',
           accent:  '#7c3aed',
           gold:    '#f59e0b',
           green:   '#10b981',
