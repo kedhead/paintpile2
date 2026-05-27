@@ -2,20 +2,13 @@
 
 import type { RecordModel } from 'pocketbase';
 import { getFileUrl } from '../../lib/pb-helpers';
-import { AdSenseSlot } from '../ads/adsense-slot';
 
 interface AdCardProps {
   ad?: RecordModel;
 }
 
 export function AdCard({ ad }: AdCardProps) {
-  if (!ad) {
-    return (
-      <div className="rounded-lg border border-border bg-card p-4">
-        <AdSenseSlot />
-      </div>
-    );
-  }
+  if (!ad) return null;
 
   const imageUrl = ad.image ? getFileUrl(ad, ad.image) : null;
 
