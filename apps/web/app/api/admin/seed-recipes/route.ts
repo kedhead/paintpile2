@@ -1,13 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validatePBAuth, createAnthropicClient, parseAIJson } from '../../../../lib/ai-helpers';
+import PocketBase from 'pocketbase';
+import { createAnthropicClient, parseAIJson } from '../../../../lib/ai-helpers';
 import { CURATED_RECIPES } from '../../../../lib/seed-recipe-data';
 
+const pbUrl = process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
+
 async function validateAdminPBAuth(pbToken: string) {
-  const { pb, userId, user } = await validatePBAuth(pbToken);
-  if (user.role !== 'admin') {
+  // Decode JWT without authRefresh (works for OAuth tokens too)
+  let userId: string;
+  try {
+    const parts = pbToken.split('.');
+    if (parts.length !== 3) throw new Error('bad token');
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+    userId = payload.id;
+    if (!userId) throw new Error('no id');
+    if (payload.exp && payload.exp * 1000 < Date.now()) throw new Error('expired');
+  } catch {
     throw new Error('Unauthorized');
   }
-  return { pb, userId };
+
+  // Authenticate PocketBase with the user's own token and verify admin role
+  const pb = new PocketBase(pbUrl);
+  pb.authStore.save(pbToken);
+  try {
+    const user = await pb.collection('users').getOne(userId);
+    if (user.role !== 'admin') throw new Error('not admin');
+    return { pb, userId };
+  } catch {
+    throw new Error('Unauthorized');
+  }
 }
 
 export async function GET(req: NextRequest) {
