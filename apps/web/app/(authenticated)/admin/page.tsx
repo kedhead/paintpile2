@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Users, Palette, Database, Download, Trash2, Shield, Award, Trophy, Newspaper, Globe, Workflow, ExternalLink, Megaphone, Send } from 'lucide-react';
+import { Users, Palette, Database, Download, Trash2, Shield, Award, Trophy, Newspaper, Globe, Workflow, ExternalLink, Megaphone, Send, BookOpen } from 'lucide-react';
 
 const adminTools = [
   {
@@ -75,6 +75,12 @@ const adminTools = [
     description: 'Grant or revoke admin privileges using setup secret',
     icon: Shield,
     href: '/admin/grant-admin',
+  },
+  {
+    title: 'Seed Recipes',
+    description: 'Add curated & AI-generated mini painting recipes to the library',
+    icon: BookOpen,
+    href: '/admin/seed-recipes',
   },
 ];
 
