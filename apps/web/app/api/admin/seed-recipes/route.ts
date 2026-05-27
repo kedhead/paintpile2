@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
 
-    const { pb, userId } = await validateAdminAuth(pbToken);
+    const { pb, userId } = await validateAdminPBAuth(pbToken);
 
     if (type === 'curated') {
       let created = 0;
