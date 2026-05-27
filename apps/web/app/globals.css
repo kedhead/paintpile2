@@ -40,20 +40,20 @@
 
   /* ─── Dark mode — "The Vault" ─── */
   .dark {
-    --background: 250 13% 6%;
+    --background: 250 20% 5%;
     --foreground: 252 100% 97%;
 
-    --card: 250 13% 10%;
+    --card: 250 18% 13%;
     --card-foreground: 252 100% 97%;
 
     --primary: 265 81% 57%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 250 13% 13%;
+    --secondary: 250 18% 16%;
     --secondary-foreground: 252 100% 97%;
 
-    --muted: 250 13% 13%;
-    --muted-foreground: 252 14% 54%;
+    --muted: 250 18% 16%;
+    --muted-foreground: 252 20% 60%;
 
     --accent: 265 81% 57%;
     --accent-foreground: 0 0% 100%;
@@ -61,8 +61,8 @@
     --destructive: 0 63% 50%;
     --destructive-foreground: 252 100% 97%;
 
-    --border: 250 13% 14%;
-    --input: 250 13% 14%;
+    --border: 250 22% 20%;
+    --input: 250 22% 20%;
     --ring: 265 81% 57%;
 
     --neon-green: 160 84% 39%;
@@ -158,20 +158,20 @@
 @layer components {
   .dark .bg-card {
     box-shadow:
-      0 0 0 1px rgba(124, 58, 237, 0.12),
+      0 0 0 1px rgba(124, 58, 237, 0.20),
       0 1px 3px rgba(0, 0, 0, 0.5),
       0 4px 16px rgba(0, 0, 0, 0.3);
   }
   .dark .bg-card:hover {
     box-shadow:
-      0 0 0 1px rgba(124, 58, 237, 0.25),
-      0 0 20px rgba(124, 58, 237, 0.1),
+      0 0 0 1px rgba(124, 58, 237, 0.35),
+      0 0 24px rgba(124, 58, 237, 0.12),
       0 2px 8px rgba(0, 0, 0, 0.5);
   }
 
   /* Top header bottom border glow */
   .dark header.border-b {
-    border-bottom-color: rgba(124, 58, 237, 0.15);
-    box-shadow: 0 1px 0 rgba(124, 58, 237, 0.08);
+    border-bottom-color: rgba(124, 58, 237, 0.20);
+    box-shadow: 0 1px 0 rgba(124, 58, 237, 0.10);
   }
 }
