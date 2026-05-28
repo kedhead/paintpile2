@@ -7,10 +7,15 @@ const pbUrl = process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
 
 async function getAdminPB(): Promise<PocketBase> {
   const pb = new PocketBase(pbUrl);
-  await pb.collection('_superusers').authWithPassword(
-    process.env.PB_ADMIN_EMAIL || 'admin@paintpile.app',
-    process.env.PB_ADMIN_PASSWORD || 'paintpile2admin'
-  );
+  try {
+    await pb.collection('_superusers').authWithPassword(
+      process.env.PB_ADMIN_EMAIL || 'admin@paintpile.app',
+      process.env.PB_ADMIN_PASSWORD || 'paintpile2admin'
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`PocketBase superuser auth failed (url=${pbUrl}): ${msg}`);
+  }
   return pb;
 }
 
