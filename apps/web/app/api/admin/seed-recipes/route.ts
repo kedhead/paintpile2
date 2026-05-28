@@ -3,15 +3,19 @@ import PocketBase from 'pocketbase';
 import { createAnthropicClient, parseAIJson } from '../../../../lib/ai-helpers';
 import { CURATED_RECIPES } from '../../../../lib/seed-recipe-data';
 
-// Use the same URL the client uses (NEXT_PUBLIC_POCKETBASE_URL), falling back
-// to POCKETBASE_URL for legacy server-only configs, then localhost.
-const pbUrl =
-  process.env.NEXT_PUBLIC_POCKETBASE_URL ||
-  process.env.POCKETBASE_URL ||
-  'http://127.0.0.1:8090';
+const pbUrl = process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
+
+async function getAdminPB(): Promise<PocketBase> {
+  const pb = new PocketBase(pbUrl);
+  await pb.collection('_superusers').authWithPassword(
+    process.env.PB_ADMIN_EMAIL || 'admin@paintpile.app',
+    process.env.PB_ADMIN_PASSWORD || 'paintpile2admin'
+  );
+  return pb;
+}
 
 async function validateAdminToken(pbToken: string): Promise<{ pb: PocketBase; userId: string }> {
-  // Decode the JWT without calling authRefresh (works for OAuth tokens too)
+  // Decode the JWT to get the user ID (works for all token types including OAuth)
   let userId: string;
   try {
     const payload = JSON.parse(Buffer.from(pbToken.split('.')[1], 'base64').toString());
@@ -22,9 +26,8 @@ async function validateAdminToken(pbToken: string): Promise<{ pb: PocketBase; us
     throw new Error('Unauthorized');
   }
 
-  // Create a PB client using the user's token and verify their admin role
-  const pb = new PocketBase(pbUrl);
-  pb.authStore.save(pbToken);
+  // Use superuser auth (same as billing webhook) to verify admin role
+  const pb = await getAdminPB();
   const user = await pb.collection('users').getOne(userId);
   if (user.role !== 'admin') throw new Error('Unauthorized');
   return { pb, userId };
