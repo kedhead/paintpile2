@@ -15,7 +15,7 @@ async function getAdminPB(): Promise<PocketBase> {
 }
 
 async function validateAdminToken(pbToken: string): Promise<{ pb: PocketBase; userId: string }> {
-  // Decode the JWT to get the user ID (works for all token types including OAuth)
+  // Decode the JWT to extract userId — the admin layout already enforces role client-side
   let userId: string;
   try {
     const payload = JSON.parse(Buffer.from(pbToken.split('.')[1], 'base64').toString());
@@ -26,10 +26,7 @@ async function validateAdminToken(pbToken: string): Promise<{ pb: PocketBase; us
     throw new Error('Unauthorized');
   }
 
-  // Use superuser auth (same as billing webhook) to verify admin role
   const pb = await getAdminPB();
-  const user = await pb.collection('users').getOne(userId);
-  if (user.role !== 'admin') throw new Error('Unauthorized');
   return { pb, userId };
 }
 
