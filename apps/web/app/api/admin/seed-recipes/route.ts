@@ -1,39 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import PocketBase from 'pocketbase';
+import { validateAdminAuth } from '../../../../lib/admin-helpers';
 import { createAnthropicClient, parseAIJson } from '../../../../lib/ai-helpers';
 import { CURATED_RECIPES } from '../../../../lib/seed-recipe-data';
-
-const pbUrl = process.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
-
-async function getAdminPB(): Promise<PocketBase> {
-  const pb = new PocketBase(pbUrl);
-  try {
-    await pb.collection('_superusers').authWithPassword(
-      process.env.PB_ADMIN_EMAIL || 'admin@paintpile.app',
-      process.env.PB_ADMIN_PASSWORD || 'paintpile2admin'
-    );
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`PocketBase superuser auth failed (url=${pbUrl}): ${msg}`);
-  }
-  return pb;
-}
-
-async function validateAdminToken(pbToken: string): Promise<{ pb: PocketBase; userId: string }> {
-  // Decode the JWT to extract userId — the admin layout already enforces role client-side
-  let userId: string;
-  try {
-    const payload = JSON.parse(Buffer.from(pbToken.split('.')[1], 'base64').toString());
-    userId = payload.id;
-    if (!userId) throw new Error('no id');
-    if (payload.exp && payload.exp * 1000 < Date.now()) throw new Error('expired');
-  } catch {
-    throw new Error('Unauthorized');
-  }
-
-  const pb = await getAdminPB();
-  return { pb, userId };
-}
 
 export async function GET(req: NextRequest) {
   try {
@@ -41,7 +9,7 @@ export async function GET(req: NextRequest) {
     if (!pbToken) {
       return NextResponse.json({ success: false, error: 'Missing token' }, { status: 400 });
     }
-    const { pb } = await validateAdminToken(pbToken);
+    const { pb } = await validateAdminAuth(pbToken);
     const result = await pb.collection('recipes').getList(1, 1, { filter: 'is_public = true' });
     return NextResponse.json({ success: true, total: result.totalItems });
   } catch (error) {
@@ -59,7 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
 
-    const { pb, userId } = await validateAdminToken(pbToken);
+    const { pb, userId } = await validateAdminAuth(pbToken);
 
     if (type === 'curated') {
       let created = 0;
