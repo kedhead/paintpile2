@@ -26,9 +26,9 @@ export const useToast = () => {
 let nextId = 0;
 
 const VARIANT_STYLES = {
-  success: { border: 'rgba(16,185,129,.4)', color: '#10b981', Icon: Check },
-  error: { border: 'rgba(239,68,68,.4)', color: '#ef4444', Icon: AlertCircle },
-  info: { border: 'rgba(124,58,237,.4)', color: '#a78bfa', Icon: Info },
+  success: { border: 'border-success/40', color: 'text-success', Icon: Check },
+  error: { border: 'border-danger/40', color: 'text-danger', Icon: AlertCircle },
+  info: { border: 'border-primary/40', color: 'text-primary-tint', Icon: Info },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -53,15 +53,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           return (
             <div
               key={t.id}
-              className="pointer-events-auto flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium"
-              style={{
-                background: '#16161e',
-                border: `1px solid ${s.border}`,
-                color: '#f0eeff',
-                boxShadow: '0 8px 32px rgba(0,0,0,.5)',
-              }}
+              className={`animate-fade-up pointer-events-auto flex items-center gap-2.5 rounded-xl border bg-surface px-4 py-3 text-sm font-medium text-ink shadow-vault-lg ${s.border}`}
             >
-              <s.Icon className="h-4 w-4 shrink-0" style={{ color: s.color }} />
+              <s.Icon className={`h-4 w-4 shrink-0 ${s.color}`} />
               <span className="flex-1">{t.message}</span>
               <button
                 onClick={() => setToasts((tt) => tt.filter((x) => x.id !== t.id))}

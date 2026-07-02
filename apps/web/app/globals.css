@@ -38,32 +38,32 @@
     --neon-pink: 265 72% 50%;
   }
 
-  /* ─── Dark mode — "The Vault" ─── */
+  /* ─── Dark mode — "The Vault" (matches design.md) ─── */
   .dark {
-    --background: 250 30% 4%;
-    --foreground: 252 100% 97%;
+    --background: 240 14% 5%;      /* #0c0c10 */
+    --foreground: 247 100% 97%;    /* #f0eeff */
 
-    --card: 250 25% 17%;
-    --card-foreground: 252 100% 97%;
+    --card: 240 15% 10%;           /* #16161e */
+    --card-foreground: 247 100% 97%;
 
-    --primary: 265 81% 57%;
+    --primary: 262 83% 58%;        /* #7c3aed */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 250 25% 21%;
-    --secondary-foreground: 252 100% 97%;
+    --secondary: 240 17% 8%;       /* #111118 — inputs, secondary surfaces */
+    --secondary-foreground: 247 100% 97%;
 
-    --muted: 250 25% 21%;
-    --muted-foreground: 252 28% 68%;
+    --muted: 240 17% 8%;           /* #111118 */
+    --muted-foreground: 244 13% 53%; /* #7a7898 */
 
-    --accent: 265 81% 57%;
+    --accent: 262 83% 58%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 63% 50%;
-    --destructive-foreground: 252 100% 97%;
+    --destructive-foreground: 247 100% 97%;
 
-    --border: 250 30% 28%;
-    --input: 250 30% 28%;
-    --ring: 265 81% 57%;
+    --border: 240 16% 16%;         /* #232330 ≈ rgba(255,255,255,.07) on bg */
+    --input: 240 16% 16%;
+    --ring: 262 83% 58%;
 
     --neon-green: 160 84% 39%;
     --neon-blue: 200 85% 55%;
@@ -158,21 +158,30 @@
 @layer components {
   .dark .bg-card {
     box-shadow:
-      0 0 0 1px rgba(124, 58, 237, 0.35),
-      0 1px 3px rgba(0, 0, 0, 0.6),
-      0 4px 20px rgba(0, 0, 0, 0.4),
-      0 0 40px rgba(124, 58, 237, 0.06);
+      0 0 0 1px rgba(255, 255, 255, 0.07),
+      0 1px 3px rgba(0, 0, 0, 0.5),
+      0 4px 16px rgba(0, 0, 0, 0.3);
   }
   .dark .bg-card:hover {
     box-shadow:
-      0 0 0 1px rgba(124, 58, 237, 0.55),
-      0 0 32px rgba(124, 58, 237, 0.22),
-      0 2px 12px rgba(0, 0, 0, 0.6);
+      0 0 0 1px rgba(124, 58, 237, 0.30),
+      0 0 24px rgba(124, 58, 237, 0.10),
+      0 2px 12px rgba(0, 0, 0, 0.5);
   }
 
   /* Top header bottom border glow */
   .dark header.border-b {
     border-bottom-color: rgba(124, 58, 237, 0.20);
     box-shadow: 0 1px 0 rgba(124, 58, 237, 0.10);
+  }
+}
+
+/* ─── Ambient background decorations ─────────────────────────── */
+@layer utilities {
+  .bg-vault-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.4) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
 }

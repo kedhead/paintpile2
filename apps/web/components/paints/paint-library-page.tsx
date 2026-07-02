@@ -135,7 +135,7 @@ export function PaintLibraryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Paint Library</h1>
+        <h1 className="font-bebas text-3xl leading-none tracking-[.04em] text-ink md:text-4xl">PAINT LIBRARY</h1>
         <button
           onClick={() => setShowCustomDialog(true)}
           className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/80"

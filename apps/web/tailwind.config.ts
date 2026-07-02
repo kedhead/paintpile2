@@ -5,7 +5,6 @@ const config: Config = {
   content: [
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
-    '../../packages/ui/src/web/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
@@ -18,6 +17,9 @@ const config: Config = {
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
+          hover: '#6d28d9',
+          tint: '#a78bfa',
+          soft: 'rgba(124,58,237,.12)',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -45,13 +47,28 @@ const config: Config = {
           orange: 'hsl(var(--neon-orange))',
           pink: 'hsl(var(--neon-pink))',
         },
-        vault: {
-          bg:      '#07071a',
-          surface: '#1e1c2e',
-          accent:  '#7c3aed',
-          gold:    '#f59e0b',
-          green:   '#10b981',
+        surface: {
+          DEFAULT: '#16161e',
+          alt:     '#111118',
+          raised:  '#1c1c26',
+          deep:    '#0e0e16',
         },
+        ink: {
+          DEFAULT: '#f0eeff',
+          muted:   '#7a7898',
+          subtle:  '#3e3c58',
+        },
+        edge: {
+          DEFAULT: 'rgba(255,255,255,.07)',
+          strong:  'rgba(255,255,255,.14)',
+        },
+        gold: {
+          DEFAULT: '#f59e0b',
+          soft:    'rgba(245,158,11,.15)',
+        },
+        success: '#10b981',
+        social:  '#ec4899',
+        danger:  '#ef4444',
       },
       fontFamily: {
         bebas:    ['"Bebas Neue"', 'cursive'],
@@ -69,6 +86,10 @@ const config: Config = {
         'glow-gold': '0 0 24px rgba(245, 158, 11, 0.3)',
         'vault': '0 1px 3px rgba(0,0,0,.5), 0 4px 16px rgba(0,0,0,.3)',
         'vault-lg': '0 8px 40px rgba(0,0,0,.6)',
+      },
+      backgroundImage: {
+        'vault-blob-purple': 'radial-gradient(circle, rgba(124,58,237,.15) 0%, transparent 65%)',
+        'vault-blob-gold': 'radial-gradient(circle, rgba(245,158,11,.08) 0%, transparent 65%)',
       },
     },
   },

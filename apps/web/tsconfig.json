@@ -7,8 +7,7 @@
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./src/*"],
-      "@paintpile/shared": ["../../packages/shared/src"],
-      "@paintpile/ui": ["../../packages/ui/src"]
+      "@paintpile/shared": ["../../packages/shared/src"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

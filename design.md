@@ -103,3 +103,21 @@ Ambient radial gradient blobs are used on key screens (landing, auth pages):
 
 ## Tailwind Config Notes
 Custom tokens: `vault.*` color scale, `font-bebas` font family, `animate-float`, `animate-fade-up`, `animate-scale-up` keyframes defined in `apps/web/tailwind.config.ts` and `apps/web/app/globals.css`.
+
+## Canonical Tailwind tokens (apps/web/tailwind.config.ts)
+
+Dark-only (`forcedTheme="dark"`). Semantic keys — use these instead of hex:
+
+| Tailwind key | Value | Usage |
+|---|---|---|
+| `bg-background` / `bg-card` etc. | HSL vars in globals.css `.dark` | shadcn-style semantic layer |
+| `surface` / `surface-alt` / `surface-raised` / `surface-deep` | #16161e / #111118 / #1c1c26 / #0e0e16 | cards, inputs, hover, sidebar/header |
+| `ink` / `ink-muted` / `ink-subtle` | #f0eeff / #7a7898 / #3e3c58 | text tiers |
+| `edge` / `edge-strong` | white/.07 / white/.14 | borders |
+| `primary` (+ `-hover`, `-tint`, `-soft`) | #7c3aed / #6d28d9 / #a78bfa / purple .12 | interactive |
+| `gold` / `gold-soft` | #f59e0b / gold .15 | Pro, achievements |
+| `success`, `social`, `danger` | #10b981 / #ec4899 / #ef4444 | status accents |
+| `shadow-vault(-lg)`, `shadow-glow-violet(-lg)`, `shadow-glow-gold` | see config | elevation/glow |
+| `bg-vault-blob-purple`, `bg-vault-blob-gold`, `.bg-vault-grid` | gradients/grid | ambient decorations |
+
+UI primitives live in `apps/web/components/ui/` (Button, Card, Input, Field, Badge, PageHeader, EmptyState, Stat, SectionHeading, Spinner, Skeleton). Prefer them over hand-rolled elements.
