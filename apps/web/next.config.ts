@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@paintpile/shared', '@paintpile/ui'],
+  transpilePackages: ['@paintpile/shared'],
   serverExternalPackages: ['puppeteer-core', 'sharp', 'web-push', 'nodemailer'],
   images: {
     remotePatterns: [

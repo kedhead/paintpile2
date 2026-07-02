@@ -44,43 +44,35 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {children}
       {state && (
         <div
-          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 p-4"
+          className="animate-fade-in fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           onClick={() => close(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-2xl border p-6"
-            style={{
-              background: '#16161e',
-              borderColor: 'rgba(255,255,255,.08)',
-              boxShadow: '0 8px 40px rgba(0,0,0,.6)',
-            }}
+            className="animate-scale-up w-full max-w-sm rounded-2xl border border-edge bg-surface p-6 shadow-vault-lg"
           >
-            <h2 className="mb-2 text-base font-bold" style={{ color: '#f0eeff' }}>
+            <h2 className="mb-2 text-base font-bold text-ink">
               {state.opts.title}
             </h2>
             {state.opts.message && (
-              <p className="mb-5 text-sm" style={{ color: '#7a7898' }}>
+              <p className="mb-5 text-sm text-ink-muted">
                 {state.opts.message}
               </p>
             )}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => close(false)}
-                className="rounded-xl border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5"
-                style={{ borderColor: 'rgba(255,255,255,.1)', color: '#f0eeff' }}
+                className="rounded-xl border border-edge-strong px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-white/5"
               >
                 {state.opts.cancelLabel || 'Cancel'}
               </button>
               <button
                 onClick={() => close(true)}
-                className="rounded-xl px-4 py-2 text-sm font-bold text-white transition-all"
-                style={{
-                  background: state.opts.destructive ? '#ef4444' : '#7c3aed',
-                  boxShadow: state.opts.destructive
-                    ? '0 0 20px rgba(239,68,68,.3)'
-                    : '0 0 20px rgba(124,58,237,.3)',
-                }}
+                className={
+                  state.opts.destructive
+                    ? 'rounded-xl bg-danger px-4 py-2 text-sm font-bold text-white shadow-[0_0_20px_rgba(239,68,68,.3)] transition-all hover:bg-danger/85'
+                    : 'rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white shadow-glow-violet transition-all hover:bg-primary-hover'
+                }
               >
                 {state.opts.confirmLabel ||
                   (state.opts.destructive ? 'Delete' : 'Confirm')}

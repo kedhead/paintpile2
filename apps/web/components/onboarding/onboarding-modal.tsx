@@ -149,7 +149,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       <PaintBlobs />
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 400 }}>
         <div className="animate-float" style={{ marginBottom: 24 }}>
-          <img src="/logosmall.png" alt="Paintpile" style={{ height: 72, width: 'auto', margin: '0 auto', filter: 'drop-shadow(0 0 32px rgba(124,58,237,.6))' }} />
+          <img src="/logo-256.png" alt="Paintpile" style={{ height: 72, width: 'auto', margin: '0 auto', filter: 'drop-shadow(0 0 32px rgba(124,58,237,.6))' }} />
         </div>
         <div className="animate-fade-up" style={{ animationDelay: '.1s' }}>
           <div style={{ fontFamily: '"Bebas Neue", cursive', fontSize: 56, letterSpacing: '.04em', lineHeight: .95, color: T.text, marginBottom: 8 }}>
@@ -477,7 +477,7 @@ export function OnboardingModal() {
           flexShrink: 0, position: 'sticky', top: 0, background: '#0c0c10', zIndex: 10,
           borderBottom: '1px solid rgba(255,255,255,.05)',
         }}>
-          <img src="/logosmall.png" alt="Paintpile" style={{ height: 26, width: 'auto', opacity: .7 }} />
+          <img src="/logo-64.png" alt="Paintpile" style={{ height: 26, width: 'auto', opacity: .7 }} />
           <StepDots total={TOTAL_DOTS} current={dotStep} />
           <div style={{ fontSize: 11, color: '#7a7898', fontFamily: '"DM Mono", monospace', letterSpacing: '.06em' }}>
             {dotStep + 1}/{TOTAL_DOTS}

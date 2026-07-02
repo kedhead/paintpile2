@@ -15,9 +15,9 @@ function DashboardContent() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <LayoutDashboard className="h-5 w-5 text-primary" />
-        <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
+        <h1 className="font-bebas text-3xl leading-none tracking-[.04em] text-ink">DASHBOARD</h1>
       </div>
 
       {/* Tabs */}

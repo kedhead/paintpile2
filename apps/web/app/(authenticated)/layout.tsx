@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NavBar } from '../../components/nav-bar';
@@ -9,6 +9,7 @@ import { WelcomeBackModal } from '../../components/welcome-back/welcome-back-mod
 import { OnboardingModal } from '../../components/onboarding/onboarding-modal';
 import { InstallPrompt } from '../../components/pwa/install-prompt';
 import { ServiceWorkerRegister } from '../../components/sw-register';
+import { cn } from '../../lib/cn';
 import {
   Home, FolderOpen, Layers, Palette, Wrench, Settings,
   ChefHat, BookOpen, Trophy, Users, Newspaper, Award,
@@ -38,6 +39,8 @@ const MORE_NAV = [
   { href: '/tools/paint-mixer',    label: 'Paint Mixer',   icon: Boxes },
 ];
 
+const SIDEBAR_COLLAPSED_KEY = 'pp-sidebar-collapsed';
+
 // ── Sidebar nav item ─────────────────────────────────────────────────────────
 function SideNavItem({
   href, label, icon: Icon, collapsed, active,
@@ -48,35 +51,15 @@ function SideNavItem({
     <Link
       href={href}
       title={collapsed ? label : undefined}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: collapsed ? 0 : 10,
-        padding: collapsed ? '11px 0' : '9px 14px',
-        justifyContent: collapsed ? 'center' : 'flex-start',
-        background: active ? 'rgba(124,58,237,.12)' : 'transparent',
-        color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
-        borderLeft: `2px solid ${active ? '#7c3aed' : 'transparent'}`,
-        transition: 'all .15s',
-        fontFamily: 'DM Sans, sans-serif',
-        fontWeight: active ? 700 : 500,
-        fontSize: 13,
-        textDecoration: 'none',
-        width: '100%',
-        whiteSpace: 'nowrap',
-      }}
-      onMouseEnter={e => {
-        if (!active) {
-          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.04)';
-          (e.currentTarget as HTMLElement).style.color = '#f0eeff';
-        }
-      }}
-      onMouseLeave={e => {
-        if (!active) {
-          (e.currentTarget as HTMLElement).style.background = 'transparent';
-          (e.currentTarget as HTMLElement).style.color = 'rgba(122,120,152,1)';
-        }
-      }}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'flex w-full items-center whitespace-nowrap border-l-2 text-[13px] transition-all',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50',
+        collapsed ? 'justify-center py-[11px]' : 'gap-2.5 px-3.5 py-[9px]',
+        active
+          ? 'border-primary bg-primary-soft font-bold text-primary-tint'
+          : 'border-transparent font-medium text-ink-muted hover:bg-white/[.04] hover:text-ink',
+      )}
     >
       <Icon className="shrink-0" size={17} />
       {!collapsed && <span>{label}</span>}
@@ -97,18 +80,13 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
 
   return (
     <aside
-      className="hidden md:flex flex-col shrink-0 border-r"
-      style={{
-        width: collapsed ? 56 : 200,
-        background: '#0e0e16',
-        borderRightColor: 'rgba(255,255,255,.05)',
-        transition: 'width .2s cubic-bezier(.4,0,.2,1)',
-        overflow: 'hidden',
-        padding: '8px 0',
-      }}
+      className={cn(
+        'hidden shrink-0 flex-col overflow-hidden border-r border-edge bg-surface-deep py-2 transition-[width] duration-200 md:flex',
+        collapsed ? 'w-14' : 'w-[200px]',
+      )}
     >
       {/* Primary nav */}
-      <div style={{ flex: 1 }}>
+      <div className="flex-1">
         {PRIMARY_NAV.map(item => (
           <SideNavItem
             key={item.href}
@@ -119,7 +97,7 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
         ))}
 
         {/* Divider + more items */}
-        <div style={{ height: 1, background: 'rgba(255,255,255,.05)', margin: '8px 0' }} />
+        <div className="my-2 h-px bg-white/5" />
         {MORE_NAV.map(item => (
           <SideNavItem
             key={item.href}
@@ -141,14 +119,7 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
         />
         <button
           onClick={() => setCollapsed(!collapsed)}
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            width: '100%', padding: '8px', background: 'transparent', border: 'none',
-            cursor: 'pointer', color: 'rgba(62,60,88,1)', fontSize: 16, lineHeight: 1,
-            transition: 'color .15s',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(122,120,152,1)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(62,60,88,1)'; }}
+          className="flex w-full cursor-pointer items-center justify-center border-none bg-transparent p-2 text-base leading-none text-ink-subtle transition-colors hover:text-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
           title={collapsed ? 'Expand' : 'Collapse'}
         >
           {collapsed ? '›' : '‹'}
@@ -194,36 +165,29 @@ function MobileBottomNav({ pathname }: { pathname: string | null }) {
       {/* Backdrop */}
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-40 md:hidden"
-          style={{ background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(4px)' }}
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
           onClick={() => setDrawerOpen(false)}
         />
       )}
 
       {/* More drawer */}
       <div
-        className="fixed left-0 right-0 z-50 md:hidden"
-        style={{
-          bottom: 60,
-          background: '#16161e',
-          borderTop: '1px solid rgba(255,255,255,.08)',
-          borderRadius: '16px 16px 0 0',
-          padding: '12px 16px 8px',
-          transform: drawerOpen ? 'translateY(0)' : 'translateY(110%)',
-          transition: 'transform .25s cubic-bezier(.4,0,.2,1)',
-          boxShadow: '0 -8px 40px rgba(0,0,0,.5)',
-        }}
+        className={cn(
+          'fixed bottom-[60px] left-0 right-0 z-50 rounded-t-2xl border-t border-white/[.08] bg-surface px-4 pb-2 pt-3 shadow-[0_-8px_40px_rgba(0,0,0,.5)] transition-transform duration-250 md:hidden',
+          drawerOpen ? 'translate-y-0' : 'translate-y-[110%]',
+        )}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontFamily: '"Bebas Neue", cursive', fontSize: 18, letterSpacing: '.06em', color: '#f0eeff' }}>MORE</span>
+        <div className="mb-3 flex items-center justify-between">
+          <span className="font-bebas text-lg tracking-[.06em] text-ink">MORE</span>
           <button
             onClick={() => setDrawerOpen(false)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(122,120,152,1)', padding: 4 }}
+            className="cursor-pointer border-none bg-transparent p-1 text-ink-muted"
+            aria-label="Close"
           >
-            <X style={{ width: 18, height: 18 } as React.CSSProperties} />
+            <X className="h-[18px] w-[18px]" />
           </button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
+        <div className="grid grid-cols-4 gap-1">
           {MORE_DRAWER_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActive(href);
             return (
@@ -231,20 +195,13 @@ function MobileBottomNav({ pathname }: { pathname: string | null }) {
                 key={href}
                 href={href}
                 onClick={() => setDrawerOpen(false)}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 5,
-                  padding: '10px 4px',
-                  borderRadius: 10,
-                  background: active ? 'rgba(124,58,237,.12)' : 'transparent',
-                  color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
-                  textDecoration: 'none',
-                }}
+                className={cn(
+                  'flex flex-col items-center gap-[5px] rounded-[10px] px-1 py-2.5',
+                  active ? 'bg-primary-soft text-primary-tint' : 'text-ink-muted',
+                )}
               >
-                <Icon style={{ width: 20, height: 20, color: 'inherit' } as React.CSSProperties} />
-                <span style={{ fontSize: 11, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.02em', textAlign: 'center', color: 'inherit' }}>
+                <Icon className="h-5 w-5" />
+                <span className={cn('text-center text-[11px] tracking-[.02em]', active ? 'font-bold' : 'font-medium')}>
                   {label}
                 </span>
               </Link>
@@ -254,35 +211,21 @@ function MobileBottomNav({ pathname }: { pathname: string | null }) {
       </div>
 
       {/* Bottom bar */}
-      <nav
-        className="fixed bottom-0 left-0 right-0 flex md:hidden z-50 border-t"
-        style={{
-          height: 60,
-          background: '#16161e',
-          borderTopColor: 'rgba(255,255,255,.07)',
-          boxShadow: '0 -4px 20px rgba(0,0,0,.4)',
-        }}
-      >
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-[60px] border-t border-edge bg-surface shadow-[0_-4px_20px_rgba(0,0,0,.4)] md:hidden">
         {MOBILE_NAV.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
             <Link
               key={href}
               href={href}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 3,
-                color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
-                textDecoration: 'none',
-                transition: 'color .15s',
-              }}
+              aria-current={active ? 'page' : undefined}
+              className={cn(
+                'flex flex-1 flex-col items-center justify-center gap-[3px] transition-colors',
+                active ? 'text-primary-tint' : 'text-ink-muted',
+              )}
             >
-              <Icon style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
-              <span style={{ fontSize: 11, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
+              <Icon className="h-[19px] w-[19px]" />
+              <span className={cn('text-[11px] uppercase tracking-[.03em]', active ? 'font-bold' : 'font-medium')}>
                 {label}
               </span>
             </Link>
@@ -292,22 +235,13 @@ function MobileBottomNav({ pathname }: { pathname: string | null }) {
         {/* More button */}
         <button
           onClick={() => setDrawerOpen(v => !v)}
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 3,
-            color: moreActive || drawerOpen ? '#7c3aed' : 'rgba(122,120,152,1)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'color .15s',
-          }}
+          className={cn(
+            'flex flex-1 cursor-pointer flex-col items-center justify-center gap-[3px] border-none bg-transparent transition-colors',
+            moreActive || drawerOpen ? 'text-primary-tint' : 'text-ink-muted',
+          )}
         >
-          <MoreHorizontal style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
-          <span style={{ fontSize: 11, fontWeight: moreActive || drawerOpen ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
+          <MoreHorizontal className="h-[19px] w-[19px]" />
+          <span className={cn('text-[11px] uppercase tracking-[.03em]', moreActive || drawerOpen ? 'font-bold' : 'font-medium')}>
             More
           </span>
         </button>
@@ -322,19 +256,26 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   const isGroupsRoute = pathname?.startsWith('/groups');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // Restore persisted collapse state after mount (avoids SSR hydration mismatch)
+  useEffect(() => {
+    setSidebarCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1');
+  }, []);
+
+  const setCollapsed = (v: boolean) => {
+    setSidebarCollapsed(v);
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, v ? '1' : '0');
+  };
+
   usePresence();
 
   return (
-    <div className="flex flex-col" style={{ minHeight: '100dvh', background: '#0c0c10' }}>
+    <div className="flex min-h-dvh flex-col bg-background">
       <NavBar />
 
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} pathname={pathname} />
+        <Sidebar collapsed={sidebarCollapsed} setCollapsed={setCollapsed} pathname={pathname} />
 
-        <main
-          className="flex-1 overflow-y-auto"
-          style={{ background: '#0c0c10' }}
-        >
+        <main className="flex-1 overflow-y-auto bg-background">
           {isGroupsRoute ? (
             children
           ) : (

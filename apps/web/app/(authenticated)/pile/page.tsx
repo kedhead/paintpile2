@@ -32,9 +32,9 @@ export default function PilePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <Boxes className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Pile of Shame</h1>
+          <h1 className="font-bebas text-3xl leading-none tracking-[.04em] text-ink md:text-4xl">PILE OF SHAME</h1>
         </div>
       </div>
 

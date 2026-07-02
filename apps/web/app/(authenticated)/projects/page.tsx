@@ -32,7 +32,7 @@ function ProjectsContent() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Projects</h1>
+        <h1 className="font-bebas text-3xl leading-none tracking-[.04em] text-ink md:text-4xl">PROJECTS</h1>
         <div className="flex items-center gap-2">
           {tab === 'my' && (
             <div className="flex rounded-lg border border-border">

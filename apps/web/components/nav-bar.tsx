@@ -1,42 +1,25 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from './auth-provider';
 import { Crown, LogIn, UserPlus, LogOut } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
 import { UserAvatar } from './social/user-avatar';
+import { Badge } from './ui/badge';
+
+const NAV_ITEM_CLASSES =
+  'flex items-center rounded-lg text-ink-muted transition-colors hover:bg-white/5 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50';
 
 export function NavBar() {
   const { user, signOut } = useAuth();
 
   return (
-    <header
-      className="sticky top-0 z-50 flex items-center border-b"
-      style={{
-        height: 52,
-        background: '#0e0e16',
-        borderBottomColor: 'rgba(255,255,255,.07)',
-        boxShadow: '0 1px 0 rgba(124,58,237,.08)',
-        padding: '0 16px',
-        gap: 12,
-        flexShrink: 0,
-      }}
-    >
+    <header className="sticky top-0 z-50 flex h-[52px] shrink-0 items-center gap-3 border-b border-edge bg-surface-deep px-4">
       {/* Logo */}
-      <Link href={user ? '/feed' : '/'} className="flex items-center gap-2.5 shrink-0">
-        <img src="/logosmall.png" alt="Paintpile" style={{ height: 30, width: 'auto' }} />
-        <span
-          className="hidden sm:block"
-          style={{
-            fontFamily: '"Bebas Neue", cursive',
-            fontSize: 20,
-            letterSpacing: '.06em',
-            color: '#f0eeff',
-            opacity: .9,
-            lineHeight: 1,
-            marginTop: 1,
-          }}
-        >
+      <Link href={user ? '/feed' : '/'} className="flex shrink-0 items-center gap-2.5">
+        <Image src="/logo-64.png" alt="Paintpile" width={55} height={30} className="h-[30px] w-auto" />
+        <span className="mt-px hidden font-bebas text-xl leading-none tracking-[.06em] text-ink/90 sm:block">
           PAINTPILE
         </span>
       </Link>
@@ -46,30 +29,21 @@ export function NavBar() {
       {user ? (
         <div className="flex items-center gap-1.5">
           {user.subscription === 'pro' && (
-            <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: 'rgba(245,158,11,.15)', color: '#f59e0b' }}>
+            <Badge variant="pro">
               <Crown className="h-3 w-3" />
               PRO
-            </span>
+            </Badge>
           )}
           <NotificationBell />
-          <Link
-            href="/profile"
-            className="flex items-center gap-2 rounded-lg px-2.5 py-2.5 text-sm font-medium transition-all"
-            style={{ color: 'rgba(122,120,152,1)' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.05)'; (e.currentTarget as HTMLElement).style.color = '#f0eeff'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(122,120,152,1)'; }}
-          >
+          <Link href="/profile" className={`${NAV_ITEM_CLASSES} gap-2 px-2.5 py-2.5 text-sm font-medium`}>
             <UserAvatar user={user} size="xs" />
-            <span className="hidden sm:inline max-w-[80px] truncate text-xs">
+            <span className="hidden max-w-[80px] truncate text-xs sm:inline">
               {user.display_name || user.username || user.name || 'Profile'}
             </span>
           </Link>
           <button
             onClick={signOut}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-2.5 text-xs font-medium transition-all"
-            style={{ color: 'rgba(122,120,152,1)' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.05)'; (e.currentTarget as HTMLElement).style.color = '#f0eeff'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(122,120,152,1)'; }}
+            className={`${NAV_ITEM_CLASSES} gap-1.5 px-2.5 py-2.5 text-xs font-medium`}
           >
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">Sign Out</span>
@@ -77,18 +51,13 @@ export function NavBar() {
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <Link
-            href="/auth/login"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all"
-            style={{ color: 'rgba(122,120,152,1)' }}
-          >
+          <Link href="/auth/login" className={`${NAV_ITEM_CLASSES} gap-1.5 px-3 py-1.5 text-sm font-medium`}>
             <LogIn className="h-4 w-4" />
             <span className="hidden sm:inline">Login</span>
           </Link>
           <Link
             href="/auth/signup"
-            className="flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-sm font-bold text-white transition-all"
-            style={{ background: '#7c3aed', boxShadow: '0 0 20px rgba(124,58,237,.3)' }}
+            className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-1.5 text-sm font-bold text-white shadow-glow-violet transition-all hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           >
             <UserPlus className="h-4 w-4" />
             <span className="hidden sm:inline">Sign Up</span>
