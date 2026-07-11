@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(20, 10, 24, 0.85)',
+    backgroundColor: 'rgba(12, 12, 16, 0.85)',
   },
 
   // Offline

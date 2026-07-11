@@ -12,11 +12,13 @@ interface PaintCardProps {
 export function PaintCard({ paint, owned, onToggleOwned }: PaintCardProps) {
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
-      {/* Color Swatch */}
-      <div
-        className="h-16 w-full"
-        style={{ backgroundColor: paint.hex_color || paint.color || '#888888' }}
-      />
+      {/* Color Swatch — neutral surround so the paint color reads true */}
+      <div className="color-true p-2">
+        <div
+          className="h-14 w-full rounded-md"
+          style={{ backgroundColor: paint.hex_color || paint.color || '#888888' }}
+        />
+      </div>
 
       {/* Info */}
       <div className="p-3">

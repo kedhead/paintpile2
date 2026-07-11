@@ -104,8 +104,8 @@ export function ColorMatcher() {
 
           {sampledColor && (
             <div className="space-y-3">
-              <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
-                <div className="h-10 w-10 rounded-lg border border-border" style={{ backgroundColor: sampledColor }} />
+              <div className="color-true flex items-center gap-3 rounded-lg border border-black/20 p-3 dark:border-white/15">
+                <div className="h-10 w-10 rounded-lg border border-black/20 dark:border-white/25" style={{ backgroundColor: sampledColor }} />
                 <div>
                   <p className="text-sm font-semibold text-foreground">{sampledColor.toUpperCase()}</p>
                   <p className="text-xs text-muted-foreground">Sampled color</p>
@@ -116,9 +116,9 @@ export function ColorMatcher() {
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold text-foreground">Closest Paints</h3>
                   {matches.map((match, i) => (
-                    <div key={match.paintId} className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2">
+                    <div key={match.paintId} className="color-true flex items-center gap-3 rounded-lg border border-black/20 px-3 py-2 dark:border-white/15">
                       <span className="text-xs font-bold text-muted-foreground">#{i + 1}</span>
-                      <div className="h-6 w-6 rounded-full border border-border" style={{ backgroundColor: match.hex }} />
+                      <div className="h-6 w-6 rounded-full border border-black/20 dark:border-white/25" style={{ backgroundColor: match.hex }} />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-foreground">{match.name}</p>
                         <p className="text-xs text-muted-foreground">{match.brand}</p>

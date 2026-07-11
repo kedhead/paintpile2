@@ -176,3 +176,21 @@
     box-shadow: 0 1px 0 rgba(124, 58, 237, 0.10);
   }
 }
+
+/* ─── Color fidelity & text contrast ─────────────────────────── */
+@layer utilities {
+  /* Violet primary is only ~3.4:1 as small text on near-black. Buttons
+     and fills keep --primary; text gets a lighter violet that passes AA. */
+  .dark .text-primary { color: hsl(255 86% 76%); }
+  .dark .hover\:text-primary:hover { color: hsl(255 86% 76%); }
+  .dark .group:hover .group-hover\:text-primary { color: hsl(255 86% 76%); }
+
+  /* Untinted neutral surround for real paint colors. Vault surfaces are
+     purple-tinted, which skews color judgement (simultaneous contrast) —
+     swatches sit on neutral gray with no glow instead. */
+  .color-true {
+    background: hsl(0 0% 100%);
+    box-shadow: none !important;
+  }
+  .dark .color-true { background: hsl(0 0% 13%); }
+}

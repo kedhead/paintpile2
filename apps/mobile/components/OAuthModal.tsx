@@ -29,11 +29,11 @@ const BRIDGE_JS = `
         }));
         // Replace page content with a "done" screen and close button
         setTimeout(function() {
-          document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#140A18;color:#F0F0F0;font-family:system-ui,sans-serif;padding:20px;text-align:center;">'
+          document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#0c0c10;color:#f0eeff;font-family:system-ui,sans-serif;padding:20px;text-align:center;">'
             + '<div style="font-size:48px;margin-bottom:16px;">&#10003;</div>'
             + '<h1 style="font-size:20px;font-weight:700;margin:0 0 8px;">Signed In!</h1>'
             + '<p style="font-size:14px;color:#999;margin:0 0 24px;">Tap the button below to continue.</p>'
-            + '<button onclick="window.ReactNativeWebView.postMessage(JSON.stringify({type:\\'close_modal\\'}))" style="background:#FA4FD1;color:#fff;border:none;border-radius:12px;padding:14px 48px;font-size:16px;font-weight:600;cursor:pointer;">Continue</button>'
+            + '<button onclick="window.ReactNativeWebView.postMessage(JSON.stringify({type:\\'close_modal\\'}))" style="background:#7c3aed;color:#fff;border:none;border-radius:12px;padding:14px 48px;font-size:16px;font-weight:600;cursor:pointer;">Continue</button>'
             + '</div>';
         }, 100);
       }
