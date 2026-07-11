@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Paintpile',
     short_name: 'Paintpile',
     description: 'Track your miniature painting projects, paints, and recipes',
-    start_url: '/feed',
+    start_url: '/home',
     display: 'standalone',
     background_color: '#0a0e14',
     theme_color: '#151a23',

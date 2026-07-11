@@ -8,9 +8,9 @@ interface FeedTabsProps {
 }
 
 const TABS: { id: FeedTab; label: string }[] = [
-  { id: 'following', label: 'Following' },
-  { id: 'discover', label: 'Discover' },
   { id: 'gallery', label: 'Gallery' },
+  { id: 'discover', label: 'Discover' },
+  { id: 'following', label: 'Following' },
   { id: 'people', label: 'People' },
 ];
 

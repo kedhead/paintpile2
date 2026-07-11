@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 // Routes that require authentication (personal/private pages)
 const authRequiredPrefixes = [
+  '/home',
   '/profile',
   '/admin',
   '/settings',
@@ -23,7 +24,7 @@ export function middleware(request: NextRequest) {
   // Redirect authenticated users away from landing page
   if (isAuthenticated && pathname === '/') {
     const url = request.nextUrl.clone();
-    url.pathname = '/feed';
+    url.pathname = '/home';
     return NextResponse.redirect(url);
   }
 
@@ -37,7 +38,7 @@ export function middleware(request: NextRequest) {
   // Redirect authenticated users away from auth pages (but allow password reset)
   if (isAuthenticated && isAuthRoute && !pathname.startsWith('/auth/reset-password')) {
     const url = request.nextUrl.clone();
-    url.pathname = '/feed';
+    url.pathname = '/home';
     return NextResponse.redirect(url);
   }
 

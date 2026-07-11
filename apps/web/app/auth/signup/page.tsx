@@ -99,7 +99,7 @@ export default function SignupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: data.displayName, email: data.email }),
       }).catch(() => {});
-      router.push('/feed');
+      router.push('/home');
       router.refresh();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to create account';

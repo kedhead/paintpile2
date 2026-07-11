@@ -74,7 +74,7 @@ export default function LoginPage() {
     try {
       await pb.collection('users').authWithPassword(data.email, data.password);
       document.cookie = `pb_auth=${pb.authStore.token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
-      router.push('/feed');
+      router.push('/home');
       router.refresh();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Invalid email or password';
@@ -87,7 +87,7 @@ export default function LoginPage() {
     try {
       await pb.collection('users').authWithOAuth2({ provider: 'google' });
       document.cookie = `pb_auth=${pb.authStore.token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
-      router.push('/feed');
+      router.push('/home');
       router.refresh();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Google sign-in failed';

@@ -23,7 +23,7 @@ function ErrorPage({ statusCode }: { statusCode: number }) {
             : 'An error occurred'}
         </p>
         <a
-          href="/feed"
+          href="/home"
           style={{
             display: 'inline-block',
             marginTop: '1.5rem',

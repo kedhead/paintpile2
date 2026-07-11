@@ -4,9 +4,9 @@
 export const BASE_URL = 'https://thepaintpile.com';
 
 export const TABS = [
-  { key: 'home',          label: 'Home',     icon: '🏠', path: '/feed' },
+  { key: 'home',          label: 'Home',     icon: '🏠', path: '/home' },
   { key: 'projects',      label: 'Projects', icon: '🎨', path: '/projects' },
-  { key: 'groups',        label: 'Groups',   icon: '👥', path: '/groups' },
+  { key: 'showcase',      label: 'Showcase', icon: '🖼️', path: '/feed' },
   { key: 'notifications', label: 'Alerts',   icon: '🔔', path: '/notifications' },
   { key: 'profile',       label: 'Profile',  icon: '👤', path: '/profile' },
 ] as const;

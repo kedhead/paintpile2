@@ -7,19 +7,19 @@ export function handleDeepLink(
   webViewRef: React.RefObject<WebView | null>,
 ) {
   // Support both paintpile:// scheme and https://thepaintpile.com URLs
-  let path = '/feed';
+  let path = '/home';
 
   if (url.startsWith('paintpile://')) {
     // paintpile://feed/123 → /feed/123
     const parsed = Linking.parse(url);
-    path = parsed.path ? `/${parsed.path}` : '/feed';
+    path = parsed.path ? `/${parsed.path}` : '/home';
   } else if (url.startsWith('https://thepaintpile.com')) {
     // https://thepaintpile.com/projects/123 → /projects/123
     try {
       const u = new URL(url);
       path = u.pathname;
     } catch {
-      path = '/feed';
+      path = '/home';
     }
   }
 

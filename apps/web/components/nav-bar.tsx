@@ -23,7 +23,7 @@ export function NavBar() {
       }}
     >
       {/* Logo */}
-      <Link href={user ? '/feed' : '/'} className="flex items-center gap-2.5 shrink-0">
+      <Link href={user ? '/home' : '/'} className="flex items-center gap-2.5 shrink-0">
         <img src="/logosmall.png" alt="Paintpile" style={{ height: 30, width: 'auto' }} />
         <span
           className="hidden sm:block"

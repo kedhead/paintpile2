@@ -20,9 +20,9 @@ import { PeopleSearch } from '../../../components/feed/people-search';
 function FeedContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const initialTab = (searchParams?.get('tab') as FeedTab) || 'discover';
+  const initialTab = (searchParams?.get('tab') as FeedTab) || 'gallery';
   const [activeTab, setActiveTab] = useState<FeedTab>(
-    (['following', 'discover', 'gallery', 'people'] as FeedTab[]).includes(initialTab) ? initialTab : 'discover'
+    (['following', 'discover', 'gallery', 'people'] as FeedTab[]).includes(initialTab) ? initialTab : 'gallery'
   );
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -57,7 +57,15 @@ function FeedContent() {
   const isGallery = activeTab === 'gallery';
 
   return (
-    <div className={`mx-auto space-y-4 ${isGallery ? 'max-w-4xl' : 'max-w-2xl'}`}>
+    <div className={`mx-auto space-y-4 ${isGallery ? 'max-w-5xl' : 'max-w-2xl'}`}>
+      {/* Page identity */}
+      <div>
+        <h1 className="font-bebas text-4xl tracking-wide text-foreground">Showcase</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Painted minis from the community — share yours when it&apos;s ready.
+        </p>
+      </div>
+
       {/* Create post + Go Live row — hidden on gallery/people tabs */}
       {!isGallery && !isPeople && (
         <div className="flex items-start gap-3">

@@ -242,7 +242,7 @@ export default function AppScreen() {
       <View style={[styles.webviewWrap, { paddingTop: insets.top }]}>
         <WebView
           ref={webViewRef}
-          source={{ uri: `${BASE_URL}/feed` }}
+          source={{ uri: `${BASE_URL}/home` }}
           style={styles.webview}
           // Cookies & session
           sharedCookiesEnabled={true}

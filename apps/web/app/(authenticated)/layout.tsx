@@ -16,23 +16,28 @@ import {
 } from 'lucide-react';
 
 // ── Navigation items ─────────────────────────────────────────────────────────
+// Utility first (works at zero users), community second, everything else last.
 const PRIMARY_NAV = [
-  { href: '/feed',     label: 'Feed',     icon: Home },
+  { href: '/home',     label: 'Home',     icon: Home },
   { href: '/projects', label: 'Projects', icon: FolderOpen },
   { href: '/pile',     label: 'Pile',     icon: Layers },
   { href: '/paints',   label: 'Paints',   icon: Palette },
+  { href: '/recipes',  label: 'Recipes',  icon: ChefHat },
   { href: '/tools',    label: 'Tools',    icon: Wrench },
 ];
 
+const COMMUNITY_NAV = [
+  { href: '/feed',       label: 'Showcase',   icon: Image },
+  { href: '/challenges', label: 'Challenges', icon: Trophy },
+  { href: '/groups',     label: 'Groups',     icon: Users },
+];
+
 const MORE_NAV = [
-  { href: '/groups',        label: 'Groups',      icon: Users },
-  { href: '/recipes',       label: 'Recipes',     icon: ChefHat },
   { href: '/diary',         label: 'Diary',       icon: BookOpen },
-  { href: '/news',          label: 'News',        icon: Newspaper },
-  { href: '/challenges',    label: 'Challenges',  icon: Trophy },
   { href: '/badges',        label: 'Badges',      icon: Award },
+  { href: '/news',          label: 'News',        icon: Newspaper },
   { href: '/dashboard',     label: 'Dashboard',   icon: LayoutDashboard },
-  { href: '/palette-post',  label: 'Palette Post',icon: Image },
+  { href: '/palette-post',  label: 'Palette Post',icon: Palette },
   { href: '/tools/lighting-ref',   label: 'Lighting Ref',  icon: Sun },
   { href: '/tools/color-matcher',  label: 'Color Matcher', icon: Crosshair },
   { href: '/tools/paint-mixer',    label: 'Paint Mixer',   icon: Boxes },
@@ -91,7 +96,8 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
   pathname: string | null;
 }) {
   const isActive = (href: string) => {
-    if (href === '/feed') return pathname === '/feed' || pathname === '/';
+    if (href === '/home') return pathname === '/home' || pathname === '/';
+    if (href === '/tools') return pathname === '/tools';
     return !!pathname?.startsWith(href);
   };
 
@@ -110,6 +116,29 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
       {/* Primary nav */}
       <div style={{ flex: 1 }}>
         {PRIMARY_NAV.map(item => (
+          <SideNavItem
+            key={item.href}
+            {...item}
+            collapsed={collapsed}
+            active={isActive(item.href)}
+          />
+        ))}
+
+        {/* Community section */}
+        <div style={{ height: 1, background: 'rgba(255,255,255,.05)', margin: '8px 0' }} />
+        {!collapsed && (
+          <div style={{
+            padding: '4px 14px 6px',
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '.12em',
+            color: 'rgba(62,60,88,1)',
+            fontFamily: 'DM Sans, sans-serif',
+          }}>
+            COMMUNITY
+          </div>
+        )}
+        {COMMUNITY_NAV.map(item => (
           <SideNavItem
             key={item.href}
             {...item}
@@ -160,22 +189,23 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
 
 // ── Mobile bottom nav ────────────────────────────────────────────────────────
 const MOBILE_NAV = [
-  { href: '/feed',     label: 'Feed',     icon: Home },
+  { href: '/home',     label: 'Home',     icon: Home },
   { href: '/projects', label: 'Projects', icon: FolderOpen },
   { href: '/pile',     label: 'Pile',     icon: Layers },
-  { href: '/paints',   label: 'Paints',   icon: Palette },
+  { href: '/feed',     label: 'Showcase', icon: Image },
 ];
 
 const MORE_DRAWER_ITEMS = [
-  { href: '/groups',       label: 'Groups',       icon: Users },
+  { href: '/paints',       label: 'Paints',       icon: Palette },
   { href: '/recipes',      label: 'Recipes',      icon: ChefHat },
-  { href: '/diary',        label: 'Diary',        icon: BookOpen },
-  { href: '/news',         label: 'News',         icon: Newspaper },
-  { href: '/challenges',   label: 'Challenges',   icon: Trophy },
-  { href: '/badges',       label: 'Badges',       icon: Award },
-  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
-  { href: '/palette-post', label: 'Palette Post', icon: Image },
   { href: '/tools',        label: 'Tools',        icon: Wrench },
+  { href: '/challenges',   label: 'Challenges',   icon: Trophy },
+  { href: '/groups',       label: 'Groups',       icon: Users },
+  { href: '/diary',        label: 'Diary',        icon: BookOpen },
+  { href: '/badges',       label: 'Badges',       icon: Award },
+  { href: '/news',         label: 'News',         icon: Newspaper },
+  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
+  { href: '/palette-post', label: 'Palette Post', icon: Palette },
   { href: '/settings/account', label: 'Settings', icon: Settings },
 ];
 
@@ -183,7 +213,7 @@ function MobileBottomNav({ pathname }: { pathname: string | null }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isActive = (href: string) => {
-    if (href === '/feed') return pathname === '/feed' || pathname === '/';
+    if (href === '/home') return pathname === '/home' || pathname === '/';
     return !!pathname?.startsWith(href);
   };
 
