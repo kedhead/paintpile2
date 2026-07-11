@@ -9,39 +9,80 @@ import { WelcomeBackModal } from '../../components/welcome-back/welcome-back-mod
 import { OnboardingModal } from '../../components/onboarding/onboarding-modal';
 import { InstallPrompt } from '../../components/pwa/install-prompt';
 import { ServiceWorkerRegister } from '../../components/sw-register';
-import {
-  Home, FolderOpen, Layers, Palette, Wrench, Settings,
-  ChefHat, BookOpen, Trophy, Users, Newspaper, Award,
-  LayoutDashboard, Image, Sun, Crosshair, Boxes, MoreHorizontal, X,
-} from 'lucide-react';
+import { Home, Hammer, Palette, Users, Settings, User } from 'lucide-react';
 
-// ── Navigation items ─────────────────────────────────────────────────────────
-// Utility first (works at zero users), community second, everything else last.
-const PRIMARY_NAV = [
-  { href: '/home',     label: 'Home',     icon: Home },
-  { href: '/projects', label: 'Projects', icon: FolderOpen },
-  { href: '/pile',     label: 'Pile',     icon: Layers },
-  { href: '/paints',   label: 'Paints',   icon: Palette },
-  { href: '/recipes',  label: 'Recipes',  icon: ChefHat },
-  { href: '/tools',    label: 'Tools',    icon: Wrench },
+// ── Navigation model ─────────────────────────────────────────────────────────
+// Five hubs. Everything in the app lives inside one of them, reachable in
+// two taps: hub (sidebar / bottom bar) → tab (horizontal sub-nav).
+interface SectionTab {
+  href: string;
+  label: string;
+}
+
+interface Section {
+  key: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
+  href: string;
+  tabs: SectionTab[];
+}
+
+const SECTIONS: Section[] = [
+  {
+    key: 'home',
+    label: 'Home',
+    icon: Home,
+    href: '/home',
+    tabs: [],
+  },
+  {
+    key: 'workshop',
+    label: 'Workshop',
+    icon: Hammer,
+    href: '/projects',
+    tabs: [
+      { href: '/projects',  label: 'Projects' },
+      { href: '/pile',      label: 'Pile' },
+      { href: '/diary',     label: 'Diary' },
+      { href: '/dashboard', label: 'Stats' },
+      { href: '/badges',    label: 'Badges' },
+    ],
+  },
+  {
+    key: 'studio',
+    label: 'Studio',
+    icon: Palette,
+    href: '/paints',
+    tabs: [
+      { href: '/paints',       label: 'Paints' },
+      { href: '/recipes',      label: 'Recipes' },
+      { href: '/tools',        label: 'Tools' },
+      { href: '/palette-post', label: 'Palette Post' },
+    ],
+  },
+  {
+    key: 'community',
+    label: 'Community',
+    icon: Users,
+    href: '/feed',
+    tabs: [
+      { href: '/feed',       label: 'Showcase' },
+      { href: '/challenges', label: 'Challenges' },
+      { href: '/groups',     label: 'Groups' },
+      { href: '/news',       label: 'News' },
+    ],
+  },
 ];
 
-const COMMUNITY_NAV = [
-  { href: '/feed',       label: 'Showcase',   icon: Image },
-  { href: '/challenges', label: 'Challenges', icon: Trophy },
-  { href: '/groups',     label: 'Groups',     icon: Users },
-];
+function sectionIsActive(section: Section, pathname: string | null): boolean {
+  if (!pathname) return false;
+  if (section.key === 'home') return pathname === '/home' || pathname === '/';
+  return section.tabs.some((t) => pathname.startsWith(t.href));
+}
 
-const MORE_NAV = [
-  { href: '/diary',         label: 'Diary',       icon: BookOpen },
-  { href: '/badges',        label: 'Badges',      icon: Award },
-  { href: '/news',          label: 'News',        icon: Newspaper },
-  { href: '/dashboard',     label: 'Dashboard',   icon: LayoutDashboard },
-  { href: '/palette-post',  label: 'Palette Post',icon: Palette },
-  { href: '/tools/lighting-ref',   label: 'Lighting Ref',  icon: Sun },
-  { href: '/tools/color-matcher',  label: 'Color Matcher', icon: Crosshair },
-  { href: '/tools/paint-mixer',    label: 'Paint Mixer',   icon: Boxes },
-];
+function activeSection(pathname: string | null): Section | undefined {
+  return SECTIONS.find((s) => sectionIsActive(s, pathname));
+}
 
 // ── Sidebar nav item ─────────────────────────────────────────────────────────
 function SideNavItem({
@@ -57,7 +98,7 @@ function SideNavItem({
         display: 'flex',
         alignItems: 'center',
         gap: collapsed ? 0 : 10,
-        padding: collapsed ? '11px 0' : '9px 14px',
+        padding: collapsed ? '13px 0' : '11px 14px',
         justifyContent: collapsed ? 'center' : 'flex-start',
         background: active ? 'rgba(124,58,237,.12)' : 'transparent',
         color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
@@ -95,12 +136,6 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
   setCollapsed: (v: boolean) => void;
   pathname: string | null;
 }) {
-  const isActive = (href: string) => {
-    if (href === '/home') return pathname === '/home' || pathname === '/';
-    if (href === '/tools') return pathname === '/tools';
-    return !!pathname?.startsWith(href);
-  };
-
   return (
     <aside
       className="hidden md:flex flex-col shrink-0 border-r"
@@ -113,48 +148,15 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
         padding: '8px 0',
       }}
     >
-      {/* Primary nav */}
       <div style={{ flex: 1 }}>
-        {PRIMARY_NAV.map(item => (
+        {SECTIONS.map(section => (
           <SideNavItem
-            key={item.href}
-            {...item}
+            key={section.key}
+            href={section.href}
+            label={section.label}
+            icon={section.icon}
             collapsed={collapsed}
-            active={isActive(item.href)}
-          />
-        ))}
-
-        {/* Community section */}
-        <div style={{ height: 1, background: 'rgba(255,255,255,.05)', margin: '8px 0' }} />
-        {!collapsed && (
-          <div style={{
-            padding: '4px 14px 6px',
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '.12em',
-            color: 'rgba(62,60,88,1)',
-            fontFamily: 'DM Sans, sans-serif',
-          }}>
-            COMMUNITY
-          </div>
-        )}
-        {COMMUNITY_NAV.map(item => (
-          <SideNavItem
-            key={item.href}
-            {...item}
-            collapsed={collapsed}
-            active={isActive(item.href)}
-          />
-        ))}
-
-        {/* Divider + more items */}
-        <div style={{ height: 1, background: 'rgba(255,255,255,.05)', margin: '8px 0' }} />
-        {MORE_NAV.map(item => (
-          <SideNavItem
-            key={item.href}
-            {...item}
-            collapsed={collapsed}
-            active={isActive(item.href)}
+            active={sectionIsActive(section, pathname)}
           />
         ))}
       </div>
@@ -187,141 +189,70 @@ function Sidebar({ collapsed, setCollapsed, pathname }: {
   );
 }
 
-// ── Mobile bottom nav ────────────────────────────────────────────────────────
-const MOBILE_NAV = [
-  { href: '/home',     label: 'Home',     icon: Home },
-  { href: '/projects', label: 'Projects', icon: FolderOpen },
-  { href: '/pile',     label: 'Pile',     icon: Layers },
-  { href: '/feed',     label: 'Showcase', icon: Image },
-];
-
-const MORE_DRAWER_ITEMS = [
-  { href: '/paints',       label: 'Paints',       icon: Palette },
-  { href: '/recipes',      label: 'Recipes',      icon: ChefHat },
-  { href: '/tools',        label: 'Tools',        icon: Wrench },
-  { href: '/challenges',   label: 'Challenges',   icon: Trophy },
-  { href: '/groups',       label: 'Groups',       icon: Users },
-  { href: '/diary',        label: 'Diary',        icon: BookOpen },
-  { href: '/badges',       label: 'Badges',       icon: Award },
-  { href: '/news',         label: 'News',         icon: Newspaper },
-  { href: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
-  { href: '/palette-post', label: 'Palette Post', icon: Palette },
-  { href: '/settings/account', label: 'Settings', icon: Settings },
-];
-
-function MobileBottomNav({ pathname }: { pathname: string | null }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const isActive = (href: string) => {
-    if (href === '/home') return pathname === '/home' || pathname === '/';
-    return !!pathname?.startsWith(href);
-  };
-
-  const moreActive = MORE_DRAWER_ITEMS.some(i => isActive(i.href));
-
+// ── Section tabs (horizontal sub-nav within a hub) ───────────────────────────
+function SectionTabs({ section, pathname }: { section: Section; pathname: string | null }) {
   return (
-    <>
-      {/* Backdrop */}
-      {drawerOpen && (
-        <div
-          className="fixed inset-0 z-40 md:hidden"
-          style={{ background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(4px)' }}
-          onClick={() => setDrawerOpen(false)}
-        />
-      )}
-
-      {/* More drawer */}
-      <div
-        className="fixed left-0 right-0 z-50 md:hidden"
-        style={{
-          bottom: 60,
-          background: '#16161e',
-          borderTop: '1px solid rgba(255,255,255,.08)',
-          borderRadius: '16px 16px 0 0',
-          padding: '12px 16px 8px',
-          transform: drawerOpen ? 'translateY(0)' : 'translateY(110%)',
-          transition: 'transform .25s cubic-bezier(.4,0,.2,1)',
-          boxShadow: '0 -8px 40px rgba(0,0,0,.5)',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontFamily: '"Bebas Neue", cursive', fontSize: 18, letterSpacing: '.06em', color: '#f0eeff' }}>MORE</span>
-          <button
-            onClick={() => setDrawerOpen(false)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(122,120,152,1)', padding: 4 }}
-          >
-            <X style={{ width: 18, height: 18 } as React.CSSProperties} />
-          </button>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
-          {MORE_DRAWER_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = isActive(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setDrawerOpen(false)}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 5,
-                  padding: '10px 4px',
-                  borderRadius: 10,
-                  background: active ? 'rgba(124,58,237,.12)' : 'transparent',
-                  color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
-                  textDecoration: 'none',
-                }}
-              >
-                <Icon style={{ width: 20, height: 20, color: 'inherit' } as React.CSSProperties} />
-                <span style={{ fontSize: 11, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.02em', textAlign: 'center', color: 'inherit' }}>
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Bottom bar */}
-      <nav
-        className="fixed bottom-0 left-0 right-0 flex md:hidden z-50 border-t"
-        style={{
-          height: 60,
-          background: '#16161e',
-          borderTopColor: 'rgba(255,255,255,.07)',
-          boxShadow: '0 -4px 20px rgba(0,0,0,.4)',
-        }}
-      >
-        {MOBILE_NAV.map(({ href, label, icon: Icon }) => {
-          const active = isActive(href);
+    <div
+      className="-mx-4 mb-5 overflow-x-auto px-4 md:mx-0 md:px-0"
+      style={{ borderBottom: '1px solid rgba(255,255,255,.07)' }}
+    >
+      <div className="flex gap-1" style={{ minWidth: 'max-content' }}>
+        {section.tabs.map(({ href, label }) => {
+          const active = !!pathname?.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
               style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 3,
+                padding: '10px 14px',
+                fontSize: 13,
+                fontFamily: 'DM Sans, sans-serif',
+                fontWeight: active ? 700 : 500,
                 color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
+                borderBottom: `2px solid ${active ? '#7c3aed' : 'transparent'}`,
+                marginBottom: -1,
                 textDecoration: 'none',
+                whiteSpace: 'nowrap',
                 transition: 'color .15s',
               }}
             >
-              <Icon style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
-              <span style={{ fontSize: 11, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
-                {label}
-              </span>
+              {label}
             </Link>
           );
         })}
+      </div>
+    </div>
+  );
+}
 
-        {/* More button */}
-        <button
-          onClick={() => setDrawerOpen(v => !v)}
+// ── Mobile bottom nav ────────────────────────────────────────────────────────
+function MobileBottomNav({ pathname }: { pathname: string | null }) {
+  const profileActive = !!pathname && (pathname.startsWith('/profile') || pathname.startsWith('/settings'));
+
+  const items = [
+    ...SECTIONS.map(s => ({
+      href: s.href,
+      label: s.label,
+      icon: s.icon,
+      active: sectionIsActive(s, pathname),
+    })),
+    { href: '/profile', label: 'Profile', icon: User, active: profileActive },
+  ];
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 flex md:hidden z-50 border-t"
+      style={{
+        height: 60,
+        background: '#16161e',
+        borderTopColor: 'rgba(255,255,255,.07)',
+        boxShadow: '0 -4px 20px rgba(0,0,0,.4)',
+      }}
+    >
+      {items.map(({ href, label, icon: Icon, active }) => (
+        <Link
+          key={href}
+          href={href}
           style={{
             flex: 1,
             display: 'flex',
@@ -329,20 +260,18 @@ function MobileBottomNav({ pathname }: { pathname: string | null }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 3,
-            color: moreActive || drawerOpen ? '#7c3aed' : 'rgba(122,120,152,1)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
+            color: active ? '#7c3aed' : 'rgba(122,120,152,1)',
+            textDecoration: 'none',
             transition: 'color .15s',
           }}
         >
-          <MoreHorizontal style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
-          <span style={{ fontSize: 11, fontWeight: moreActive || drawerOpen ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.03em', textTransform: 'uppercase', color: 'inherit' }}>
-            More
+          <Icon style={{ width: 19, height: 19, color: 'inherit' } as React.CSSProperties} />
+          <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, fontFamily: 'DM Sans, sans-serif', letterSpacing: '.02em', textTransform: 'uppercase', color: 'inherit' }}>
+            {label}
           </span>
-        </button>
-      </nav>
-    </>
+        </Link>
+      ))}
+    </nav>
   );
 }
 
@@ -353,6 +282,11 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   usePresence();
+
+  const section = activeSection(pathname);
+  // Groups keeps its full-bleed chat layout; every other tabbed route gets
+  // the hub sub-nav above its content.
+  const showTabs = !!section && section.tabs.length > 0 && !isGroupsRoute;
 
   return (
     <div className="flex flex-col" style={{ minHeight: '100dvh', background: '#0c0c10' }}>
@@ -369,6 +303,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
             children
           ) : (
             <div className="mx-auto max-w-7xl px-4 py-6 pb-20 md:pb-6">
+              {showTabs && <SectionTabs section={section} pathname={pathname} />}
               {children}
             </div>
           )}

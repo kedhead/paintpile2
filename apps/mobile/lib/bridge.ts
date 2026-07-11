@@ -66,12 +66,14 @@ const DISMISS_POPUPS_JS = `
     }
   } catch(e) {}
 
-  // Hide overlays, banners, ads via CSS
+  // Hide overlays, banners, ads via CSS. Also hide the site's own mobile
+  // bottom nav — the native tab bar replaces it inside the app.
   var style = document.createElement('style');
   style.textContent = [
     'body > div.fixed[class*="z-50"][class*="inset-0"] { display: none !important; }',
     'div.fixed[class*="bottom-4"][class*="z-40"] { display: none !important; }',
     'ins.adsbygoogle, .ad-card { display: none !important; }',
+    'nav.fixed.bottom-0 { display: none !important; }',
   ].join('\\n');
   document.head.appendChild(style);
 `;

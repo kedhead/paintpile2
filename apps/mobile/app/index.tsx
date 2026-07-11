@@ -166,7 +166,7 @@ export default function AppScreen() {
 
       switch (data.type) {
         case 'nav': {
-          const match = TABS.find((t) => data.url.startsWith(t.path));
+          const match = TABS.find((t) => t.match.some((m) => data.url.startsWith(m)));
           if (match) setActiveTab(match.key);
           break;
         }
