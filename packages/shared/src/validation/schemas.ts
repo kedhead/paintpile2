@@ -1,5 +1,18 @@
 import { z } from 'zod';
 
+/** Usernames double as profile URLs (`/kedhead`), so they can't shadow a
+ * top-level route — static routes win and the profile would be unreachable. */
+export const RESERVED_USERNAMES: ReadonlySet<string> = new Set([
+  'admin', 'api', 'auth', 'badges', 'brag-board', 'challenges', 'dashboard',
+  'diary', 'explore', 'feed', 'help', 'home', 'news', 'notifications', 'paints',
+  'painters', 'palette-post', 'pile', 'posts', 'privacy', 'profile', 'projects',
+  'recipes', 'robots', 'search', 'settings', 'share', 'sitemap', 'support',
+  'terms', 'tools', 'workshop',
+]);
+
+const notReserved = (value: string) => !RESERVED_USERNAMES.has(value);
+const RESERVED_MESSAGE = 'That username is reserved. Try another one.';
+
 // Authentication Schemas
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -13,7 +26,8 @@ export const signupSchema = z
       .string()
       .min(3, 'Username must be at least 3 characters')
       .max(20, 'Username is too long')
-      .regex(/^[a-z0-9_]+$/, 'Only lowercase letters, numbers, and underscores'),
+      .regex(/^[a-z0-9_]+$/, 'Only lowercase letters, numbers, and underscores')
+      .refine(notReserved, RESERVED_MESSAGE),
     email: z.string().email('Invalid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string(),
@@ -43,6 +57,7 @@ export const profileSchema = z.object({
     .min(3, 'Username must be at least 3 characters')
     .max(20, 'Username is too long')
     .regex(/^[a-z0-9_]+$/, 'Username can only contain lowercase letters, numbers, and underscores')
+    .refine(notReserved, RESERVED_MESSAGE)
     .optional(),
   bio: z.string().max(200, 'Bio is too long').optional(),
 });

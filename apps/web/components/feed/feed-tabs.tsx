@@ -1,6 +1,6 @@
 'use client';
 
-export type FeedTab = 'following' | 'discover' | 'gallery' | 'people';
+export type FeedTab = 'following' | 'discover' | 'people';
 
 interface FeedTabsProps {
   activeTab: FeedTab;
@@ -8,7 +8,6 @@ interface FeedTabsProps {
 }
 
 const TABS: { id: FeedTab; label: string }[] = [
-  { id: 'gallery', label: 'Gallery' },
   { id: 'discover', label: 'Discover' },
   { id: 'following', label: 'Following' },
   { id: 'people', label: 'People' },

@@ -18,7 +18,8 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: '/community', destination: '/feed?tab=gallery', permanent: true },
+      { source: '/community', destination: '/', permanent: true },
+      { source: '/feed', has: [{ type: 'query', key: 'tab', value: 'gallery' }], destination: '/', permanent: true },
       { source: '/armies', destination: '/projects?tab=armies', permanent: true },
       { source: '/armies/:armyId', destination: '/projects/armies/:armyId', permanent: true },
       { source: '/analytics', destination: '/dashboard', permanent: true },

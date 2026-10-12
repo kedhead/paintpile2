@@ -9,6 +9,7 @@ import { UserAvatar } from './user-avatar';
 import { useAuth } from '../auth-provider';
 import { useEditComment, useDeleteComment } from '../../hooks/use-comments';
 import { relativeTime } from '../../lib/pb-helpers';
+import { profilePath } from '../../lib/urls';
 
 interface CommentItemProps {
   comment: RecordModel;
@@ -33,14 +34,14 @@ export function CommentItem({ comment }: CommentItemProps) {
   return (
     <div className="flex gap-2 py-2">
       {author && (
-        <Link href={`/profile/${author.id}`} className="shrink-0">
+        <Link href={profilePath(author)} className="shrink-0">
           <UserAvatar user={author} size="sm" />
         </Link>
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
           {author && (
-            <Link href={`/profile/${author.id}`} className="text-xs font-medium text-foreground hover:underline">
+            <Link href={profilePath(author)} className="text-xs font-medium text-foreground hover:underline">
               {getDisplayName(author)}
             </Link>
           )}

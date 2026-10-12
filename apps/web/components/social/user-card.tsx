@@ -5,6 +5,7 @@ import type { RecordModel } from 'pocketbase';
 import { getDisplayName } from '@paintpile/shared';
 import { UserAvatar } from './user-avatar';
 import { FollowButton } from './follow-button';
+import { profilePath } from '../../lib/urls';
 
 interface UserCardProps {
   user: RecordModel;
@@ -17,12 +18,12 @@ export function UserCard({ user, showFollowButton = false, currentUserId }: User
 
   return (
     <div className="flex items-center gap-3 py-2">
-      <Link href={`/profile/${user.id}`}>
+      <Link href={profilePath(user)}>
         <UserAvatar user={user} size="md" />
       </Link>
       <div className="min-w-0 flex-1">
         <Link
-          href={`/profile/${user.id}`}
+          href={profilePath(user)}
           className="block truncate text-sm font-medium text-foreground hover:underline"
         >
           {getDisplayName(user)}

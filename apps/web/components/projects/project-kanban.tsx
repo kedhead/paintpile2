@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { useMyProjects, useUpdateProject } from '../../hooks/use-projects';
 import { ProjectStatusBadge } from './project-status-badge';
 import Link from 'next/link';
+import { projectPath } from '../../lib/urls';
 
 const COLUMNS = [
   { status: 'not-started', label: 'Planning', color: 'border-t-gray-500' },
@@ -76,7 +77,7 @@ function KanbanCard({
 
   return (
     <div className="rounded-lg border border-border bg-background p-2.5">
-      <Link href={`/projects/${project.id}`} className="text-sm font-medium text-foreground hover:text-primary">
+      <Link href={projectPath(project)} className="text-sm font-medium text-foreground hover:text-primary">
         {project.name}
       </Link>
       {Array.isArray(project.tags) && project.tags.length > 0 && (

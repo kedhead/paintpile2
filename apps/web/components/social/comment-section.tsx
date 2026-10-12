@@ -12,10 +12,11 @@ interface CommentSectionProps {
   targetId: string;
   targetType: string;
   commentCount: number;
+  defaultExpanded?: boolean;
 }
 
-export function CommentSection({ targetId, targetType, commentCount }: CommentSectionProps) {
-  const [expanded, setExpanded] = useState(false);
+export function CommentSection({ targetId, targetType, commentCount, defaultExpanded = false }: CommentSectionProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const { user } = useAuth();
   const { data: comments } = useComments(targetId, expanded);
   const createComment = useCreateComment();

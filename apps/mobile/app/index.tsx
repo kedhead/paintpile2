@@ -44,7 +44,7 @@ export default function AppScreen() {
   const webViewRef = useRef<WebView>(null);
 
   // ── Core state ──
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('workshop');
   const [isOffline, setIsOffline] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [ready, setReady] = useState(false);
@@ -166,7 +166,7 @@ export default function AppScreen() {
 
       switch (data.type) {
         case 'nav': {
-          const match = TABS.find((t) => t.match.some((m) => data.url.startsWith(m)));
+          const match = TABS.find((t) => t.match.some((m) => (m === '/' ? data.url === '/' : data.url.startsWith(m))));
           if (match) setActiveTab(match.key);
           break;
         }
