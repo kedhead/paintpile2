@@ -78,7 +78,7 @@ export const queryKeys = {
   },
   diary: {
     all: ['diary'] as const,
-    my: (search?: string, tag?: string) => [...queryKeys.diary.all, 'my', search || '', tag || ''] as const,
+    my: (search?: string, tag?: string, project?: string) => [...queryKeys.diary.all, 'my', search || '', tag || '', project || ''] as const,
     detail: (entryId: string) => [...queryKeys.diary.all, 'detail', entryId] as const,
   },
   news: {

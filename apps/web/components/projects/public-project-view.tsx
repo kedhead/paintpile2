@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
-import { MessageCircle, Palette } from 'lucide-react';
+import { Award, MessageCircle, Palette } from 'lucide-react';
 import { UserAvatar } from '../social/user-avatar';
 import { FollowButton } from '../social/follow-button';
 import { LikeButton } from '../social/like-button';
@@ -18,6 +18,7 @@ interface PublicProjectViewProps {
   photos: RecordModel[];
   projectPaints: RecordModel[];
   moreFromAuthor: RecordModel[];
+  critique?: { grade: string; score: number } | null;
 }
 
 const chip = 'inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs text-foreground transition-colors hover:border-primary hover:bg-primary/10';
@@ -31,7 +32,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export function PublicProjectView({ project, photos, projectPaints, moreFromAuthor }: PublicProjectViewProps) {
+export function PublicProjectView({ project, photos, projectPaints, moreFromAuthor, critique }: PublicProjectViewProps) {
   const author = project.expand?.user as RecordModel | undefined;
 
   // Cover first, then the rest of the photo set.
@@ -99,6 +100,16 @@ export function PublicProjectView({ project, photos, projectPaints, moreFromAuth
               <MessageCircle className="h-4 w-4" />
               {project.comment_count || 0}
             </span>
+            {critique && (
+              <span
+                className="ml-auto flex items-center gap-1.5 rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground"
+                title="AI critique score, shared by the painter"
+              >
+                <Award className="h-3.5 w-3.5 text-amber-500" />
+                <span className="font-bold text-foreground">{critique.grade}</span>
+                {critique.score}/100
+              </span>
+            )}
           </div>
 
           {project.description && (

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import type { RecordModel } from 'pocketbase';
-import { Edit2, Trash2, ExternalLink, Tag } from 'lucide-react';
+import Link from 'next/link';
+import { Edit2, Trash2, ExternalLink, FolderOpen, Tag } from 'lucide-react';
 import { relativeTime } from '../../lib/pb-helpers';
 import { useDeleteDiaryEntry } from '../../hooks/use-diary';
 import { useConfirm } from '../ui/confirm-dialog';
@@ -10,9 +11,11 @@ import { useConfirm } from '../ui/confirm-dialog';
 interface DiaryEntryCardProps {
   entry: RecordModel;
   onEdit: (entry: RecordModel) => void;
+  /** Hide the project chip, e.g. inside that project's own journal. */
+  hideProject?: boolean;
 }
 
-export function DiaryEntryCard({ entry, onEdit }: DiaryEntryCardProps) {
+export function DiaryEntryCard({ entry, onEdit, hideProject = false }: DiaryEntryCardProps) {
   const deleteEntry = useDeleteDiaryEntry();
   const confirm = useConfirm();
   const [expanded, setExpanded] = useState(false);
@@ -21,7 +24,7 @@ export function DiaryEntryCard({ entry, onEdit }: DiaryEntryCardProps) {
   const tags = typeof entry.tags === 'string' ? JSON.parse(entry.tags || '[]') : (entry.tags || []);
 
   const handleDelete = async () => {
-    const ok = await confirm({ title: 'Delete this diary entry?', destructive: true });
+    const ok = await confirm({ title: 'Delete this note?', destructive: true });
     if (!ok) return;
     await deleteEntry.mutateAsync(entry.id);
   };
@@ -31,7 +34,18 @@ export function DiaryEntryCard({ entry, onEdit }: DiaryEntryCardProps) {
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold text-foreground">{entry.title}</h3>
-          <p className="text-xs text-muted-foreground">{relativeTime(entry.created)}</p>
+          <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+            {relativeTime(entry.created)}
+            {!hideProject && entry.expand?.project && (
+              <Link
+                href={`/projects/${entry.expand.project.id}`}
+                className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 hover:text-foreground"
+              >
+                <FolderOpen className="h-3 w-3" />
+                {entry.expand.project.name}
+              </Link>
+            )}
+          </p>
         </div>
         <div className="flex gap-1">
           <button

@@ -4,13 +4,16 @@ import { useState } from 'react';
 import type { RecordModel } from 'pocketbase';
 import { Plus, X, Loader2 } from 'lucide-react';
 import { useCreateDiaryEntry, useUpdateDiaryEntry } from '../../hooks/use-diary';
+import { useMyProjects } from '../../hooks/use-projects';
 
 interface DiaryEntryFormProps {
   editEntry?: RecordModel | null;
   onClose: () => void;
+  /** Pre-select (and lock) the project, e.g. when adding from a project's journal. */
+  projectId?: string;
 }
 
-export function DiaryEntryForm({ editEntry, onClose }: DiaryEntryFormProps) {
+export function DiaryEntryForm({ editEntry, onClose, projectId }: DiaryEntryFormProps) {
   const isEdit = !!editEntry;
   const existingLinks = editEntry
     ? (typeof editEntry.links === 'string' ? JSON.parse(editEntry.links || '[]') : (editEntry.links || []))
@@ -24,6 +27,9 @@ export function DiaryEntryForm({ editEntry, onClose }: DiaryEntryFormProps) {
   const [links, setLinks] = useState<{ label: string; url: string }[]>(existingLinks);
   const [tags, setTags] = useState<string[]>(existingTags);
   const [tagInput, setTagInput] = useState('');
+  const [project, setProject] = useState<string>(projectId || editEntry?.project || '');
+  const myProjects = useMyProjects();
+  const projectOptions = (myProjects.data?.pages.flatMap((p) => p.items) || []) as RecordModel[];
 
   const createEntry = useCreateDiaryEntry();
   const updateEntry = useUpdateDiaryEntry();
@@ -52,6 +58,7 @@ export function DiaryEntryForm({ editEntry, onClose }: DiaryEntryFormProps) {
       content: content.trim(),
       links: links.filter((l) => l.url.trim()),
       tags,
+      project,
     };
 
     if (isEdit) {
@@ -65,7 +72,7 @@ export function DiaryEntryForm({ editEntry, onClose }: DiaryEntryFormProps) {
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <h3 className="mb-3 text-sm font-semibold text-foreground">
-        {isEdit ? 'Edit Entry' : 'New Diary Entry'}
+        {isEdit ? 'Edit Note' : 'New Note'}
       </h3>
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
@@ -85,6 +92,22 @@ export function DiaryEntryForm({ editEntry, onClose }: DiaryEntryFormProps) {
           className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none"
           required
         />
+
+        {!projectId && (
+          <label className="block space-y-1">
+            <span className="text-xs font-medium text-muted-foreground">Project (optional)</span>
+            <select
+              value={project}
+              onChange={(e) => setProject(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+            >
+              <option value="">Not linked to a project</option>
+              {projectOptions.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </label>
+        )}
 
         {/* Links */}
         <div className="space-y-2">

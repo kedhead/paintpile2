@@ -1,7 +1,11 @@
 """
-Add the project "showcase details" fields (kind, source, style, techniques,
-color_scheme) to an existing PocketBase, and check that public project pages
-can read photos and paints.
+Bring an existing PocketBase up to date with the reworked app:
+
+1. Project "showcase details" fields (kind, source, style, techniques,
+   color_scheme).
+2. Read rules for photos and paint lists (with --fix-rules).
+3. An optional `project` link on notes (diary_entries), which turns a
+   project's notes into its private build journal.
 
 Safe to re-run: existing fields are left alone.
 
@@ -81,3 +85,19 @@ for name, rule in RULES.items():
         print(f"{name}: was {problem} -> rules updated")
     else:
         print(f"{name}: {problem}. Re-run with --fix-rules to apply the recommended rule.")
+
+# 3. Notes -> project journal: optional link from a note to a project.
+#    Deleting a project keeps its notes (they just become unlinked).
+try:
+    diary = call("GET", "/collections/diary_entries", token=token)
+except SystemExit:
+    diary = None
+if diary is None:
+    print("diary_entries: collection not found, skipping journal link")
+elif any(f["name"] == "project" for f in diary["fields"]):
+    print("diary_entries already has the project link")
+else:
+    link = {"name": "project", "type": "relation", "collectionId": projects["id"],
+            "maxSelect": 1, "cascadeDelete": False, "required": False}
+    call("PATCH", "/collections/diary_entries", {"fields": diary["fields"] + [link]}, token=token)
+    print("Added to diary_entries: project (notes can now form a project journal)")

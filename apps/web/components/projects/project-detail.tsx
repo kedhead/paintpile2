@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
-import { ArrowLeft, Edit2, Trash2, Palette, Image as ImageIcon, Camera, ChefHat, Share2, Check, Link2, Award, Globe, Lock, Send, Loader2, MessageSquarePlus } from 'lucide-react';
+import { ArrowLeft, BookOpen, Edit2, Trash2, Palette, Image as ImageIcon, Camera, ChefHat, Share2, Check, Link2, Award, Globe, Lock, Send, Loader2, MessageSquarePlus } from 'lucide-react';
 import { useAuth } from '../auth-provider';
 import { useConfirm } from '../ui/confirm-dialog';
 import { useDeleteProject, useUpdateProject } from '../../hooks/use-projects';
@@ -23,6 +23,7 @@ import { PhotoUpload } from './photo-upload';
 import { ProjectPaintLibrary } from './project-paint-library';
 import { ProjectRecipesList } from './project-recipes-list';
 import { ProjectDetailsEditor } from './project-details-editor';
+import { ProjectJournal } from './project-journal';
 
 interface ProjectDetailProps {
   project: RecordModel;
@@ -41,7 +42,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
   const [editDescription, setEditDescription] = useState(project.description || '');
   const [editStatus, setEditStatus] = useState(project.status || 'not-started');
   const [editPublic, setEditPublic] = useState(project.is_public ?? false);
-  const [activeTab, setActiveTab] = useState<'photos' | 'paints' | 'recipes'>('photos');
+  const [activeTab, setActiveTab] = useState<'photos' | 'paints' | 'recipes' | 'journal'>('photos');
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showPostToFeed, setShowPostToFeed] = useState(false);
@@ -280,6 +281,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             { key: 'photos' as const, label: 'Photos', icon: Camera },
             { key: 'paints' as const, label: 'Paints', icon: Palette },
             { key: 'recipes' as const, label: 'Recipes', icon: ChefHat },
+            ...(isOwner ? [{ key: 'journal' as const, label: 'Journal', icon: BookOpen }] : []),
           ].map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -308,6 +310,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         {activeTab === 'recipes' && (
           <ProjectRecipesList projectId={project.id} isOwner={isOwner} />
         )}
+        {activeTab === 'journal' && isOwner && <ProjectJournal projectId={project.id} />}
       </div>
 
       {/* AI Features */}

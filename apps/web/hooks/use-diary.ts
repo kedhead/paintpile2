@@ -11,21 +11,25 @@ export interface DiaryEntryData {
   content: string;
   links?: { label: string; url: string }[];
   tags?: string[];
+  /** Optional project this note belongs to ('' unlinks it). */
+  project?: string;
 }
 
-export function useMyDiary(search?: string, tag?: string) {
+export function useMyDiary(search?: string, tag?: string, projectId?: string) {
   const { pb, user } = useAuth();
 
   return useInfiniteQuery({
-    queryKey: queryKeys.diary.my(search, tag),
+    queryKey: queryKeys.diary.my(search, tag, projectId),
     queryFn: async ({ pageParam = 1 }) => {
-      let filter = `user="${user!.id}"`;
-      if (search) filter += ` && (title~"${search}" || content~"${search}")`;
-      if (tag) filter += ` && tags~"${tag}"`;
+      const parts = [pb.filter('user = {:user}', { user: user!.id })];
+      if (search) parts.push(pb.filter('(title ~ {:q} || content ~ {:q})', { q: search }));
+      if (tag) parts.push(pb.filter('tags ~ {:tag}', { tag }));
+      if (projectId) parts.push(pb.filter('project = {:project}', { project: projectId }));
 
       return pb.collection('diary_entries').getList(pageParam, PAGE_SIZE, {
         sort: '-created',
-        filter,
+        filter: parts.join(' && '),
+        expand: 'project',
       });
     },
     getNextPageParam: (lastPage) =>
@@ -47,6 +51,7 @@ export function useCreateDiaryEntry() {
         content: data.content,
         links: JSON.stringify(data.links || []),
         tags: JSON.stringify(data.tags || []),
+        ...(data.project ? { project: data.project } : {}),
       });
     },
     onSuccess: () => {

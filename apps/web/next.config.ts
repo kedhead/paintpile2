@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
       { source: '/armies', destination: '/projects?tab=armies', permanent: true },
       { source: '/armies/:armyId', destination: '/projects/armies/:armyId', permanent: true },
       { source: '/analytics', destination: '/dashboard', permanent: true },
+      // Shared critique scores now show on each project page.
+      { source: '/brag-board', destination: '/', permanent: true },
       { source: '/activity', destination: '/dashboard?tab=activity', permanent: true },
     ];
   },
