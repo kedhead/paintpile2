@@ -32,6 +32,11 @@ export const queryKeys = {
     list: () => [...queryKeys.notifications.all, 'list'] as const,
     unreadCount: () => [...queryKeys.notifications.all, 'unread'] as const,
   },
+  collections: {
+    all: ['collections'] as const,
+    mine: () => [...queryKeys.collections.all, 'mine'] as const,
+    savedIn: (projectId: string) => [...queryKeys.collections.all, 'saved-in', projectId] as const,
+  },
   projects: {
     all: ['projects'] as const,
     my: () => [...queryKeys.projects.all, 'my'] as const,

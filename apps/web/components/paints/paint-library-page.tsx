@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Search, Plus, Palette, Package, ChevronDown, ChevronRight, Loader2, Check } from 'lucide-react';
 import { usePaintDatabase, usePaintBrands, usePaintSets, useMyInventory, useAddToInventory, useRemoveFromInventory, useAddSetToInventory } from '../../hooks/use-paints';
 import { PaintCard } from './paint-card';
@@ -9,7 +10,9 @@ import type { RecordModel } from 'pocketbase';
 
 export function PaintLibraryPage() {
   const [tab, setTab] = useState<'all' | 'inventory' | 'sets'>('all');
-  const [search, setSearch] = useState('');
+  // ?q= lets search results deep-link into the library.
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(searchParams?.get('q') ?? '');
   const [brand, setBrand] = useState('');
   const [showCustomDialog, setShowCustomDialog] = useState(false);
   const [expandedSet, setExpandedSet] = useState<string | null>(null);
