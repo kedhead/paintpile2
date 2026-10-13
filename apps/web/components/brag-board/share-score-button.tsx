@@ -114,7 +114,7 @@ export function ShareScoreButton({ projectId, projectName, critique, imageUrl }:
           ) : (
             <Share2 className="h-3.5 w-3.5" />
           )}
-          {shared ? 'Shared!' : 'Share to Feed'}
+          {shared ? 'Showing on your project page' : 'Show score on project page'}
         </button>
 
         <button

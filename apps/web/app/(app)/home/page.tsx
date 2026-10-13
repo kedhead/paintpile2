@@ -4,12 +4,13 @@ import Link from 'next/link';
 import type { RecordModel } from 'pocketbase';
 import {
   Loader2, Layers, Brush, CheckCircle2, TrendingUp,
-  FolderOpen, ChefHat, Globe, ArrowRight, Plus,
+  FolderOpen, ChefHat, Globe, ArrowRight, Plus, BookOpen, BarChart3, Award,
 } from 'lucide-react';
 import { useAuth } from '../../../components/auth-provider';
 import { useMyProjects, usePublicProjects } from '../../../hooks/use-projects';
 import { usePileStats } from '../../../hooks/use-pile';
 import { useMyRecipes } from '../../../hooks/use-recipes';
+import { useMyDiary } from '../../../hooks/use-diary';
 import { ProjectCard } from '../../../components/projects/project-card';
 import { relativeTime } from '../../../lib/pb-helpers';
 
@@ -50,12 +51,14 @@ function HomeContent() {
   const myProjects = useMyProjects();
   const myRecipes = useMyRecipes();
   const publicProjects = usePublicProjects();
+  const myNotes = useMyDiary();
 
   const allMyProjects: RecordModel[] = myProjects.data?.pages.flatMap((p) => p.items) || [];
   const inProgress = allMyProjects.filter((p) => p.status === 'in-progress');
   const benchProjects = (inProgress.length > 0 ? inProgress : allMyProjects).slice(0, 6);
 
   const recipes: RecordModel[] = (myRecipes.data?.pages.flatMap((p) => p.items) || []).slice(0, 3);
+  const notes: RecordModel[] = (myNotes.data?.pages.flatMap((p) => p.items) || []).slice(0, 3);
   const communityProjects: RecordModel[] = (publicProjects.data?.pages.flatMap((p) => p.items) || []).slice(0, 6);
 
   const firstName = (user?.name || user?.username || 'Painter').split(' ')[0];
@@ -153,6 +156,65 @@ function HomeContent() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Notes */}
+      <section className="space-y-3">
+        <SectionHeader title="Notes" href="/diary" linkLabel="All notes" />
+        {myNotes.isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : notes.length === 0 ? (
+          <div className="rounded-xl border border-border bg-card p-6 text-center">
+            <BookOpen className="mx-auto h-8 w-8 text-muted-foreground" />
+            <p className="mt-2 text-sm text-muted-foreground">
+              Jot down what you tried and what worked. Link a note to a project and it becomes that project&apos;s journal.
+            </p>
+            <Link href="/diary" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              Write a note <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        ) : (
+          <div className="divide-y divide-border rounded-xl border border-border bg-card">
+            {notes.map((note) => (
+              <Link
+                key={note.id}
+                href={note.expand?.project ? `/projects/${note.expand.project.id}` : '/diary'}
+                className="group flex items-center gap-3 p-4 first:rounded-t-xl last:rounded-b-xl hover:bg-muted"
+              >
+                <BookOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary">{note.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {note.expand?.project ? `${note.expand.project.name} · ` : ''}{note.content}
+                  </p>
+                </div>
+                <span className="shrink-0 text-xs text-muted-foreground">{relativeTime(note.created)}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Stats & badges */}
+      <section className="grid gap-3 sm:grid-cols-2">
+        <Link href="/dashboard" className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 hover:border-primary/50">
+          <BarChart3 className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-semibold text-foreground group-hover:text-primary">Stats &amp; activity</p>
+            <p className="text-xs text-muted-foreground">Your painting history in charts</p>
+          </div>
+          <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
+        </Link>
+        <Link href="/badges" className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 hover:border-primary/50">
+          <Award className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-semibold text-foreground group-hover:text-primary">Badges</p>
+            <p className="text-xs text-muted-foreground">What you&apos;ve earned and what&apos;s next</p>
+          </div>
+          <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
+        </Link>
       </section>
 
       {/* Community strip */}

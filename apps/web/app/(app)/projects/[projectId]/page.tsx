@@ -11,6 +11,17 @@ import { parseProjectId, projectPath } from '../../../../lib/urls';
 type Params = { params: Promise<{ projectId: string }> };
 type PageProps = Params & { searchParams: Promise<{ view?: string }> };
 
+function parseCritique(activity: RecordModel | null): { grade: string; score: number } | null {
+  if (!activity) return null;
+  try {
+    const meta = typeof activity.metadata === 'string' ? JSON.parse(activity.metadata) : activity.metadata;
+    const { grade, score } = meta?.critique ?? {};
+    return typeof grade === 'string' && typeof score === 'number' ? { grade, score } : null;
+  } catch {
+    return null;
+  }
+}
+
 async function loadProject(param: string): Promise<RecordModel | null> {
   const id = parseProjectId(param);
   if (!/^[a-z0-9]{15}$/i.test(id)) return null;
@@ -53,7 +64,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps) {
   if (!isOwner && decodeURIComponent(`/projects/${projectId}`) !== canonical) permanentRedirect(canonical);
 
   const pb = publicPb();
-  const [photos, projectPaints, more] = await Promise.all([
+  const [photos, projectPaints, more, sharedCritique] = await Promise.all([
     safe(() => pb.collection('photos').getFullList({ filter: pb.filter('project = {:id}', { id: project.id }), sort: 'created' }), []),
     safe(() => pb.collection('project_paints').getFullList({ filter: pb.filter('project = {:id}', { id: project.id }), expand: 'paint', sort: 'created' }), []),
     safe(
@@ -62,6 +73,15 @@ export default async function ProjectPage({ params, searchParams }: PageProps) {
           filter: pb.filter('user = {:user} && is_public = true && cover_photo != "" && id != {:id}', { user: project.user, id: project.id }),
           sort: '-like_count,-created',
         }),
+      null,
+    ),
+    // The owner chose to show their AI critique score (formerly the Brag Board).
+    safe(
+      () =>
+        pb.collection('activities').getFirstListItem(
+          pb.filter('type = "project_critique_shared" && target_id = {:id} && user = {:user}', { id: project.id, user: project.user }),
+          { sort: '-updated' },
+        ),
       null,
     ),
   ]);
@@ -79,6 +99,7 @@ export default async function ProjectPage({ params, searchParams }: PageProps) {
       photos={photos.filter((p) => p.image)}
       projectPaints={projectPaints}
       moreFromAuthor={more?.items ?? []}
+        critique={parseCritique(sharedCritique)}
       />
     </>
   );

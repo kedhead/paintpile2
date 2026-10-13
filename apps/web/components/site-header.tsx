@@ -22,19 +22,26 @@ export const PRIMARY_TABS = [
 ];
 
 export const WORKSHOP_TABS = [
-  { href: '/home',         label: 'Overview' },
-  { href: '/projects',     label: 'My Projects' },
-  { href: '/pile',         label: 'Pile' },
-  { href: '/recipes',      label: 'Recipes' },
-  { href: '/tools',        label: 'Tools' },
-  { href: '/diary',        label: 'Diary' },
-  { href: '/palette-post', label: 'Palette Post' },
-  { href: '/dashboard',    label: 'Stats' },
-  { href: '/badges',       label: 'Badges' },
+  { href: '/home',     label: 'Overview' },
+  { href: '/projects', label: 'My Projects' },
+  { href: '/pile',     label: 'Pile' },
+  { href: '/recipes',  label: 'Recipes' },
+  { href: '/tools',    label: 'Tools' },
 ];
+
+// Workshop pages without their own tab, and the tab they live under.
+const WORKSHOP_SUBPAGES: Record<string, string> = {
+  '/diary': '/home',
+  '/dashboard': '/home',
+  '/badges': '/home',
+  '/palette-post': '/tools',
+};
 
 function tabIsActive(href: string, pathname: string): boolean {
   if (href === '/') return pathname === '/';
+  for (const [sub, parent] of Object.entries(WORKSHOP_SUBPAGES)) {
+    if (pathname === sub || pathname.startsWith(`${sub}/`)) return href === parent;
+  }
   if (href === '/projects') return pathname === '/projects' || pathname.startsWith('/projects/armies');
   return pathname === href || pathname.startsWith(`${href}/`);
 }

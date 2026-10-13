@@ -44,7 +44,7 @@ export default function DiaryPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-primary" />
-          <h1 className="text-xl font-bold text-foreground">Hobby Diary</h1>
+          <h1 className="text-xl font-bold text-foreground">Notes</h1>
         </div>
         <button
           onClick={() => {
@@ -54,7 +54,7 @@ export default function DiaryPage() {
           className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/80"
         >
           <Plus className="h-4 w-4" />
-          New Entry
+          New Note
         </button>
       </div>
 
@@ -63,7 +63,7 @@ export default function DiaryPage() {
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Search entries..."
+          placeholder="Search notes..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm focus:border-primary focus:outline-none"
@@ -88,7 +88,7 @@ export default function DiaryPage() {
         <div className="rounded-lg border border-border bg-card p-8 text-center">
           <BookOpen className="mx-auto h-8 w-8 text-muted-foreground" />
           <p className="mt-2 text-sm text-muted-foreground">
-            {search ? 'No entries match your search' : 'Start your hobby diary'}
+            {search ? 'No notes match your search' : 'No notes yet. Jot down what you\'re working on, and link it to a project to build a journal.'}
           </p>
         </div>
       ) : (
