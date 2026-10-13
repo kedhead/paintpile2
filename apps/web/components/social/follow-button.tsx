@@ -27,6 +27,8 @@ export function FollowButton({ targetUserId, initialIsFollowing }: FollowButtonP
   const [hovering, setHovering] = useState(false);
 
   if (authLoading) return <Spinner />;
+  // No following yourself (and the follow-status query is disabled for it).
+  if (user?.id === targetUserId) return null;
   if (!user) {
     return (
       <LoginPrompt action="follow painters">
