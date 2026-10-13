@@ -9,6 +9,9 @@ import { GalleryCard } from '../gallery/gallery-card';
 import { PhotoViewer } from './photo-viewer';
 import { fileUrl } from '../../lib/pb-server';
 import { profilePath } from '../../lib/urls';
+import { filterHref } from '../../lib/gallery-filters';
+import { asStringArray, asSwatches, KINDS, labelFor, SOURCES, STYLES, TECHNIQUES } from '../../lib/project-details';
+import { PaintsUsed, type UsedPaint } from './paints-used';
 
 interface PublicProjectViewProps {
   project: RecordModel;
@@ -16,6 +19,8 @@ interface PublicProjectViewProps {
   projectPaints: RecordModel[];
   moreFromAuthor: RecordModel[];
 }
+
+const chip = 'inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs text-foreground transition-colors hover:border-primary hover:bg-primary/10';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -37,11 +42,22 @@ export function PublicProjectView({ project, photos, projectPaints, moreFromAuth
     ...photos.map((p) => ({ id: p.id, full: fileUrl(p, p.image), thumb: fileUrl(p, p.image, '128x128') })),
   ];
 
-  const paints = projectPaints
-    .map((pp) => pp.expand?.paint as RecordModel | undefined)
-    .filter((p): p is RecordModel => !!p);
+  // One row per paint, even if it was logged against the project twice.
+  const paints: UsedPaint[] = [];
+  const seenPaints = new Set<string>();
+  for (const pp of projectPaints) {
+    const p = pp.expand?.paint as RecordModel | undefined;
+    if (!p || seenPaints.has(p.id)) continue;
+    seenPaints.add(p.id);
+    paints.push({ id: p.id, name: p.name, brand: p.brand, hex_color: p.hex_color });
+  }
 
-  const tags: string[] = Array.isArray(project.tags) ? project.tags : [];
+  const tags = asStringArray(project.tags);
+  const techniques = asStringArray(project.techniques);
+  const scheme = asSwatches(project.color_scheme);
+  const kind = labelFor(KINDS, project.kind);
+  const source = labelFor(SOURCES, project.source);
+  const style = labelFor(STYLES, project.style);
 
   return (
     <div className="space-y-12">
@@ -89,21 +105,46 @@ export function PublicProjectView({ project, photos, projectPaints, moreFromAuth
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{project.description}</p>
           )}
 
-          {paints.length > 0 && (
-            <Section title={`Paints used (${paints.length})`}>
-              <ul className="space-y-1.5">
-                {paints.map((paint) => (
-                  <li key={paint.id} className="flex items-center gap-2.5 text-sm">
-                    <span
-                      className="h-5 w-5 shrink-0 rounded-full border border-border"
-                      style={{ background: paint.hex_color }}
-                      aria-hidden
-                    />
-                    <span className="min-w-0 truncate text-foreground">{paint.name}</span>
-                    <span className="ml-auto shrink-0 text-xs text-muted-foreground">{paint.brand}</span>
-                  </li>
+          {(kind || source || style) && (
+            <Section title="Project details">
+              <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                {source && <Link href={filterHref({ source: project.source })} className={chip}>{source}</Link>}
+                {kind && <Link href={filterHref({ kind: project.kind })} className={chip}>{kind}</Link>}
+                {style && (
+                  <>
+                    <span>painted in</span>
+                    <Link href={filterHref({ style: project.style })} className={chip}>{style}</Link>
+                    <span>style</span>
+                  </>
+                )}
+              </div>
+            </Section>
+          )}
+
+          {scheme.length > 0 && (
+            <Section title="Color scheme">
+              <div className="flex flex-wrap gap-1.5">
+                {scheme.map((s) => (
+                  <Link key={s.name} href={filterHref({ color: s.name })} className={chip}>
+                    <span className="h-3.5 w-3.5 rounded-full border border-border" style={{ background: s.hex }} aria-hidden />
+                    {s.name}
+                  </Link>
                 ))}
-              </ul>
+              </div>
+            </Section>
+          )}
+
+          {paints.length > 0 && <PaintsUsed paints={paints} />}
+
+          {techniques.length > 0 && (
+            <Section title="Techniques">
+              <div className="flex flex-wrap gap-1.5">
+                {techniques.map((t) => (
+                  <Link key={t} href={filterHref({ technique: t })} className={chip}>
+                    {labelFor(TECHNIQUES, t) ?? t}
+                  </Link>
+                ))}
+              </div>
             </Section>
           )}
 
@@ -111,9 +152,9 @@ export function PublicProjectView({ project, photos, projectPaints, moreFromAuth
             <Section title="Tags">
               <div className="flex flex-wrap gap-1.5">
                 {tags.map((tag) => (
-                  <span key={tag} className="rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                  <Link key={tag} href={filterHref({ tag })} className={chip}>
                     {tag}
-                  </span>
+                  </Link>
                 ))}
               </div>
             </Section>

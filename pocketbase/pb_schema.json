@@ -98,7 +98,12 @@
       { "name": "like_count", "type": "number", "options": { "min": 0 } },
       { "name": "comment_count", "type": "number", "options": { "min": 0 } },
       { "name": "armies", "type": "relation", "options": { "collectionId": "armies", "maxSelect": 99 } },
-      { "name": "last_critique", "type": "json" }
+      { "name": "last_critique", "type": "json" },
+      { "name": "kind", "type": "text" },
+      { "name": "source", "type": "text" },
+      { "name": "style", "type": "text" },
+      { "name": "techniques", "type": "json" },
+      { "name": "color_scheme", "type": "json" }
     ],
     "listRule": "is_public = true || user = @request.auth.id",
     "viewRule": "is_public = true || user = @request.auth.id",

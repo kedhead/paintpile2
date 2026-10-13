@@ -22,6 +22,7 @@ import { PhotoGallery } from './photo-gallery';
 import { PhotoUpload } from './photo-upload';
 import { ProjectPaintLibrary } from './project-paint-library';
 import { ProjectRecipesList } from './project-recipes-list';
+import { ProjectDetailsEditor } from './project-details-editor';
 
 interface ProjectDetailProps {
   project: RecordModel;
@@ -269,6 +270,8 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           ))}
         </div>
       )}
+
+      {isOwner && <ProjectDetailsEditor key={project.updated} project={project} />}
 
       {/* Tabbed Sections */}
       <div className="space-y-3">
