@@ -36,14 +36,14 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
     title: 'Paintpile',
   },
   applicationName: 'Paintpile',
 };
 
 export const viewport: Viewport = {
-  themeColor: '#14111e',
+  themeColor: '#f5f5f5',
   width: 'device-width',
   initialScale: 1,
 };

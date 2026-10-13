@@ -22,16 +22,15 @@ export const TABS = [
 export type Tab = (typeof TABS)[number];
 
 // ================================================================
-// THEME — matches PaintPile web dark mode ("The Vault"):
-// near-black surfaces, violet primary. `active` is the lighter
-// violet the web uses for text so small labels pass AA contrast.
+// THEME — matches the web's default light theme ("Gallery"):
+// neutral surfaces so painted minis read true, one cadmium accent.
 // ================================================================
 export const C = {
-  bg:       '#0c0c10',
-  card:     '#16161e',
-  primary:  '#7c3aed',
-  border:   'rgba(255,255,255,0.07)',
-  active:   '#a78bfa',
-  inactive: '#7a7898',
-  fg:       '#f0eeff',
+  bg:       '#f5f5f5',
+  card:     '#ffffff',
+  primary:  '#bf3918',
+  border:   'rgba(0,0,0,0.08)',
+  active:   '#bf3918',
+  inactive: '#61616b',
+  fg:       '#18181b',
 } as const;

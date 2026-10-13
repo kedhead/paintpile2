@@ -7,24 +7,24 @@ const STORAGE_KEY = 'paintpile-onboarded';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const T = {
-  bg:          '#0c0c10',
-  bgAlt:       '#111118',
-  surface:     '#16161e',
-  surfaceHov:  '#1c1c26',
-  border:      'rgba(255,255,255,.07)',
-  borderStr:   'rgba(255,255,255,.14)',
-  text:        '#f0eeff',
-  muted:       '#7a7898',
-  subtle:      '#3e3c58',
-  accent:      '#7c3aed',
-  accentHov:   '#6d28d9',
-  accentGlow:  'rgba(124,58,237,.35)',
-  accentLight: 'rgba(124,58,237,.12)',
+  bg:          'hsl(var(--background))',
+  bgAlt:       'hsl(var(--secondary))',
+  surface:     'hsl(var(--card))',
+  surfaceHov:  'hsl(var(--muted))',
+  border:      'hsl(var(--foreground) / .07)',
+  borderStr:   'hsl(var(--foreground) / .14)',
+  text:        'hsl(var(--foreground))',
+  muted:       'hsl(var(--muted-foreground))',
+  subtle:      'hsl(var(--muted-foreground))',
+  accent:      'hsl(var(--primary))',
+  accentHov:   'hsl(var(--primary) / .85)',
+  accentGlow:  'hsl(var(--primary) / .35)',
+  accentLight: 'hsl(var(--primary) / .12)',
   gold:        '#f59e0b',
   green:       '#10b981',
-  pill:        'rgba(255,255,255,.06)',
+  pill:        'hsl(var(--foreground) / .06)',
   shadow:      '0 1px 3px rgba(0,0,0,.5), 0 4px 16px rgba(0,0,0,.3)',
-  glow:        '0 0 24px rgba(124,58,237,.3)',
+  glow:        '0 0 24px hsl(var(--primary) / .3)',
 };
 
 // ── Step dots ────────────────────────────────────────────────────────────────
@@ -117,9 +117,9 @@ function CTABtn({ children, onClick, disabled, secondary, fullWidth }: {
 function PaintBlobs() {
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-      <div style={{ position: 'absolute', top: '-20%', right: '-10%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,.18) 0%, transparent 70%)' }} />
+      <div style={{ position: 'absolute', top: '-20%', right: '-10%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, hsl(var(--primary) / .18) 0%, transparent 70%)' }} />
       <div style={{ position: 'absolute', bottom: '-10%', left: '-5%', width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,.1) 0%, transparent 70%)' }} />
-      <div style={{ position: 'absolute', inset: 0, opacity: .025, backgroundImage: 'linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      <div style={{ position: 'absolute', inset: 0, opacity: .025, backgroundImage: 'linear-gradient(hsl(var(--foreground) / .3) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground) / .3) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
     </div>
   );
 }
@@ -149,7 +149,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       <PaintBlobs />
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 400 }}>
         <div className="animate-float" style={{ marginBottom: 24 }}>
-          <img src="/logosmall.png" alt="Paintpile" style={{ height: 72, width: 'auto', margin: '0 auto', filter: 'drop-shadow(0 0 32px rgba(124,58,237,.6))' }} />
+          <img src="/logosmall.png" alt="Paintpile" style={{ height: 72, width: 'auto', margin: '0 auto', filter: 'drop-shadow(0 0 32px hsl(var(--primary) / .6))' }} />
         </div>
         <div className="animate-fade-up" style={{ animationDelay: '.1s' }}>
           <div style={{ fontFamily: '"Bebas Neue", cursive', fontSize: 56, letterSpacing: '.04em', lineHeight: .95, color: T.text, marginBottom: 8 }}>
@@ -469,17 +469,17 @@ export function OnboardingModal() {
   const dotStep = stepIdx - 1;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#0c0c10', color: '#f0eeff', display: 'flex', flexDirection: 'column', fontFamily: 'DM Sans, sans-serif', overflow: 'hidden' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'hsl(var(--background))', color: 'hsl(var(--foreground))', display: 'flex', flexDirection: 'column', fontFamily: 'DM Sans, sans-serif', overflow: 'hidden' }}>
       {/* Progress header */}
       {showDots && (
         <div style={{
           padding: '16px 24px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          flexShrink: 0, position: 'sticky', top: 0, background: '#0c0c10', zIndex: 10,
-          borderBottom: '1px solid rgba(255,255,255,.05)',
+          flexShrink: 0, position: 'sticky', top: 0, background: 'hsl(var(--background))', zIndex: 10,
+          borderBottom: '1px solid hsl(var(--foreground) / .05)',
         }}>
           <img src="/logosmall.png" alt="Paintpile" style={{ height: 26, width: 'auto', opacity: .7 }} />
           <StepDots total={TOTAL_DOTS} current={dotStep} />
-          <div style={{ fontSize: 11, color: '#7a7898', fontFamily: '"DM Mono", monospace', letterSpacing: '.06em' }}>
+          <div style={{ fontSize: 11, color: 'hsl(var(--muted-foreground))', fontFamily: '"DM Mono", monospace', letterSpacing: '.06em' }}>
             {dotStep + 1}/{TOTAL_DOTS}
           </div>
         </div>

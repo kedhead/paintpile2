@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { ListResult, RecordModel } from 'pocketbase';
 import { GalleryGrid } from '../../components/gallery/gallery-grid';
 import { getViewerId, publicPb, safe } from '../../lib/pb-server';
-import { GALLERY_PAGE_SIZE, GALLERY_SORTS, galleryQuery, parseGallerySort } from '../../lib/gallery';
+import { DEFAULT_GALLERY_SORT, GALLERY_PAGE_SIZE, GALLERY_SORTS, galleryQuery, parseGallerySort } from '../../lib/gallery';
 import { describeFilters, filterHref, galleryFilterExpr, parseGalleryFilters } from '../../lib/gallery-filters';
 import { X } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export default async function GalleryPage({
   ]);
   const sortHref = (id: string) => {
     const qs = new URLSearchParams(filterHref(filters).slice(2));
-    if (id !== 'trending') qs.set('sort', id);
+    if (id !== DEFAULT_GALLERY_SORT) qs.set('sort', id);
     const str = qs.toString();
     return str ? `/?${str}` : '/';
   };
@@ -64,7 +64,7 @@ export default async function GalleryPage({
       <div className="flex flex-wrap items-center justify-center gap-3">
         {filterLabel && (
           <Link
-            href={sort === 'trending' ? '/' : `/?sort=${sort}`}
+            href={sort === DEFAULT_GALLERY_SORT ? '/' : `/?sort=${sort}`}
             className="flex items-center gap-1.5 rounded-full border border-primary bg-primary/15 px-3 py-1.5 text-sm font-medium text-foreground hover:bg-primary/25"
             title="Clear filter"
           >
