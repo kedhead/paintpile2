@@ -17,10 +17,12 @@ import { CommentSection } from '../social/comment-section';
 import { AIActionBar } from '../ai/ai-action-bar';
 import { AIQuotaBadge } from '../ai/ai-quota-badge';
 import { getFileUrl, relativeTime } from '../../lib/pb-helpers';
+import { profilePath, projectPath } from '../../lib/urls';
 import { PhotoGallery } from './photo-gallery';
 import { PhotoUpload } from './photo-upload';
 import { ProjectPaintLibrary } from './project-paint-library';
 import { ProjectRecipesList } from './project-recipes-list';
+import { ProjectDetailsEditor } from './project-details-editor';
 
 interface ProjectDetailProps {
   project: RecordModel;
@@ -156,7 +158,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
       {/* Author */}
       {project.expand?.user && !isOwner && (
         <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
-          <Link href={`/profile/${project.expand.user.id}`} className="flex items-center gap-3 min-w-0 flex-1">
+          <Link href={profilePath(project.expand.user)} className="flex items-center gap-3 min-w-0 flex-1">
             <UserAvatar user={project.expand.user} size="sm" showOnline />
             <span className="text-sm font-medium text-foreground truncate">
               {project.expand.user.display_name || project.expand.user.username || 'User'}
@@ -269,6 +271,8 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         </div>
       )}
 
+      {isOwner && <ProjectDetailsEditor key={project.updated} project={project} />}
+
       {/* Tabbed Sections */}
       <div className="space-y-3">
         <div className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
@@ -355,7 +359,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   <>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/share/project/${project.id}`);
+                        navigator.clipboard.writeText(`${window.location.origin}${projectPath(project)}`);
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                         setTimeout(() => setShowShare(false), 1500);
@@ -366,7 +370,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                       {copied ? 'Link copied!' : 'Copy link'}
                     </button>
                     <a
-                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my miniature painting project "${project.name}" on Paintpile!`)}&url=${encodeURIComponent(`${window.location.origin}/share/project/${project.id}`)}`}
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my miniature painting project "${project.name}" on Paintpile!`)}&url=${encodeURIComponent(`${window.location.origin}${projectPath(project)}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted"
@@ -375,7 +379,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                       X / Twitter
                     </a>
                     <a
-                      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/share/project/${project.id}`)}`}
+                      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}${projectPath(project)}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted"
@@ -384,7 +388,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                       Facebook
                     </a>
                     <a
-                      href={`https://www.reddit.com/submit?url=${encodeURIComponent(`${window.location.origin}/share/project/${project.id}`)}&title=${encodeURIComponent(project.name)}`}
+                      href={`https://www.reddit.com/submit?url=${encodeURIComponent(`${window.location.origin}${projectPath(project)}`)}&title=${encodeURIComponent(project.name)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted"

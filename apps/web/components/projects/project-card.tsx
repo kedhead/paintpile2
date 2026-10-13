@@ -6,6 +6,7 @@ import { Image as ImageIcon, Palette } from 'lucide-react';
 import { ProjectStatusBadge } from './project-status-badge';
 import { UserAvatar } from '../social/user-avatar';
 import { getFileUrl, relativeTime } from '../../lib/pb-helpers';
+import { profilePath, projectPath } from '../../lib/urls';
 
 interface ProjectCardProps {
   project: RecordModel;
@@ -17,7 +18,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     : null;
 
   return (
-    <Link href={`/projects/${project.id}`}>
+    <Link href={projectPath(project)}>
       <article className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
         {/* Cover Photo */}
         <div className="aspect-[4/3] bg-muted">
@@ -62,7 +63,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           {/* Author */}
           {project.expand?.user && (
             <Link
-              href={`/profile/${project.expand.user.id}`}
+              href={profilePath(project.expand.user)}
               onClick={(e) => e.stopPropagation()}
               className="mt-2 flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
             >

@@ -141,6 +141,9 @@ create_col("projects", [
     file_field("cover_photo"),
     number("like_count"), number("comment_count"),
     json_field("last_critique"),
+    # Showcase details (see apps/web/lib/project-details.ts)
+    text("kind"), text("source"), text("style"),
+    json_field("techniques"), json_field("color_scheme"),
 ], {"listRule": "is_public = true || user = @request.auth.id", "viewRule": "is_public = true || user = @request.auth.id", "createRule": "@request.auth.id = user", "updateRule": "@request.auth.id = user", "deleteRule": "@request.auth.id = user"})
 
 # likes

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Share2, Download, Loader2, Check } from 'lucide-react';
 import { useAuth } from '../auth-provider';
 import { CritiqueShowcaseCard } from '../ai/critique-showcase-card';
+import { projectPath } from '../../lib/urls';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://thepaintpile.com';
 
@@ -22,7 +23,7 @@ export function ShareScoreButton({ projectId, projectName, critique, imageUrl }:
   const [showCard, setShowCard] = useState(false);
 
   const cardId = `showcase-card-${projectId}`;
-  const shareUrl = `${SITE_URL}/share/project/${projectId}`;
+  const shareUrl = `${SITE_URL}${projectPath({ id: projectId, name: projectName })}`;
   const shareText = `My "${projectName}" just got a ${critique.grade} (${critique.score}/100) from AI critique on Paintpile!`;
 
   const handleShare = async () => {

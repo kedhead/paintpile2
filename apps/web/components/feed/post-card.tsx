@@ -12,6 +12,7 @@ import { CommentSection } from '../social/comment-section';
 import { PostMediaGrid } from './post-media-grid';
 import { useDeletePost, useAdminDeletePost, useUpdatePost } from '../../hooks/use-posts';
 import { relativeTime } from '../../lib/pb-helpers';
+import { profilePath } from '../../lib/urls';
 
 interface PostCardProps {
   post: RecordModel;
@@ -81,14 +82,14 @@ export function PostCard({ post }: PostCardProps) {
       {/* Header */}
       <div className="flex items-center gap-3">
         {author && (
-          <Link href={`/profile/${author.id}`}>
+          <Link href={profilePath(author)}>
             <UserAvatar user={author} size="md" />
           </Link>
         )}
         <div className="min-w-0 flex-1">
           {author && (
             <Link
-              href={`/profile/${author.id}`}
+              href={profilePath(author)}
               className="text-sm font-medium text-foreground hover:underline"
             >
               {getDisplayName(author)}

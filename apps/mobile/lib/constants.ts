@@ -3,17 +3,18 @@
 // ================================================================
 export const BASE_URL = 'https://thepaintpile.com';
 
-// Mirrors the web app's five-hub navigation. `match` lists every web route
-// that belongs to a tab so the active state follows in-page navigation.
+// Mirrors the web app's navigation. `match` lists every web route that
+// belongs to a tab so the active state follows in-page navigation; '/' only
+// matches the gallery itself, and the first matching tab wins.
 export const TABS = [
-  { key: 'home',      label: 'Home',      icon: '🏠', path: '/home',
-    match: ['/home'] },
-  { key: 'workshop',  label: 'Workshop',  icon: '🛠️', path: '/projects',
-    match: ['/projects', '/pile', '/diary', '/dashboard', '/badges'] },
-  { key: 'studio',    label: 'Studio',    icon: '🎨', path: '/paints',
-    match: ['/paints', '/recipes', '/tools', '/palette-post'] },
-  { key: 'community', label: 'Community', icon: '👥', path: '/feed',
-    match: ['/feed', '/challenges', '/groups', '/news'] },
+  { key: 'explore',   label: 'Explore',   icon: '🖼️', path: '/',
+    match: ['/', '/projects/', '/painters'] },
+  { key: 'posts',     label: 'Posts',     icon: '💬', path: '/feed',
+    match: ['/feed', '/challenges', '/news'] },
+  { key: 'paints',    label: 'Paints',    icon: '🎨', path: '/paints',
+    match: ['/paints'] },
+  { key: 'workshop',  label: 'Workshop',  icon: '🛠️', path: '/home',
+    match: ['/home', '/projects', '/pile', '/recipes', '/tools', '/diary', '/palette-post', '/dashboard', '/badges'] },
   { key: 'alerts',    label: 'Alerts',    icon: '🔔', path: '/notifications',
     match: ['/notifications'] },
 ] as const;

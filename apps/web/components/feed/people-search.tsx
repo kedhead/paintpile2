@@ -9,6 +9,7 @@ import { getDisplayName } from '@paintpile/shared';
 import { useAuth } from '../auth-provider';
 import { UserAvatar } from '../social/user-avatar';
 import { FollowButton } from '../social/follow-button';
+import { profilePath } from '../../lib/urls';
 
 export function PeopleSearch() {
   const { pb, user } = useAuth();
@@ -92,12 +93,12 @@ export function PeopleSearch() {
           <div className="divide-y divide-border">
             {results.map((u) => (
               <div key={u.id} className="flex items-center gap-3 px-4 py-3">
-                <Link href={`/profile/${u.id}`} className="shrink-0">
+                <Link href={profilePath(u)} className="shrink-0">
                   <UserAvatar user={u} size="md" />
                 </Link>
                 <div className="min-w-0 flex-1">
                   <Link
-                    href={`/profile/${u.id}`}
+                    href={profilePath(u)}
                     className="block truncate text-sm font-medium text-foreground hover:underline"
                   >
                     {getDisplayName(u)}

@@ -34,7 +34,6 @@ export function AnalyticsDashboard() {
     { label: 'Create your first project', done: projects.length > 0, href: '/projects' },
     { label: 'Add paints to your inventory', done: inventory.length > 0, href: '/paints' },
     { label: 'Follow someone on the feed', done: false, href: '/feed?tab=people' },
-    { label: 'Join a community group', done: false, href: '/groups' },
   ];
 
   if (isNewUser) {

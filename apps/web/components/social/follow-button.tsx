@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { useIsFollowing, useToggleFollow } from '../../hooks/use-follows';
 import { useAuth } from '../auth-provider';
 import { useToast } from '../ui/toast';
+import { LoginPrompt } from '../auth/login-prompt';
 
 interface FollowButtonProps {
   targetUserId: string;
@@ -26,7 +27,20 @@ export function FollowButton({ targetUserId, initialIsFollowing }: FollowButtonP
   const [hovering, setHovering] = useState(false);
 
   if (authLoading) return <Spinner />;
-  if (!user) return null;
+  if (!user) {
+    return (
+      <LoginPrompt action="follow painters">
+        {(open) => (
+          <button
+            onClick={open}
+            className="rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/80"
+          >
+            Follow
+          </button>
+        )}
+      </LoginPrompt>
+    );
+  }
 
   // Use pre-loaded value if provided, otherwise use query result
   const isFollowing = initialIsFollowing !== undefined ? initialIsFollowing : queryIsFollowing ?? false;
