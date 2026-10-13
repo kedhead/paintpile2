@@ -9,8 +9,9 @@ Usage:
   PB_URL=https://your-pocketbase PB_ADMIN_EMAIL=... PB_ADMIN_PASSWORD=... \
     python3 pocketbase/add_showcase_fields.py [--fix-rules]
 
---fix-rules also sets the list/view rules on `photos` and `project_paints` so
-anyone can read them for public projects (owners can always read their own).
+--fix-rules also sets the list/view rules on `photos` and `project_paints` to
+the recommended ones: anyone can read them for public projects; for private
+projects only the owner (and admins) can. Without it, the script only reports.
 """
 import json, os, sys, urllib.request, urllib.error
 
@@ -53,17 +54,30 @@ if missing:
 else:
     print("projects already has all showcase fields")
 
-# 2. Public read access for the pieces of a project page
-PUBLIC_RULE = "project.is_public = true || project.user = @request.auth.id"
+# 2. Read access for the pieces of a project page: public for public projects,
+#    owner-only (plus admins) for private ones. An empty rule ('') would let
+#    anyone list photos and paints from private projects via the API.
+ADMIN = '@request.auth.role = "admin"'
+RULES = {
+    # Photos always carry their uploader, so owners keep access to every photo.
+    "photos": f"user = @request.auth.id || project.user = @request.auth.id || project.is_public = true || {ADMIN}",
+    "project_paints": f"project.user = @request.auth.id || project.is_public = true || {ADMIN}",
+}
 fix = "--fix-rules" in sys.argv
-for name in ["photos", "project_paints"]:
+for name, rule in RULES.items():
     col = call("GET", f"/collections/{name}", token=token)
-    rules = {k: col.get(k) for k in ("listRule", "viewRule")}
-    ok = all(r == "" or (r is not None and "is_public" in r) for r in rules.values())
-    if ok:
-        print(f"{name}: public projects are readable ({rules['listRule']!r})")
-    elif fix:
-        call("PATCH", f"/collections/{name}", {"listRule": PUBLIC_RULE, "viewRule": PUBLIC_RULE}, token=token)
-        print(f"{name}: rules updated to {PUBLIC_RULE!r}")
+    current = {k: col.get(k) for k in ("listRule", "viewRule")}
+    if all(v == rule for v in current.values()):
+        print(f"{name}: OK (public projects readable, private ones owner-only)")
+        continue
+    if current["listRule"] == "":
+        problem = "open to everyone, including photos/paints of PRIVATE projects"
+    elif current["listRule"] is None:
+        problem = "admin-only, so visitors can't see public projects' photos/paints"
     else:
-        print(f"{name}: visitors can't read this yet (listRule={rules['listRule']!r}). Re-run with --fix-rules.")
+        problem = f"custom rule {current['listRule']!r}"
+    if fix:
+        call("PATCH", f"/collections/{name}", {"listRule": rule, "viewRule": rule}, token=token)
+        print(f"{name}: was {problem} -> rules updated")
+    else:
+        print(f"{name}: {problem}. Re-run with --fix-rules to apply the recommended rule.")
