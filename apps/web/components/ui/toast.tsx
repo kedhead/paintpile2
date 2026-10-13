@@ -28,7 +28,7 @@ let nextId = 0;
 const VARIANT_STYLES = {
   success: { border: 'rgba(16,185,129,.4)', color: '#10b981', Icon: Check },
   error: { border: 'rgba(239,68,68,.4)', color: '#ef4444', Icon: AlertCircle },
-  info: { border: 'rgba(124,58,237,.4)', color: '#a78bfa', Icon: Info },
+  info: { border: 'hsl(var(--primary) / .4)', color: 'hsl(var(--primary))', Icon: Info },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -55,9 +55,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               key={t.id}
               className="pointer-events-auto flex items-center gap-2.5 rounded-xl px-4 py-3 text-sm font-medium"
               style={{
-                background: '#16161e',
+                background: 'hsl(var(--card))',
                 border: `1px solid ${s.border}`,
-                color: '#f0eeff',
+                color: 'hsl(var(--foreground))',
                 boxShadow: '0 8px 32px rgba(0,0,0,.5)',
               }}
             >

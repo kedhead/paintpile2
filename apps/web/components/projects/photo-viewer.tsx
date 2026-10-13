@@ -15,7 +15,7 @@ export function PhotoViewer({ photos, alt }: PhotoViewerProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-center overflow-hidden rounded-2xl bg-black/40 lg:min-h-[70vh]">
+      <div className="flex items-center justify-center overflow-hidden rounded-2xl bg-muted lg:min-h-[70vh]">
         <img src={current.full} alt={alt} className="max-h-[80vh] w-full object-contain" />
       </div>
       {photos.length > 1 && (

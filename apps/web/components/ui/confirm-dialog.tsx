@@ -51,16 +51,16 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-sm rounded-2xl border p-6"
             style={{
-              background: '#16161e',
-              borderColor: 'rgba(255,255,255,.08)',
+              background: 'hsl(var(--card))',
+              borderColor: 'hsl(var(--foreground) / .08)',
               boxShadow: '0 8px 40px rgba(0,0,0,.6)',
             }}
           >
-            <h2 className="mb-2 text-base font-bold" style={{ color: '#f0eeff' }}>
+            <h2 className="mb-2 text-base font-bold" style={{ color: 'hsl(var(--foreground))' }}>
               {state.opts.title}
             </h2>
             {state.opts.message && (
-              <p className="mb-5 text-sm" style={{ color: '#7a7898' }}>
+              <p className="mb-5 text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
                 {state.opts.message}
               </p>
             )}
@@ -68,7 +68,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               <button
                 onClick={() => close(false)}
                 className="rounded-xl border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/5"
-                style={{ borderColor: 'rgba(255,255,255,.1)', color: '#f0eeff' }}
+                style={{ borderColor: 'hsl(var(--foreground) / .1)', color: 'hsl(var(--foreground))' }}
               >
                 {state.opts.cancelLabel || 'Cancel'}
               </button>
@@ -76,10 +76,10 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 onClick={() => close(true)}
                 className="rounded-xl px-4 py-2 text-sm font-bold text-white transition-all"
                 style={{
-                  background: state.opts.destructive ? '#ef4444' : '#7c3aed',
+                  background: state.opts.destructive ? '#ef4444' : 'hsl(var(--primary))',
                   boxShadow: state.opts.destructive
                     ? '0 0 20px rgba(239,68,68,.3)'
-                    : '0 0 20px rgba(124,58,237,.3)',
+                    : '0 0 20px hsl(var(--primary) / .3)',
                 }}
               >
                 {state.opts.confirmLabel ||

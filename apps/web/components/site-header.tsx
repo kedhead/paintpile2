@@ -7,6 +7,7 @@ import { Crown, Hammer, LogOut, Settings, User } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { NotificationBell } from './notifications/notification-bell';
 import { UserAvatar } from './social/user-avatar';
+import { ThemeToggle } from './theme-toggle';
 import { profilePath } from '../lib/urls';
 
 // ── Navigation model ─────────────────────────────────────────────────────────
@@ -139,11 +140,13 @@ export function SiteHeader() {
               <Hammer className="h-4 w-4" />
               Workshop
             </Link>
+            <ThemeToggle />
             <NotificationBell />
             <UserMenu />
           </div>
         ) : (
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link href="/auth/login" className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
               Sign in
             </Link>

@@ -26,12 +26,12 @@ function VaultInput({
   const isFocused = focused === id;
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-xs font-bold tracking-[.06em] uppercase text-[#7a7898]">
+      <label htmlFor={id} className="mb-1.5 block text-xs font-bold tracking-[.06em] uppercase text-muted-foreground">
         {label}
       </label>
       <div className="relative">
         {prefix && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#7a7898]">{prefix}</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">{prefix}</span>
         )}
         <input
           id={id}
@@ -43,15 +43,15 @@ function VaultInput({
           style={{
             width: '100%',
             padding: prefix ? '12px 14px 12px 28px' : '12px 14px',
-            background: isFocused ? '#1c1c26' : '#111118',
-            border: `1.5px solid ${isFocused ? '#7c3aed' : 'rgba(255,255,255,.07)'}`,
+            background: isFocused ? 'hsl(var(--muted))' : 'hsl(var(--secondary))',
+            border: `1.5px solid ${isFocused ? 'hsl(var(--primary))' : 'hsl(var(--foreground) / .07)'}`,
             borderRadius: 10,
-            color: '#f0eeff',
+            color: 'hsl(var(--foreground))',
             fontSize: 14,
             outline: 'none',
             fontFamily: 'DM Sans, sans-serif',
             transition: 'all .15s',
-            boxShadow: isFocused ? '0 0 0 3px rgba(124,58,237,.12)' : 'none',
+            boxShadow: isFocused ? '0 0 0 3px hsl(var(--primary) / .12)' : 'none',
           }}
         />
       </div>
@@ -111,11 +111,11 @@ export default function SignupPage() {
   return (
     <div
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-12"
-      style={{ background: '#0c0c10', color: '#f0eeff' }}
+      style={{ background: 'hsl(var(--background))', color: 'hsl(var(--foreground))' }}
     >
       {/* Background blobs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute" style={{ top: '-20%', right: '-10%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,.15) 0%, transparent 70%)' }} />
+        <div className="absolute" style={{ top: '-20%', right: '-10%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, hsl(var(--primary) / .15) 0%, transparent 70%)' }} />
         <div className="absolute" style={{ bottom: '-10%', left: '-5%', width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,.08) 0%, transparent 70%)' }} />
       </div>
 
@@ -126,12 +126,12 @@ export default function SignupPage() {
             src="/logosmall.png"
             alt="Paintpile"
             className="mx-auto mb-3 h-12 w-auto"
-            style={{ filter: 'drop-shadow(0 0 20px rgba(124,58,237,.5))' }}
+            style={{ filter: 'drop-shadow(0 0 20px hsl(var(--primary) / .5))' }}
           />
-          <h1 className="font-bebas text-5xl tracking-[.03em] leading-none text-[#f0eeff]">
+          <h1 className="font-bebas text-5xl tracking-[.03em] leading-none text-foreground">
             CREATE ACCOUNT
           </h1>
-          <p className="mt-1 text-sm text-[#7a7898]">Join thousands of mini painters</p>
+          <p className="mt-1 text-sm text-muted-foreground">Join thousands of mini painters</p>
         </div>
 
         {error && (
@@ -173,8 +173,8 @@ export default function SignupPage() {
               disabled={loading}
               className="flex w-full items-center justify-center rounded-xl px-6 py-3.5 text-sm font-bold text-white transition-all disabled:opacity-50"
               style={{
-                background: loading ? '#4a2a9a' : '#7c3aed',
-                boxShadow: loading ? 'none' : '0 0 24px rgba(124,58,237,.3)',
+                background: loading ? 'hsl(var(--primary) / .6)' : 'hsl(var(--primary))',
+                boxShadow: loading ? 'none' : '0 0 24px hsl(var(--primary) / .3)',
               }}
             >
               {loading ? 'Creating account…' : 'Create Account →'}
@@ -182,13 +182,13 @@ export default function SignupPage() {
           </div>
         </form>
 
-        <p className="mt-2 text-center text-[11px] text-[#3e3c58] leading-relaxed">
+        <p className="mt-2 text-center text-[11px] text-muted-foreground leading-relaxed">
           By continuing you agree to our Terms of Service and Privacy Policy
         </p>
 
-        <p className="mt-5 text-center text-sm text-[#7a7898]">
+        <p className="mt-5 text-center text-sm text-muted-foreground">
           Already have an account?{' '}
-          <Link href="/auth/login" className="font-semibold text-[#7c3aed] hover:underline">
+          <Link href="/auth/login" className="font-semibold text-primary hover:underline">
             Sign in
           </Link>
         </p>

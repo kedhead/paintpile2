@@ -22,8 +22,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
+  // New storage key: everyone starts on the light theme; dark is opt-in.
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="paintpile-theme">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ToastProvider>

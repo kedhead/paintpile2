@@ -4,16 +4,19 @@
 export type GallerySort = 'trending' | 'popular' | 'latest';
 
 export const GALLERY_SORTS: { id: GallerySort; label: string }[] = [
-  { id: 'trending', label: 'Trending' },
   { id: 'popular',  label: 'Popular' },
+  { id: 'trending', label: 'Trending' },
   { id: 'latest',   label: 'Latest' },
 ];
+
+/** What `/` shows with no ?sort= */
+export const DEFAULT_GALLERY_SORT: GallerySort = 'popular';
 
 export const GALLERY_PAGE_SIZE = 30;
 const TRENDING_WINDOW_DAYS = 30;
 
 export function parseGallerySort(value: unknown): GallerySort {
-  return value === 'popular' || value === 'latest' ? value : 'trending';
+  return value === 'trending' || value === 'popular' || value === 'latest' ? value : DEFAULT_GALLERY_SORT;
 }
 
 export function galleryQuery(sort: GallerySort, extraFilter?: string) {
