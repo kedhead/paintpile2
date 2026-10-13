@@ -12,6 +12,7 @@ import { profilePath } from '../../lib/urls';
 import { filterHref } from '../../lib/gallery-filters';
 import { asStringArray, asSwatches, KINDS, labelFor, SOURCES, STYLES, TECHNIQUES } from '../../lib/project-details';
 import { PaintsUsed, type UsedPaint } from './paints-used';
+import { SaveButton } from '../collections/save-button';
 
 interface PublicProjectViewProps {
   project: RecordModel;
@@ -96,6 +97,7 @@ export function PublicProjectView({ project, photos, projectPaints, moreFromAuth
 
           <div className="flex items-center gap-5 border-y border-border py-3">
             <LikeButton targetId={project.id} targetType="project" initialCount={project.like_count || 0} />
+            <SaveButton projectId={project.id} />
             <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <MessageCircle className="h-4 w-4" />
               {project.comment_count || 0}

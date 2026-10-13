@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Crown, Hammer, LogOut, Settings, User } from 'lucide-react';
+import { Crown, Hammer, LogOut, Search, Settings, User } from 'lucide-react';
 import { useAuth } from './auth-provider';
 import { NotificationBell } from './notifications/notification-bell';
 import { UserAvatar } from './social/user-avatar';
@@ -18,6 +18,7 @@ export const PRIMARY_TABS = [
   { href: '/feed',       label: 'Posts' },
   { href: '/challenges', label: 'Challenges' },
   { href: '/painters',   label: 'Painters' },
+  { href: '/collections', label: 'Collections' },
   { href: '/paints',     label: 'Paints' },
 ];
 
@@ -115,6 +116,31 @@ function UserMenu() {
   );
 }
 
+function HeaderSearch() {
+  const pathname = usePathname();
+  if (pathname === '/search') return null; // the page has its own big search box
+  return (
+    <>
+      <form action="/search" className="relative hidden lg:block" role="search">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          name="q"
+          placeholder="Search"
+          aria-label="Search projects, painters, collections and paints"
+          className="w-44 rounded-lg border border-border bg-card py-1.5 pl-8 pr-2 text-sm text-foreground transition-[width] focus:w-64 focus:border-primary focus:outline-none xl:w-56"
+        />
+      </form>
+      <Link
+        href="/search"
+        className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+        aria-label="Search"
+      >
+        <Search className="h-4 w-4" />
+      </Link>
+    </>
+  );
+}
+
 export function SiteHeader() {
   const { user, loading } = useAuth();
   const pathname = usePathname() || '/';
@@ -135,6 +161,8 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex-1" />
+
+        <HeaderSearch />
 
         {loading ? null : user ? (
           <div className="flex items-center gap-1">

@@ -3,7 +3,7 @@ import { z } from 'zod';
 /** Usernames double as profile URLs (`/kedhead`), so they can't shadow a
  * top-level route — static routes win and the profile would be unreachable. */
 export const RESERVED_USERNAMES: ReadonlySet<string> = new Set([
-  'admin', 'api', 'auth', 'badges', 'brag-board', 'challenges', 'dashboard',
+  'admin', 'api', 'auth', 'badges', 'brag-board', 'challenges', 'collections', 'dashboard',
   'diary', 'explore', 'feed', 'help', 'home', 'news', 'notifications', 'paints',
   'painters', 'palette-post', 'pile', 'posts', 'privacy', 'profile', 'projects',
   'recipes', 'robots', 'search', 'settings', 'share', 'sitemap', 'support',

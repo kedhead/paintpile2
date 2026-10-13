@@ -6,7 +6,9 @@ import { getDisplayName } from '@paintpile/shared';
 import { ProfileHeader } from '../../../components/profile/profile-header';
 import { ProfilePostGrid } from '../../../components/profile/profile-post-grid';
 import { GalleryGrid } from '../../../components/gallery/gallery-grid';
-import { fileUrl, publicPb, safe, SITE_URL } from '../../../lib/pb-server';
+import { fileUrl, publicPb, safe, SITE_URL, viewerPb } from '../../../lib/pb-server';
+import { CollectionCard } from '../../../components/collections/collection-card';
+import { buildCollectionCards } from '../../../lib/collections-server';
 import { GALLERY_PAGE_SIZE, galleryQuery } from '../../../lib/gallery';
 import { profilePath } from '../../../lib/urls';
 
@@ -45,13 +47,20 @@ export default async function PainterProfilePage({ params, searchParams }: Props
   const user = await loadUser(username);
   if (!user) notFound();
 
-  const activeTab = tab === 'posts' ? 'posts' : 'projects';
+  const activeTab = tab === 'posts' || tab === 'collections' ? tab : 'projects';
   const pb = publicPb();
   const userFilter = pb.filter('user = {:id}', { id: user.id });
   const projects = await safe(
     () => pb.collection('projects').getList(1, GALLERY_PAGE_SIZE, galleryQuery('latest', userFilter)),
     null,
   );
+
+  // Viewer's own token, so owners also see their private collections.
+  const vpb = await viewerPb();
+  const boards = activeTab === 'collections'
+    ? await safe(() => vpb.collection('project_collections').getFullList({ filter: vpb.filter('user = {:id}', { id: user.id }), sort: '-updated', expand: 'user' }), [])
+    : [];
+  const collectionCards = await buildCollectionCards(vpb, boards);
 
   const base = profilePath(user);
   const tabClass = (active: boolean) =>
@@ -70,9 +79,23 @@ export default async function PainterProfilePage({ params, searchParams }: Props
           Posts
           {activeTab === 'posts' && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />}
         </Link>
+        <Link href={`${base}?tab=collections`} className={tabClass(activeTab === 'collections')}>
+          Collections
+          {activeTab === 'collections' && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-primary" />}
+        </Link>
       </nav>
 
-      {activeTab === 'posts' ? (
+      {activeTab === 'collections' ? (
+        collectionCards.length === 0 ? (
+          <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
+            No collections yet.
+          </div>
+        ) : (
+          <div className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+            {collectionCards.map((card) => <CollectionCard key={card.id} card={card} />)}
+          </div>
+        )
+      ) : activeTab === 'posts' ? (
         <div className="mx-auto max-w-2xl">
           <ProfilePostGrid userId={user.id} />
         </div>

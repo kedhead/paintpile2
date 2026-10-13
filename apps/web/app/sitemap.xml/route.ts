@@ -18,6 +18,7 @@ export async function GET() {
     { url: '/feed', priority: '0.8', changefreq: 'hourly' },
     { url: '/challenges', priority: '0.8', changefreq: 'daily' },
     { url: '/painters', priority: '0.8', changefreq: 'daily' },
+    { url: '/collections', priority: '0.7', changefreq: 'daily' },
     { url: '/paints', priority: '0.8', changefreq: 'weekly' },
     { url: '/auth/login', priority: '0.5', changefreq: 'monthly' },
     { url: '/auth/signup', priority: '0.5', changefreq: 'monthly' },

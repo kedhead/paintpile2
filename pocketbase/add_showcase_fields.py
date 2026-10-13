@@ -6,6 +6,8 @@ Bring an existing PocketBase up to date with the reworked app:
 2. Read rules for photos and paint lists (with --fix-rules).
 3. An optional `project` link on notes (diary_entries), which turns a
    project's notes into its private build journal.
+4. Collections: `project_collections` (a painter's named boards) and
+   `project_collection_items` (which projects are saved to which board).
 
 Safe to re-run: existing fields are left alone.
 
@@ -101,3 +103,50 @@ else:
             "maxSelect": 1, "cascadeDelete": False, "required": False}
     call("PATCH", "/collections/diary_entries", {"fields": diary["fields"] + [link]}, token=token)
     print("Added to diary_entries: project (notes can now form a project journal)")
+
+# 4. Collections ("boards" of saved projects).
+OWNER = "user = @request.auth.id"
+existing_names = {c["name"] for c in call("GET", "/collections?perPage=500", token=token)["items"]}
+autodates = [
+    {"name": "created", "type": "autodate", "onCreate": True, "onUpdate": False},
+    {"name": "updated", "type": "autodate", "onCreate": True, "onUpdate": True},
+]
+if "project_collections" in existing_names:
+    print("project_collections already exists")
+    boards = call("GET", "/collections/project_collections", token=token)
+else:
+    boards = call("POST", "/collections", {
+        "name": "project_collections",
+        "type": "base",
+        "fields": [
+            {"name": "user", "type": "relation", "collectionId": "_pb_users_auth_", "maxSelect": 1, "required": True, "cascadeDelete": True},
+            {"name": "name", "type": "text", "required": True, "max": 60},
+            {"name": "description", "type": "text", "max": 300},
+            {"name": "is_public", "type": "bool"},
+        ] + autodates,
+        "listRule": f"is_public = true || {OWNER}",
+        "viewRule": f"is_public = true || {OWNER}",
+        "createRule": OWNER,
+        # Owners can edit, but never hand a board to someone else.
+        "updateRule": f"{OWNER} && (@request.body.user:isset = false || @request.body.user = @request.auth.id)",
+        "deleteRule": OWNER,
+    }, token=token)
+    print("Created project_collections")
+
+if "project_collection_items" in existing_names:
+    print("project_collection_items already exists")
+else:
+    call("POST", "/collections", {
+        "name": "project_collection_items",
+        "type": "base",
+        "fields": [
+            {"name": "collection", "type": "relation", "collectionId": boards["id"], "maxSelect": 1, "required": True, "cascadeDelete": True},
+            {"name": "project", "type": "relation", "collectionId": projects["id"], "maxSelect": 1, "required": True, "cascadeDelete": True},
+        ] + autodates,
+        "indexes": ["CREATE UNIQUE INDEX idx_collection_project ON project_collection_items (collection, project)"],
+        "listRule": "collection.is_public = true || collection.user = @request.auth.id",
+        "viewRule": "collection.is_public = true || collection.user = @request.auth.id",
+        "createRule": "collection.user = @request.auth.id",
+        "deleteRule": "collection.user = @request.auth.id",
+    }, token=token)
+    print("Created project_collection_items")
